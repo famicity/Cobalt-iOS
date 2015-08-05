@@ -539,32 +539,47 @@ NSString * webLayerPage;
                 }
                 //POP
                 else if ([action isEqualToString:JSActionNavigationPop]) {
-                    NSDictionary * controllersConfigration = [Cobalt getControllersConfiguration];
-                    NSDictionary * data = [dict objectForKey:kJSData];
+                    id data = [dict objectForKey:kJSData];
                     
                     if (data
                         && [data isKindOfClass:[NSDictionary class]]) {
-                        NSString * controllerKey = [data objectForKey: kJSNavigationController];
-                        NSString * controllerPage = [data objectForKey: kJSPage];
+                        id page = [data objectForKey:kJSPage];
                         
-                        NSDictionary * controllerConfiguration = [controllersConfigration objectForKey: controllerKey];
-                        NSString * controllerClassName = [controllerConfiguration objectForKey: kIos];
-                        
-                        for(UIViewController * viewController in self.navigationController.viewControllers) {
-                            if([viewController isKindOfClass: [CobaltViewController class]]) {
-                                if([viewController isKindOfClass: NSClassFromString(controllerClassName)] && [((CobaltViewController *)viewController).pageName isEqualToString: controllerPage]) {
-                                    [self.navigationController popToViewController: viewController animated: YES];
-                                    break;
+                        if (page
+                            && [page isKindOfClass:[NSString class]]) {
+                            NSDictionary *controllerConfiguration;
+                            id controller = [data objectForKey:kJSNavigationController];
+                            if (controller
+                                && [controller isKindOfClass:[NSString class]]) {
+                                controllerConfiguration = [CobaltViewController getConfigurationForController:controller];
+                            }
+                            else {
+                                controllerConfiguration = [CobaltViewController getConfigurationForController:nil];
+                            }
+                            
+                            if (controllerConfiguration) {
+                                NSString *controllerClassName = [controllerConfiguration objectForKey:kIos];
+                                
+                                for (UIViewController *viewController in self.navigationController.viewControllers) {
+                                    if ([viewController isKindOfClass:NSClassFromString(controllerClassName)]
+                                        && (! [viewController isKindOfClass:[CobaltViewController class]]
+                                            || ([viewController isKindOfClass:[CobaltViewController class]]
+                                                && [((CobaltViewController *)viewController).pageName isEqualToString:page]))) {
+                                                [self.navigationController popToViewController:viewController
+                                                                                      animated:YES];
+                                                break;
+                                    }
                                 }
                             }
                         }
-                        
-#if DEBUG_COBALT
-                        NSLog(@"pop: controller/page not found");
-#endif
+                        else {
+                            // TODO: with data
+                            [self popViewController];
+                        }
                     }
-                    else
+                    else {
                         [self popViewController];
+                    }
                 }
                 //MODAL
                 else if ([action isEqualToString:JSActionNavigationModal]) {
