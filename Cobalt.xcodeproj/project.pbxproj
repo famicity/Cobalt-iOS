@@ -1,0 +1,543 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BE1ABE081B71105C0070657C /* Cobalt.h in Headers */ = {isa = PBXBuildFile; fileRef = BE1ABE071B71105C0070657C /* Cobalt.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BE1ABE0E1B71105D0070657C /* Cobalt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE1ABE021B71105C0070657C /* Cobalt.framework */; };
+		BE1ABE151B71105D0070657C /* CobaltTests.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1ABE141B71105D0070657C /* CobaltTests.m */; };
+		BE1ABE361B7110B20070657C /* Cobalt-Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = BE1ABE1F1B7110B20070657C /* Cobalt-Prefix.pch */; settings = {ATTRIBUTES = (Public, ); }; };
+		BE1ABE371B7110B20070657C /* Cobalt.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1ABE201B7110B20070657C /* Cobalt.m */; };
+		BE1ABE3B1B7110B20070657C /* FontAwesome.h in Headers */ = {isa = PBXBuildFile; fileRef = BE1ABE251B7110B20070657C /* FontAwesome.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BE1ABE3C1B7110B20070657C /* FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1ABE261B7110B20070657C /* FontAwesome.m */; };
+		BE1ABE3D1B7110B20070657C /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BE1ABE271B7110B20070657C /* FontAwesome.ttf */; };
+		BE1ABE501B71165E0070657C /* CobaltViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = BE1ABE4D1B71165E0070657C /* CobaltViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BE1ABE511B71165E0070657C /* CobaltViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1ABE4E1B71165E0070657C /* CobaltViewController.m */; };
+		BE1ABE521B71165E0070657C /* CobaltViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = BE1ABE4F1B71165E0070657C /* CobaltViewController.xib */; };
+		BE1ABE551B7116670070657C /* ImageManager.h in Headers */ = {isa = PBXBuildFile; fileRef = BE1ABE531B7116670070657C /* ImageManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BE1ABE561B7116670070657C /* ImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1ABE541B7116670070657C /* ImageManager.m */; };
+		BE1ABE5B1B7116710070657C /* CobaltAbstractPlugin.h in Headers */ = {isa = PBXBuildFile; fileRef = BE1ABE571B7116710070657C /* CobaltAbstractPlugin.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BE1ABE5C1B7116710070657C /* CobaltAbstractPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1ABE581B7116710070657C /* CobaltAbstractPlugin.m */; };
+		BE1ABE5D1B7116710070657C /* CobaltPluginManager.h in Headers */ = {isa = PBXBuildFile; fileRef = BE1ABE591B7116710070657C /* CobaltPluginManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BE1ABE5E1B7116710070657C /* CobaltPluginManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1ABE5A1B7116710070657C /* CobaltPluginManager.m */; };
+		BE1ABE631B71167E0070657C /* CobaltToast.h in Headers */ = {isa = PBXBuildFile; fileRef = BE1ABE5F1B71167E0070657C /* CobaltToast.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BE1ABE641B71167E0070657C /* CobaltToast.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1ABE601B71167E0070657C /* CobaltToast.m */; };
+		BE1ABE651B71167E0070657C /* iToast.h in Headers */ = {isa = PBXBuildFile; fileRef = BE1ABE611B71167E0070657C /* iToast.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BE1ABE661B71167E0070657C /* iToast.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1ABE621B71167E0070657C /* iToast.m */; };
+		BE1ABEAB1B71EB620070657C /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE1ABEA81B71EB490070657C /* JavaScriptCore.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BE1ABE0F1B71105D0070657C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BE1ABDF91B71105C0070657C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BE1ABE011B71105C0070657C;
+			remoteInfo = Cobalt;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		BE1ABE021B71105C0070657C /* Cobalt.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Cobalt.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE1ABE061B71105C0070657C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BE1ABE071B71105C0070657C /* Cobalt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Cobalt.h; sourceTree = "<group>"; };
+		BE1ABE0D1B71105D0070657C /* CobaltTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CobaltTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE1ABE131B71105D0070657C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BE1ABE141B71105D0070657C /* CobaltTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CobaltTests.m; sourceTree = "<group>"; };
+		BE1ABE1F1B7110B20070657C /* Cobalt-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Cobalt-Prefix.pch"; sourceTree = "<group>"; };
+		BE1ABE201B7110B20070657C /* Cobalt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Cobalt.m; sourceTree = "<group>"; };
+		BE1ABE251B7110B20070657C /* FontAwesome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FontAwesome.h; sourceTree = "<group>"; };
+		BE1ABE261B7110B20070657C /* FontAwesome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FontAwesome.m; sourceTree = "<group>"; };
+		BE1ABE271B7110B20070657C /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = FontAwesome.ttf; sourceTree = "<group>"; };
+		BE1ABE4D1B71165E0070657C /* CobaltViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CobaltViewController.h; path = Cobalt/CobaltViewController.h; sourceTree = SOURCE_ROOT; };
+		BE1ABE4E1B71165E0070657C /* CobaltViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CobaltViewController.m; path = Cobalt/CobaltViewController.m; sourceTree = SOURCE_ROOT; };
+		BE1ABE4F1B71165E0070657C /* CobaltViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = CobaltViewController.xib; path = Cobalt/CobaltViewController.xib; sourceTree = SOURCE_ROOT; };
+		BE1ABE531B7116670070657C /* ImageManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImageManager.h; path = Cobalt/ImageManager.h; sourceTree = SOURCE_ROOT; };
+		BE1ABE541B7116670070657C /* ImageManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ImageManager.m; path = Cobalt/ImageManager.m; sourceTree = SOURCE_ROOT; };
+		BE1ABE571B7116710070657C /* CobaltAbstractPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CobaltAbstractPlugin.h; path = Cobalt/CobaltAbstractPlugin.h; sourceTree = SOURCE_ROOT; };
+		BE1ABE581B7116710070657C /* CobaltAbstractPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CobaltAbstractPlugin.m; path = Cobalt/CobaltAbstractPlugin.m; sourceTree = SOURCE_ROOT; };
+		BE1ABE591B7116710070657C /* CobaltPluginManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CobaltPluginManager.h; path = Cobalt/CobaltPluginManager.h; sourceTree = SOURCE_ROOT; };
+		BE1ABE5A1B7116710070657C /* CobaltPluginManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CobaltPluginManager.m; path = Cobalt/CobaltPluginManager.m; sourceTree = SOURCE_ROOT; };
+		BE1ABE5F1B71167E0070657C /* CobaltToast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CobaltToast.h; path = Cobalt/CobaltToast.h; sourceTree = SOURCE_ROOT; };
+		BE1ABE601B71167E0070657C /* CobaltToast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CobaltToast.m; path = Cobalt/CobaltToast.m; sourceTree = SOURCE_ROOT; };
+		BE1ABE611B71167E0070657C /* iToast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = iToast.h; path = Cobalt/iToast.h; sourceTree = SOURCE_ROOT; };
+		BE1ABE621B71167E0070657C /* iToast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = iToast.m; path = Cobalt/iToast.m; sourceTree = SOURCE_ROOT; };
+		BE1ABEA81B71EB490070657C /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BE1ABDFE1B71105C0070657C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE1ABEAB1B71EB620070657C /* JavaScriptCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BE1ABE0A1B71105D0070657C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE1ABE0E1B71105D0070657C /* Cobalt.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BE1ABDF81B71105C0070657C = {
+			isa = PBXGroup;
+			children = (
+				BE1ABE041B71105C0070657C /* Cobalt */,
+				BE1ABE111B71105D0070657C /* CobaltTests */,
+				BE1ABEAA1B71EB4E0070657C /* Frameworks */,
+				BE1ABE031B71105C0070657C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		BE1ABE031B71105C0070657C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BE1ABE021B71105C0070657C /* Cobalt.framework */,
+				BE1ABE0D1B71105D0070657C /* CobaltTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BE1ABE041B71105C0070657C /* Cobalt */ = {
+			isa = PBXGroup;
+			children = (
+				BE1ABE071B71105C0070657C /* Cobalt.h */,
+				BE1ABE201B7110B20070657C /* Cobalt.m */,
+				BE1ABE211B7110B20070657C /* Controllers */,
+				BE1ABE251B7110B20070657C /* FontAwesome.h */,
+				BE1ABE261B7110B20070657C /* FontAwesome.m */,
+				BE1ABE271B7110B20070657C /* FontAwesome.ttf */,
+				BE1ABE281B7110B20070657C /* Model */,
+				BE1ABE2B1B7110B20070657C /* Plugin */,
+				BE1ABE301B7110B20070657C /* View */,
+				BE1ABE051B71105C0070657C /* Supporting Files */,
+			);
+			path = Cobalt;
+			sourceTree = "<group>";
+		};
+		BE1ABE051B71105C0070657C /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				BE1ABE1F1B7110B20070657C /* Cobalt-Prefix.pch */,
+				BE1ABE061B71105C0070657C /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		BE1ABE111B71105D0070657C /* CobaltTests */ = {
+			isa = PBXGroup;
+			children = (
+				BE1ABE141B71105D0070657C /* CobaltTests.m */,
+				BE1ABE121B71105D0070657C /* Supporting Files */,
+			);
+			path = CobaltTests;
+			sourceTree = "<group>";
+		};
+		BE1ABE121B71105D0070657C /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				BE1ABE131B71105D0070657C /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		BE1ABE211B7110B20070657C /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				BE1ABE4D1B71165E0070657C /* CobaltViewController.h */,
+				BE1ABE4E1B71165E0070657C /* CobaltViewController.m */,
+				BE1ABE4F1B71165E0070657C /* CobaltViewController.xib */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		BE1ABE281B7110B20070657C /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				BE1ABE531B7116670070657C /* ImageManager.h */,
+				BE1ABE541B7116670070657C /* ImageManager.m */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		BE1ABE2B1B7110B20070657C /* Plugin */ = {
+			isa = PBXGroup;
+			children = (
+				BE1ABE571B7116710070657C /* CobaltAbstractPlugin.h */,
+				BE1ABE581B7116710070657C /* CobaltAbstractPlugin.m */,
+				BE1ABE591B7116710070657C /* CobaltPluginManager.h */,
+				BE1ABE5A1B7116710070657C /* CobaltPluginManager.m */,
+			);
+			path = Plugin;
+			sourceTree = "<group>";
+		};
+		BE1ABE301B7110B20070657C /* View */ = {
+			isa = PBXGroup;
+			children = (
+				BE1ABE5F1B71167E0070657C /* CobaltToast.h */,
+				BE1ABE601B71167E0070657C /* CobaltToast.m */,
+				BE1ABE611B71167E0070657C /* iToast.h */,
+				BE1ABE621B71167E0070657C /* iToast.m */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		BE1ABEAA1B71EB4E0070657C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				BE1ABEA81B71EB490070657C /* JavaScriptCore.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		BE1ABDFF1B71105C0070657C /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE1ABE501B71165E0070657C /* CobaltViewController.h in Headers */,
+				BE1ABE551B7116670070657C /* ImageManager.h in Headers */,
+				BE1ABE5B1B7116710070657C /* CobaltAbstractPlugin.h in Headers */,
+				BE1ABE361B7110B20070657C /* Cobalt-Prefix.pch in Headers */,
+				BE1ABE631B71167E0070657C /* CobaltToast.h in Headers */,
+				BE1ABE081B71105C0070657C /* Cobalt.h in Headers */,
+				BE1ABE5D1B7116710070657C /* CobaltPluginManager.h in Headers */,
+				BE1ABE3B1B7110B20070657C /* FontAwesome.h in Headers */,
+				BE1ABE651B71167E0070657C /* iToast.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		BE1ABE011B71105C0070657C /* Cobalt */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BE1ABE181B71105D0070657C /* Build configuration list for PBXNativeTarget "Cobalt" */;
+			buildPhases = (
+				BE1ABDFD1B71105C0070657C /* Sources */,
+				BE1ABDFE1B71105C0070657C /* Frameworks */,
+				BE1ABDFF1B71105C0070657C /* Headers */,
+				BE1ABE001B71105C0070657C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Cobalt;
+			productName = Cobalt;
+			productReference = BE1ABE021B71105C0070657C /* Cobalt.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		BE1ABE0C1B71105D0070657C /* CobaltTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BE1ABE1B1B71105D0070657C /* Build configuration list for PBXNativeTarget "CobaltTests" */;
+			buildPhases = (
+				BE1ABE091B71105D0070657C /* Sources */,
+				BE1ABE0A1B71105D0070657C /* Frameworks */,
+				BE1ABE0B1B71105D0070657C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BE1ABE101B71105D0070657C /* PBXTargetDependency */,
+			);
+			name = CobaltTests;
+			productName = CobaltTests;
+			productReference = BE1ABE0D1B71105D0070657C /* CobaltTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BE1ABDF91B71105C0070657C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0640;
+				ORGANIZATIONNAME = Cobaltians;
+				TargetAttributes = {
+					BE1ABE011B71105C0070657C = {
+						CreatedOnToolsVersion = 6.4;
+					};
+					BE1ABE0C1B71105D0070657C = {
+						CreatedOnToolsVersion = 6.4;
+					};
+				};
+			};
+			buildConfigurationList = BE1ABDFC1B71105C0070657C /* Build configuration list for PBXProject "Cobalt" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = BE1ABDF81B71105C0070657C;
+			productRefGroup = BE1ABE031B71105C0070657C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BE1ABE011B71105C0070657C /* Cobalt */,
+				BE1ABE0C1B71105D0070657C /* CobaltTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BE1ABE001B71105C0070657C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE1ABE521B71165E0070657C /* CobaltViewController.xib in Resources */,
+				BE1ABE3D1B7110B20070657C /* FontAwesome.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BE1ABE0B1B71105D0070657C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BE1ABDFD1B71105C0070657C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE1ABE641B71167E0070657C /* CobaltToast.m in Sources */,
+				BE1ABE511B71165E0070657C /* CobaltViewController.m in Sources */,
+				BE1ABE661B71167E0070657C /* iToast.m in Sources */,
+				BE1ABE5E1B7116710070657C /* CobaltPluginManager.m in Sources */,
+				BE1ABE561B7116670070657C /* ImageManager.m in Sources */,
+				BE1ABE3C1B7110B20070657C /* FontAwesome.m in Sources */,
+				BE1ABE5C1B7116710070657C /* CobaltAbstractPlugin.m in Sources */,
+				BE1ABE371B7110B20070657C /* Cobalt.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BE1ABE091B71105D0070657C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE1ABE151B71105D0070657C /* CobaltTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BE1ABE101B71105D0070657C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BE1ABE011B71105C0070657C /* Cobalt */;
+			targetProxy = BE1ABE0F1B71105D0070657C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		BE1ABE161B71105D0070657C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		BE1ABE171B71105D0070657C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		BE1ABE191B71105D0070657C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/sebastien/Developer/SDK,
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Cobalt/Cobalt-Prefix.pch";
+				INFOPLIST_FILE = Cobalt/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		BE1ABE1A1B71105D0070657C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/sebastien/Developer/SDK,
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Cobalt/Cobalt-Prefix.pch";
+				INFOPLIST_FILE = Cobalt/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		BE1ABE1C1B71105D0070657C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = CobaltTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		BE1ABE1D1B71105D0070657C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = CobaltTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BE1ABDFC1B71105C0070657C /* Build configuration list for PBXProject "Cobalt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BE1ABE161B71105D0070657C /* Debug */,
+				BE1ABE171B71105D0070657C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BE1ABE181B71105D0070657C /* Build configuration list for PBXNativeTarget "Cobalt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BE1ABE191B71105D0070657C /* Debug */,
+				BE1ABE1A1B71105D0070657C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BE1ABE1B1B71105D0070657C /* Build configuration list for PBXNativeTarget "CobaltTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BE1ABE1C1B71105D0070657C /* Debug */,
+				BE1ABE1D1B71105D0070657C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BE1ABDF91B71105C0070657C /* Project object */;
+}

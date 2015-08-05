@@ -997,27 +997,28 @@ NSString * webLayerPage;
     return viewController;
 }
 
-+ (UIViewController *)getViewControllerForController:(NSString *)controller
-{
-    NSDictionary * configuration = [CobaltViewController getConfigurationForController:controller];
++ (UIViewController *)getViewControllerForController:(NSString *)controller {
+    NSDictionary *configuration = [CobaltViewController getConfigurationForController:controller];
     
     if (configuration) {
-        NSString * class = [configuration objectForKey: kIos];
-        NSString * nib = [configuration objectForKey:kIosNibName];
+        NSBundle *bundle = [NSBundle mainBundle];
+        NSString *class = [configuration objectForKey: kIos];
+        NSString *nib = [configuration objectForKey:kIosNibName];
         BOOL pullToRefreshEnabled = [[configuration objectForKey:kPullToRefreshEnabled] boolValue];
         BOOL infiniteScrollEnabled = [[configuration objectForKey:kInfiniteScrollEnabled] boolValue];
         int infiniteScrollOffset = [configuration objectForKey:kInfiniteScrollOffset] != nil ? [[configuration objectForKey:kInfiniteScrollOffset] intValue] : 0;
         // TODO: uncomment for Bars
         /*
-        NSMutableDictionary * barsDictionary = [NSMutableDictionary dictionaryWithDictionary: [configuration objectForKey: kBars]];
+        NSMutableDictionary *barsDictionary = [NSMutableDictionary dictionaryWithDictionary:[configuration objectForKey:kBars]];
         
-        NSDictionary * barActionsArray = [barsDictionary objectForKey: kBarActions];
-        NSMutableArray * mutableBarActionsArray = [NSMutableArray arrayWithCapacity: barActionsArray.count];
-        for(NSDictionary * barActionDictionary in barActionsArray) {
-            [mutableBarActionsArray addObject: [NSMutableDictionary dictionaryWithDictionary: barActionDictionary]];
+        NSDictionary *barActionsArray = [barsDictionary objectForKey:kBarActions];
+        NSMutableArray *mutableBarActionsArray = [NSMutableArray arrayWithCapacity:barActionsArray.count];
+        for(NSDictionary *barActionDictionary in barActionsArray) {
+            [mutableBarActionsArray addObject:[NSMutableDictionary dictionaryWithDictionary:barActionDictionary]];
         }
         
-        [barsDictionary setObject: mutableBarActionsArray forKey: kBarActions];
+        [barsDictionary setObject:mutableBarActionsArray 
+                           forKey:kBarActions];
         */
         
         if (! class) {
@@ -1033,14 +1034,17 @@ NSString * webLayerPage;
         }
         
         //if nib file does no exists, use default one i.e. CobaltViewController.xib
-        if([[NSBundle mainBundle] pathForResource:nib ofType:@"nib"] == nil)
-        {
+        if ([bundle pathForResource:nib
+                             ofType:@"nib"] == nil) {
+            bundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", bundle.bundlePath,
+                                               @"/Frameworks/Cobalt.framework"]];
             nib = @"CobaltViewController";
         }
         
-        if ([CobaltViewController isValidViewControllerWithClass:class andNib:nib]) {
+        if ([CobaltViewController isValidViewControllerWithClass:class andNib:nib forBundle:bundle]) {
             if ([NSClassFromString(class) isSubclassOfClass:[CobaltViewController class]]) {
-                CobaltViewController * viewController = [[NSClassFromString(class) alloc] initWithNibName:nib bundle:[NSBundle mainBundle]];
+                CobaltViewController *viewController = [[NSClassFromString(class) alloc] initWithNibName:nib
+                                                                                                  bundle:bundle];
                 viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
                 viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
                 viewController.infiniteScrollOffset = infiniteScrollOffset;
@@ -1050,7 +1054,8 @@ NSString * webLayerPage;
                 return viewController;
             }
             else {
-                return [[NSClassFromString(class) alloc] initWithNibName:nib bundle:[NSBundle mainBundle]];
+                return [[NSClassFromString(class) alloc] initWithNibName:nib
+                                                                  bundle:bundle];
             }
         }
     }
@@ -1058,11 +1063,13 @@ NSString * webLayerPage;
     return nil;
 }
 
-+ (BOOL)isValidViewControllerWithClass:(NSString *)class andNib:(NSString *)nib
++ (BOOL)isValidViewControllerWithClass:(NSString *)class
+                                andNib:(NSString *)nib
+                             forBundle:(NSBundle *)bundle
 {
     BOOL isValidClass = NSClassFromString(class) != nil;
     BOOL isValidNib = (nib.length > 0
-                       && [[NSBundle mainBundle] pathForResource:nib ofType:@"nib"] != nil);
+                       && [bundle pathForResource:nib ofType:@"nib"] != nil);
     
 #if DEBUG_COBALT
     if (! isValidClass) {
