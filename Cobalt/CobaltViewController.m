@@ -259,35 +259,42 @@ NSString * webLayerPage;
     [mWebView loadRequest:requestURL];
 }
 
-+ (NSDictionary *)getConfigurationForController:(NSString *)controller
-{
-    NSDictionary * configuration = [Cobalt getControllersConfiguration];
++ (NSDictionary *)defaultConfiguration {
+    NSDictionary *configuration = [Cobalt getControllersConfiguration];
     if (configuration) {
-        if (controller) {
-            NSDictionary * controllerConfiguration = [configuration objectForKey:controller];
-            
-            if (controllerConfiguration
-                && [controllerConfiguration isKindOfClass:[NSDictionary class]]) {
-                return controllerConfiguration;
-            }
-#if DEBUG_COBALT
-            else {
-
-                NSLog(@"getConfigurationForController: no configuration found for %@ controller.\n\
-                      Trying to return default controller configuration", controller);
-            }
-#endif
-        }
-        
-        NSDictionary * defaultControllerConfiguration = [configuration objectForKey:JSNavigationControllerDefault];
-        
-        if (defaultControllerConfiguration
-            && [defaultControllerConfiguration isKindOfClass:[NSDictionary class]]) {
-            return defaultControllerConfiguration;
+        NSDictionary *defaultConfiguration = [configuration objectForKey:JSNavigationControllerDefault];
+        if (defaultConfiguration
+            && [defaultConfiguration isKindOfClass:[NSDictionary class]]) {
+            return defaultConfiguration;
         }
 #if DEBUG_COBALT
         else {
             NSLog(@"getConfigurationForController: no configuration found for default controller");
+        }
+#endif
+    }
+    
+    return nil;
+}
+
++ (NSDictionary *)configurationForController:(NSString *)controller {
+    if (! controller) {
+#if DEBUG_COBALT
+        NSLog(@"configurationForController: controller is nil");
+#endif
+        return nil;
+    }
+    
+    NSDictionary *configuration = [Cobalt getControllersConfiguration];
+    if (configuration) {
+        NSDictionary *controllerConfiguration = [configuration objectForKey:controller];
+        if (controllerConfiguration
+            && [controllerConfiguration isKindOfClass:[NSDictionary class]]) {
+            return controllerConfiguration;
+        }
+#if DEBUG_COBALT
+        else {
+            NSLog(@"getConfigurationForController: no configuration found for %@ controller.", controller);
         }
 #endif
     }
@@ -551,10 +558,10 @@ NSString * webLayerPage;
                             id controller = [data objectForKey:kJSNavigationController];
                             if (controller
                                 && [controller isKindOfClass:[NSString class]]) {
-                                controllerConfiguration = [CobaltViewController getConfigurationForController:controller];
+                                controllerConfiguration = [CobaltViewController configurationForController:controller];
                             }
                             else {
-                                controllerConfiguration = [CobaltViewController getConfigurationForController:nil];
+                                controllerConfiguration = [CobaltViewController defaultConfiguration];
                             }
                             
                             if (controllerConfiguration) {
@@ -1016,8 +1023,10 @@ NSString * webLayerPage;
                                                                                             @"/Frameworks/Cobalt.framework"]];
     NSString *nib = @"CobaltViewController";
     
-    NSDictionary *configuration = [CobaltViewController getConfigurationForController:controller];
-    
+    NSDictionary *configuration = [CobaltViewController configurationForController:controller];
+    if (! configuration) {
+        configuration = [CobaltViewController defaultConfiguration];
+    }
     if (! configuration) {
         CobaltViewController *viewController = [[CobaltViewController alloc] initWithNibName:nib
                                                                                       bundle:cobaltBundle];
@@ -1103,8 +1112,10 @@ NSString * webLayerPage;
 }
 
 + (UIViewController *)nativeViewControllerForController:(NSString *)controller {
-    NSDictionary *configuration = [CobaltViewController getConfigurationForController:controller];
-    
+    NSDictionary *configuration = [CobaltViewController configurationForController:controller];
+    if (! configuration) {
+        configuration = [CobaltViewController defaultConfiguration];
+    }
     if (! configuration) {
         return nil;
     }
