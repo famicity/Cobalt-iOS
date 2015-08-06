@@ -240,10 +240,16 @@ typedef enum {
 @property (strong, nonatomic) NSString * pageName;
 
 /*!
- @property		data
- @abstract		the data to pass to the webview in onPageShown event
+ @property		pushedData
+ @abstract		the data to pass to the webview in onPageShown event when pushed or modaled
  */
-@property (strong, nonatomic) NSDictionary *data;
+@property (strong, nonatomic) NSDictionary *pushedData;
+
+/*!
+ @property		poppedData
+ @abstract		the data to pass to the webview in onPageShown event when popped or dismissed
+ */
+@property (strong, nonatomic) NSDictionary *poppedData;
 
 @property (strong, nonatomic) UIWebView * webLayer;
 

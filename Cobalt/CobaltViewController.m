@@ -179,13 +179,15 @@ NSString * webLayerPage;
         _firstAppearance = NO;
         
         [self sendEvent:JSEventOnPageShown
-               withData:_data
+               withData:_pushedData
             andCallback:nil];
     }
     else {
         [self sendEvent:JSEventOnPageShown
-               withData:nil
+               withData:_poppedData
             andCallback:nil];
+        
+        _poppedData = nil;
     }
 }
 
@@ -591,8 +593,7 @@ NSString * webLayerPage;
                             }
                         }
                         else {
-                            // TODO: with data
-                            [self popViewController];
+                            [self popViewControllerWithData:data];
                         }
                     }
                     else {
@@ -972,7 +973,7 @@ NSString * webLayerPage;
         if (viewController) {
             if (innerData
                 && [innerData isKindOfClass:[NSDictionary class]]) {
-                [viewController setData:innerData];
+                viewController.pushedData = innerData;
             }
             
             // Push corresponding viewController
@@ -1003,6 +1004,23 @@ NSString * webLayerPage;
 
 - (void)popViewController
 {
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (void)popViewControllerWithData:(NSDictionary *)data {
+    id innerData = [data objectForKey:kJSData];
+    
+    if (innerData
+        && [innerData isKindOfClass:[NSDictionary class]]) {
+        NSArray *viewControllers = self.navigationController.viewControllers;
+        if (viewControllers.count > 1) {
+            UIViewController *popToViewController = [viewControllers objectAtIndex:viewControllers.count - 2];
+            if ([popToViewController isKindOfClass:[CobaltViewController class]]) {
+                ((CobaltViewController *)popToViewController).poppedData = innerData;
+            }
+        }
+    }
+    
     [self.navigationController popViewControllerAnimated:YES];
 }
 
