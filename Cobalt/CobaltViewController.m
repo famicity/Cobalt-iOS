@@ -81,6 +81,8 @@ NSString * webLayerPage;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+        _firstAppearance = YES;
+        
         toJavaScriptOperationQueue = [[NSOperationQueue alloc] init] ;
         [toJavaScriptOperationQueue setSuspended:YES];
         
@@ -173,9 +175,18 @@ NSString * webLayerPage;
                                              selector:@selector(onAppForeground:)
                                                  name:kOnAppForegroundNotification object:nil];
     
-    [self sendEvent:JSEventOnPageShown
-           withData:nil
-        andCallback:nil];
+    if (_firstAppearance) {
+        _firstAppearance = NO;
+        
+        [self sendEvent:JSEventOnPageShown
+               withData:_data
+            andCallback:nil];
+    }
+    else {
+        [self sendEvent:JSEventOnPageShown
+               withData:nil
+            andCallback:nil];
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -949,25 +960,42 @@ NSString * webLayerPage;
 #endif
 }
 
-- (void)pushViewControllerWithData:(NSDictionary *)data
-{
-    NSString * page = [data objectForKey:kJSPage];
-    NSString * controller = [data objectForKey:kJSNavigationController];
+- (void)pushViewControllerWithData:(NSDictionary *)data {
+    id page = [data objectForKey:kJSPage];
+    id controller = [data objectForKey:kJSNavigationController];
+    id innerData = [data objectForKey:kJSData];
     
     if (page
         && [page isKindOfClass:[NSString class]]) {
         CobaltViewController *viewController = [CobaltViewController cobaltViewControllerForController:controller
                                                                                                andPage:page];
         if (viewController) {
+            if (innerData
+                && [innerData isKindOfClass:[NSDictionary class]]) {
+                [viewController setData:innerData];
+            }
+            
             // Push corresponding viewController
             dispatch_async(dispatch_get_main_queue(), ^{
-                [self.navigationController pushViewController:viewController animated:YES];
+                [self.navigationController pushViewController:viewController
+                                                     animated:YES];
+            });
+        }
+    }
+    else if (controller
+             && [controller isKindOfClass:[NSString class]]){
+        UIViewController *viewController = [CobaltViewController nativeViewControllerForController:controller];
+        if (viewController) {
+            // Push corresponding viewController
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.navigationController pushViewController:viewController
+                                                     animated:YES];
             });
         }
     }
 #if DEBUG_COBALT
     else {
-        NSLog(@"pushViewControllerWithData: page field missing or not a string (data: %@)", [data description]);
+        NSLog(@"pushViewControllerWithData: one of page or controller fields must be specified at least.");
     }
 #endif
 }

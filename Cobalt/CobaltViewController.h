@@ -205,6 +205,7 @@ typedef enum {
 @private
     
     id<CobaltDelegate> _delegate;
+    BOOL _firstAppearance;
     int _alertViewCounter;
     float _lastWebviewContentOffset;
 	BOOL _isLoadingMore;
@@ -237,6 +238,12 @@ typedef enum {
  @discussion    the file must be located at ressourcePath
  */
 @property (strong, nonatomic) NSString * pageName;
+
+/*!
+ @property		data
+ @abstract		the data to pass to the webview in onPageShown event
+ */
+@property (strong, nonatomic) NSDictionary *data;
 
 @property (strong, nonatomic) UIWebView * webLayer;
 
