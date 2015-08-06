@@ -350,12 +350,20 @@ typedef enum {
 - (void)sendACK;
 
 /*!
- @method		+ (UIViewController *)getViewControllerForController:(NSString *)controller andPage:(NSString *)page;
- @abstract		Returns an allocated and initialized view controller from its id in cobalt configuration file and HTML page
+ @method		+ (CobaltViewController *)cobaltViewControllerForController:(NSString *)controller andPage:(NSString *)page;
+ @abstract		Returns an allocated and initialized Cobalt view controller from its id in cobalt configuration file and HTML page
  @param         controller: view controller id
  @param         page: HTML page
  */
-+ (UIViewController *)getViewControllerForController:(NSString *)controller andPage:(NSString *)page;
++ (CobaltViewController *)cobaltViewControllerForController:(NSString *)controller
+                                                    andPage:(NSString *)page;
+
+/*!
+ @method		+ (UIViewController *)nativeViewControllerForController:(NSString *)controller;
+ @abstract		Returns an allocated and initialized native view controller from its id in cobalt configuration file
+ @param         controller: view controller id
+ */
++ (UIViewController *)nativeViewControllerForController:(NSString *)controller;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -

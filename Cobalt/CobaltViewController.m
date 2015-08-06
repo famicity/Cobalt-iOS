@@ -926,7 +926,8 @@ NSString * webLayerPage;
     
     if (page
         && [page isKindOfClass:[NSString class]]) {
-        UIViewController * viewController = [CobaltViewController getViewControllerForController:controller andPage:page];
+        CobaltViewController *viewController = [CobaltViewController cobaltViewControllerForController:controller
+                                                                                               andPage:page];
         if (viewController) {
             // replace current view with corresponding viewController
             NSMutableArray * viewControllers = [NSMutableArray arrayWithArray: [self.navigationController viewControllers]];
@@ -948,7 +949,8 @@ NSString * webLayerPage;
     
     if (page
         && [page isKindOfClass:[NSString class]]) {
-        UIViewController * viewController = [CobaltViewController getViewControllerForController:controller andPage:page];
+        CobaltViewController *viewController = [CobaltViewController cobaltViewControllerForController:controller
+                                                                                               andPage:page];
         if (viewController) {
             // Push corresponding viewController
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -975,7 +977,8 @@ NSString * webLayerPage;
     NSString * controller = [data objectForKey:kJSNavigationController];
     if (page
         && [page isKindOfClass:[NSString class]]) {
-        UIViewController * viewController = [CobaltViewController getViewControllerForController:controller andPage:page];
+        CobaltViewController *viewController = [CobaltViewController cobaltViewControllerForController:controller
+                                                                                               andPage:page];
         if (viewController) {
             [self presentViewController:[[UINavigationController alloc] initWithRootViewController:viewController] animated:YES completion:nil];
         }
@@ -999,104 +1002,200 @@ NSString * webLayerPage;
 #endif
 }
 
-+ (UIViewController *)getViewControllerForController:(NSString *)controller andPage:(NSString *)page
-{
-    UIViewController * viewController = [CobaltViewController getViewControllerForController:controller];
-    
-    if (viewController
-        && [[viewController class] isSubclassOfClass:[CobaltViewController class]]) {
-        // Sets page
-        ((CobaltViewController *)viewController).pageName = page;
++ (CobaltViewController *)cobaltViewControllerForController:(NSString *)controller
+                                                    andPage:(NSString *)page {
+    if (! page) {
+#if DEBUG_COBALT
+        NSLog(@"getCobaltViewControllerForController: no page specified");
+#endif
+        return nil;
     }
     
-    return viewController;
-}
-
-+ (UIViewController *)getViewControllerForController:(NSString *)controller {
+    NSBundle *mainBundle = [NSBundle mainBundle];
+    NSBundle *cobaltBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@",   mainBundle.bundlePath,
+                                                                                            @"/Frameworks/Cobalt.framework"]];
+    NSString *nib = @"CobaltViewController";
+    
     NSDictionary *configuration = [CobaltViewController getConfigurationForController:controller];
     
-    if (configuration) {
-        NSBundle *bundle = [NSBundle mainBundle];
-        NSString *class = [configuration objectForKey: kIos];
-        NSString *nib = [configuration objectForKey:kIosNibName];
-        BOOL pullToRefreshEnabled = [[configuration objectForKey:kPullToRefreshEnabled] boolValue];
-        BOOL infiniteScrollEnabled = [[configuration objectForKey:kInfiniteScrollEnabled] boolValue];
-        int infiniteScrollOffset = [configuration objectForKey:kInfiniteScrollOffset] != nil ? [[configuration objectForKey:kInfiniteScrollOffset] intValue] : 0;
+    if (! configuration) {
+        CobaltViewController *viewController = [[CobaltViewController alloc] initWithNibName:nib
+                                                                                      bundle:cobaltBundle];
+        viewController.pageName = page;
+        viewController.isPullToRefreshEnabled = false;
+        viewController.isInfiniteScrollEnabled = false;
+        viewController.infiniteScrollOffset = 0;
         // TODO: uncomment for Bars
-        /*
-        NSMutableDictionary *barsDictionary = [NSMutableDictionary dictionaryWithDictionary:[configuration objectForKey:kBars]];
+        //viewController.barsConfiguration = [NSMutableDictionary dictionaryWithCapacity:0];;
         
-        NSDictionary *barActionsArray = [barsDictionary objectForKey:kBarActions];
-        NSMutableArray *mutableBarActionsArray = [NSMutableArray arrayWithCapacity:barActionsArray.count];
-        for(NSDictionary *barActionDictionary in barActionsArray) {
-            [mutableBarActionsArray addObject:[NSMutableDictionary dictionaryWithDictionary:barActionDictionary]];
-        }
-        
-        [barsDictionary setObject:mutableBarActionsArray 
-                           forKey:kBarActions];
-        */
-        
-        if (! class) {
+        return viewController;
+    }
+    
+    NSString *class = [configuration objectForKey:kIos];
+    nib = [configuration objectForKey:kIosNibName];
+    BOOL pullToRefreshEnabled = [[configuration objectForKey:kPullToRefreshEnabled] boolValue];
+    BOOL infiniteScrollEnabled = [[configuration objectForKey:kInfiniteScrollEnabled] boolValue];
+    int infiniteScrollOffset = [configuration objectForKey:kInfiniteScrollOffset] != nil ? [[configuration objectForKey:kInfiniteScrollOffset] intValue] : 0;
+    
+    // TODO: uncomment for Bars
+    /*
+     NSMutableDictionary *barsDictionary = [NSMutableDictionary dictionaryWithDictionary:[configuration objectForKey:kBars]];
+     
+     NSDictionary *barActionsArray = [barsDictionary objectForKey:kBarActions];
+     NSMutableArray *mutableBarActionsArray = [NSMutableArray arrayWithCapacity:barActionsArray.count];
+     for(NSDictionary *barActionDictionary in barActionsArray) {
+        [mutableBarActionsArray addObject:[NSMutableDictionary dictionaryWithDictionary:barActionDictionary]];
+     }
+     
+     [barsDictionary setObject:mutableBarActionsArray
+     forKey:kBarActions];
+     */
+    
+    if (! class) {
 #if DEBUG_COBALT
-            NSLog(@"getCobaltViewControllerForController: no class found for %@ controller", controller);
+        NSLog(@"getCobaltViewControllerForController: no class found for %@ controller", controller);
 #endif
-            return nil;
-        }
-        
-        // If nib not defined in configuration file, use same as class!
-        if(! nib) {
-            nib = class;
-        }
-        
-        //if nib file does no exists, use default one i.e. CobaltViewController.xib
-        if ([bundle pathForResource:nib
-                             ofType:@"nib"] == nil) {
-            bundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", bundle.bundlePath,
-                                               @"/Frameworks/Cobalt.framework"]];
-            nib = @"CobaltViewController";
-        }
-        
-        if ([CobaltViewController isValidViewControllerWithClass:class andNib:nib forBundle:bundle]) {
-            if ([NSClassFromString(class) isSubclassOfClass:[CobaltViewController class]]) {
-                CobaltViewController *viewController = [[NSClassFromString(class) alloc] initWithNibName:nib
-                                                                                                  bundle:bundle];
-                viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
-                viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
-                viewController.infiniteScrollOffset = infiniteScrollOffset;
-                // TODO: uncomment for Bars
-                //viewController.barsConfiguration = barsDictionary;
-                
-                return viewController;
+        return nil;
+    }
+    
+    if ([CobaltViewController isValidCobaltViewControllerWithClassName:class]) {
+        if (! nib) {
+            CobaltViewController *viewController;
+            // If nib not defined in configuration file, use same as class if it exists!
+            if ([CobaltViewController isValidNib:class
+                                       forBundle:mainBundle]) {
+                viewController = [[NSClassFromString(class) alloc] initWithNibName:class
+                                                                            bundle:mainBundle];
             }
+            // If nib file does no exists, use default one i.e. CobaltViewController.xib
             else {
-                return [[NSClassFromString(class) alloc] initWithNibName:nib
-                                                                  bundle:bundle];
+                nib = @"CobaltViewController";
+                
+                viewController = [[NSClassFromString(class) alloc] initWithNibName:nib
+                                                                            bundle:cobaltBundle];
             }
+            
+            viewController.pageName = page;
+            viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
+            viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
+            viewController.infiniteScrollOffset = infiniteScrollOffset;
+            // TODO: uncomment for Bars
+            //viewController.barsConfiguration = barsDictionary;
+            
+            return viewController;
+        }
+        else if ([CobaltViewController isValidNib:nib
+                                        forBundle:mainBundle]) {
+            CobaltViewController *viewController = [[NSClassFromString(class) alloc] initWithNibName:nib
+                                                                                              bundle:mainBundle];
+            viewController.pageName = page;
+            viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
+            viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
+            viewController.infiniteScrollOffset = infiniteScrollOffset;
+            // TODO: uncomment for Bars
+            //viewController.barsConfiguration = barsDictionary;
+            
+            return viewController;
         }
     }
     
     return nil;
 }
 
-+ (BOOL)isValidViewControllerWithClass:(NSString *)class
-                                andNib:(NSString *)nib
-                             forBundle:(NSBundle *)bundle
-{
-    BOOL isValidClass = NSClassFromString(class) != nil;
-    BOOL isValidNib = (nib.length > 0
-                       && [bundle pathForResource:nib ofType:@"nib"] != nil);
++ (UIViewController *)nativeViewControllerForController:(NSString *)controller {
+    NSDictionary *configuration = [CobaltViewController getConfigurationForController:controller];
     
-#if DEBUG_COBALT
-    if (! isValidClass) {
-        NSLog(@"isValidViewControllerWithClass: class %@ not found", class);
+    if (! configuration) {
+        return nil;
     }
     
+    NSBundle *bundle = [NSBundle mainBundle];
+    NSString *class = [configuration objectForKey:kIos];
+    NSString *nib = [configuration objectForKey:kIosNibName];
+    
+    if (! class) {
+#if DEBUG_COBALT
+        NSLog(@"getCobaltViewControllerForController: no class found for %@ controller", controller);
+#endif
+        return nil;
+    }
+    
+    if (! [CobaltViewController isValidNativeViewControllerWithClassName:class]) {
+        return nil;
+    }
+    
+    if (! nib) {
+        // If nib not defined in configuration file, use same as class if it exists!
+        if ([CobaltViewController isValidNib:class
+                                   forBundle:bundle]) {
+            return [[NSClassFromString(class) alloc] initWithNibName:class
+                                                              bundle:bundle];
+        }
+        else {
+            return [[NSClassFromString(class) alloc] init];
+        }
+    }
+    else if ([CobaltViewController isValidNib:nib
+                                    forBundle:bundle]) {
+        return [[NSClassFromString(class) alloc] initWithNibName:nib
+                                                          bundle:bundle];
+    }
+    else {
+        return nil;
+    }
+}
+
++ (BOOL)isValidNativeViewControllerWithClassName:(NSString *)className {
+    Class class = NSClassFromString(className);
+    BOOL isValidViewControllerClass =   class
+                                        && [class isSubclassOfClass:UIViewController.class];
+    BOOL isValidNativeViewControllerClass = class
+                                            && ! [class isSubclassOfClass:CobaltViewController.class];
+    
+#if DEBUG_COBALT
+    if (! isValidViewControllerClass) {
+        NSLog(@"isValidNativeViewControllerWithClassName: class %@ not found", className);
+    }
+    else if (! isValidNativeViewControllerClass) {
+        NSLog(@"isValidNativeViewControllerWithClassName: class %@ inherits from CobaltViewController", className);
+    }
+#endif
+    
+    return isValidViewControllerClass && isValidNativeViewControllerClass;
+}
+
++ (BOOL)isValidCobaltViewControllerWithClassName:(NSString *)className {
+    Class class = NSClassFromString(className);
+    BOOL isValidViewControllerClass =   class
+                                        && [class isSubclassOfClass:UIViewController.class];
+    BOOL isValidCobaltViewControllerClass = class
+                                            && [class isSubclassOfClass:CobaltViewController.class];
+    
+#if DEBUG_COBALT
+    if (! isValidViewControllerClass) {
+        NSLog(@"isValidNativeViewControllerWithClassName: class %@ not found", className);
+    }
+    else if (! isValidCobaltViewControllerClass) {
+        NSLog(@"isValidCobaltViewControllerWithClassName: class %@ does not inherit from CobaltViewController", className);
+    }
+#endif
+    
+    return isValidViewControllerClass && isValidCobaltViewControllerClass;
+}
+
++ (BOOL)isValidNib:(NSString *)nib
+         forBundle:(NSBundle *)bundle {
+    BOOL isValidNib = (nib.length > 0
+                       && [bundle pathForResource:nib
+                                           ofType:@"nib"]);
+    
+#if DEBUG_COBALT
     if(! isValidNib) {
         NSLog(@"isValidViewControllerWithClass: %@ nib does not exist!", nib);
     }
 #endif
     
-    return isValidClass && isValidNib;
+    return isValidNib;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
