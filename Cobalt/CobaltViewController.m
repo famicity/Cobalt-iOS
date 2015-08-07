@@ -626,7 +626,6 @@ NSString * webLayerPage;
                 }
                 //REPLACE
                 else if ([action isEqualToString:kJSActionNavigationReplace]) {
-                    [self dismissViewController];
                     NSDictionary * data = [dict objectForKey:kJSData];
                     if (data
                         && [data isKindOfClass:[NSDictionary class]]) {
@@ -637,7 +636,6 @@ NSString * webLayerPage;
                         NSLog(@"handleDictionarySentByJavaScript: data field missing or not an object (message: %@)", [dict description]);
                     }
 #endif
-
                 }
                 else {
 #if DEBUG_COBALT
@@ -944,26 +942,49 @@ NSString * webLayerPage;
 #pragma mark -
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)replaceViewControllerWithData:(NSDictionary *)data
-{
-    NSString * page = [data objectForKey:kJSPage];
-    NSString * controller = [data objectForKey:kJSNavigationController];
+- (void)replaceViewControllerWithData:(NSDictionary *)data {
+    id page = [data objectForKey:kJSPage];
+    id controller = [data objectForKey:kJSNavigationController];
     BOOL animated = [[data objectForKey: kJSAnimated] boolValue];
+    id innerData = [data objectForKey:kJSData];
     
     if (page
         && [page isKindOfClass:[NSString class]]) {
         CobaltViewController *viewController = [CobaltViewController cobaltViewControllerForController:controller
                                                                                                andPage:page];
         if (viewController) {
+            if (innerData
+                && [innerData isKindOfClass:[NSDictionary class]]) {
+                viewController.pushedData = innerData;
+            }
+            
             // replace current view with corresponding viewController
-            NSMutableArray * viewControllers = [NSMutableArray arrayWithArray: [self.navigationController viewControllers]];
-            [viewControllers replaceObjectAtIndex: (viewControllers.count - 1) withObject: viewController];
-            [self.navigationController setViewControllers: viewControllers animated: animated];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSMutableArray *viewControllers = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
+                [viewControllers replaceObjectAtIndex:(viewControllers.count - 1)
+                                           withObject:viewController];
+                [self.navigationController setViewControllers:viewControllers
+                                                     animated:animated];
+            });
+        }
+    }
+    else if (controller
+             && [controller isKindOfClass:[NSString class]]) {
+        UIViewController *viewController = [CobaltViewController nativeViewControllerForController:controller];
+        if (viewController) {
+            // Push corresponding viewController
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSMutableArray *viewControllers = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
+                [viewControllers replaceObjectAtIndex:(viewControllers.count - 1)
+                                           withObject:viewController];
+                [self.navigationController setViewControllers:viewControllers
+                                                     animated:animated];
+            });
         }
     }
 #if DEBUG_COBALT
     else {
-        NSLog(@"replaceViewControllerWithData: page field missing or not a string (data: %@)", [data description]);
+        NSLog(@"replaceViewControllerWithData: one of page or controller fields must be specified at least.");
     }
 #endif
 }
