@@ -615,7 +615,14 @@ NSString * webLayerPage;
                 }
                 //DISMISS
                 else if ([action isEqualToString:JSActionNavigationDismiss]) {
-                    [self dismissViewController];
+                    NSDictionary *data = [dict objectForKey:kJSData];
+                    if (data
+                        && [data isKindOfClass:[NSDictionary class]]) {
+                        [self dismissViewControllerWithData:data];
+                    }
+                    else {
+                        [self dismissViewController];
+                    }
                 }
                 //REPLACE
                 else if ([action isEqualToString:kJSActionNavigationReplace]) {
@@ -1021,24 +1028,47 @@ NSString * webLayerPage;
         }
     }
     
-    [self.navigationController popViewControllerAnimated:YES];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.navigationController popViewControllerAnimated:YES];
+    });
 }
 
-- (void)presentViewControllerWithData:(NSDictionary *)data
-{
-    NSString * page = [data objectForKey:kJSPage];
-    NSString * controller = [data objectForKey:kJSNavigationController];
+- (void)presentViewControllerWithData:(NSDictionary *)data {
+    id page = [data objectForKey:kJSPage];
+    id controller = [data objectForKey:kJSNavigationController];
+    id innerData = [data objectForKey:kJSData];
+    
     if (page
         && [page isKindOfClass:[NSString class]]) {
         CobaltViewController *viewController = [CobaltViewController cobaltViewControllerForController:controller
                                                                                                andPage:page];
         if (viewController) {
-            [self presentViewController:[[UINavigationController alloc] initWithRootViewController:viewController] animated:YES completion:nil];
+            if (innerData
+                && [innerData isKindOfClass:[NSDictionary class]]) {
+                viewController.pushedData = innerData;
+            }
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self presentViewController:[[UINavigationController alloc] initWithRootViewController:viewController]
+                                   animated:YES
+                                 completion:nil];
+            });
+        }
+    }
+    else if (controller
+             && [controller isKindOfClass:[NSString class]]){
+        UIViewController *viewController = [CobaltViewController nativeViewControllerForController:controller];
+        if (viewController) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self presentViewController:[[UINavigationController alloc] initWithRootViewController:viewController]
+                                   animated:YES
+                                 completion:nil];
+            });
         }
     }
 #if DEBUG_COBALT
     else {
-        NSLog(@"presentViewControllerWithData: page field missing or not a string (data: %@)", [data description]);
+        NSLog(@"presentViewControllerWithData: one of page or controller fields must be specified at least.");
     }
 #endif
 }
@@ -1051,6 +1081,38 @@ NSString * webLayerPage;
 #if DEBUG_COBALT
     else {
         NSLog(@"dismissViewController: current controller was not presented");
+    }
+#endif
+}
+
+- (void)dismissViewControllerWithData:(NSDictionary *)data {
+    if (self.presentingViewController) {
+        id innerData = [data objectForKey:kJSData];
+        
+        if (innerData
+            && [innerData isKindOfClass:[NSDictionary class]]) {
+            UIViewController *popToViewController;
+            if ([self.presentingViewController isKindOfClass:[UINavigationController class]]) {
+                popToViewController = ((UINavigationController *)self.presentingViewController).viewControllers.lastObject;
+            }
+            else if ([self.presentingViewController isKindOfClass:[UIViewController class]]) {
+                popToViewController = self.presentingViewController;
+            }
+            
+            if (popToViewController
+                && [popToViewController isKindOfClass:[CobaltViewController class]]) {
+                ((CobaltViewController *)popToViewController).poppedData = innerData;
+            }
+        }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.presentingViewController dismissViewControllerAnimated:YES
+                                                              completion:nil];
+        });
+    }
+#if DEBUG_COBALT
+    else {
+        NSLog(@"dismissViewControllerWithData: current controller was not presented");
     }
 #endif
 }
