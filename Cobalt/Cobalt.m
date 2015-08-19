@@ -44,14 +44,17 @@ static NSString * sResourcePath = nil;
     sResourcePath = resourcePath;
 }
 
-+ (NSString *)resourcePath
-{
++ (NSString *)resourcePath {
     if (sResourcePath != nil) {
         return sResourcePath;
     }
-    else {
-        return [NSString stringWithFormat:@"%@%@",[[NSBundle mainBundle] resourcePath], @"/www/"];
+
+    NSBundle *mainBundle = [NSBundle mainBundle];
+    if (mainBundle == nil) {
+        return nil;
     }
+
+    return [NSString stringWithFormat:@"%@%@", [mainBundle resourcePath], @"/www/"];
 }
 
 + (NSDictionary *)getControllersConfiguration
