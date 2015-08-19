@@ -51,6 +51,7 @@ static NSString * sResourcePath = nil;
 
     NSBundle *mainBundle = [NSBundle mainBundle];
     if (mainBundle == nil) {
+        NSLog(@"resourcePath: app bundle could not be created.");
         return nil;
     }
 
