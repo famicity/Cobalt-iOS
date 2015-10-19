@@ -52,7 +52,7 @@ static NSDictionary *sFontsConfiguration;
                 id fontConfiguration = [fontsConfiguration objectForKey:font];
                 if (fontConfiguration != nil
                     && [fontConfiguration isKindOfClass:[NSDictionary class]]) {
-                    id fontClassName = [fontConfiguration objectForKey:@"ios"];
+                    id fontClassName = [fontConfiguration objectForKey:kConfigurationIOS];
                     if (fontClassName != nil
                         && [fontClassName isKindOfClass:[NSString class]]) {
                         Class fontClass = NSClassFromString(fontClassName);
@@ -86,7 +86,7 @@ static NSDictionary *sFontsConfiguration;
         return nil;
     }
     
-    id fontsConfiguration = [cobaltConfiguration objectForKey:@"fonts"];
+    id fontsConfiguration = [cobaltConfiguration objectForKey:kConfigurationFonts];
     if (fontsConfiguration == nil
         || ! [fontsConfiguration isKindOfClass:[NSDictionary class]]) {
         return nil;

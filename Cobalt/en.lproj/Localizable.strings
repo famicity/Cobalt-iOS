@@ -28,3 +28,6 @@
  */
 
 "back" = "Back";
+"OK" = "OK";
+"pullToRefresh" = "Pull-to-refresh";
+"refreshing" = "Refreshing";

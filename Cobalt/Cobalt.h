@@ -59,29 +59,38 @@ FOUNDATION_EXPORT const unsigned char CobaltVersionString[];
 
 #import "CobaltViewController.h"
 
-#define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
-
 #define viewControllerDeallocatedNotification   @"viewControllerDeallocatedNotification"
 
-#define cobaltSpecialJSKey      @"cob@l7#k&y"
+// CONFIGURATION
+#define kConfigurationIOS                               @"ios"
+#define kConfigurationControllers                       @"controllers"
+#define kConfigurationControllerDefault                 @"default"
+#define kConfigurationControllerIOSNibName              @"iosNibName"
+#define kConfigurationControllerPullToRefresh           @"pullToRefresh"
+#define kConfigurationControllerInfiniteScroll          @"infiniteScroll"
+#define kConfigurationControllerInfiniteScrollOffset    @"infiniteScrollOffset"
 
-// CONFIGURATION FILE
-#define kIos                    @"ios"
-#define kIosNibName             @"iosNibName"
-#define kInfiniteScrollOffset   @"infiniteScrollOffset"
-// TODO: uncomment for Bars
-/*
-#define kBars                   @"bars"
-#define kBarVisible             @"visible"
-#define kBarBackgroundColor     @"backgroundColor"
-#define kBarTitle               @"title"
-#define kBarActions             @"actions"
-#define kBarActionIcon          @"iosIcon"
-#define kBarActionName          @"name"
-#define kBarActionTitle         @"title"
-#define kBarActionVisible       @"visible"
-#define kBarActionPosition      @"iosPosition"
-*/
+// BARS
+#define kConfigurationBars                          @"bars"
+#define kConfigurationBarsBackgroundColor           @"backgroundColor"
+#define kConfigurationBarsColor                     @"color"
+#define kConfigurationBarsTitle                     @"title"
+#define kConfigurationBarsVisible                   @"visible"
+#define kConfigurationBarsVisibleTop                @"top"
+#define kConfigurationBarsVisibleBottom             @"bottom"
+#define kConfigurationBarsActions                   @"actions"
+#define kConfigurationBarsActionBadge               @"badge"
+#define kConfigurationBarsActionColor               @"color"
+#define kConfigurationBarsActionEnabled             @"enabled"
+#define kConfigurationBarsActionIcon                @"icon"
+#define kConfigurationBarsActionIconIOS             @"iosIcon"
+#define kConfigurationBarsActionName                @"name"
+#define kConfigurationBarsActionPosition            @"iosPosition"
+#define kConfigurationBarsActionPositionTopRight    @"topRight"
+#define kConfigurationBarsActionPositionTopLeft     @"topLeft"
+#define kConfigurationBarsActionPositionBottom      @"bottom"
+#define kConfigurationBarsActionTitle               @"title"
+#define kConfigurationBarsActionVisible             @"visible"
 
 @interface Cobalt : NSObject
 

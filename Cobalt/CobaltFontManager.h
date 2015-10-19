@@ -30,6 +30,8 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+#define kConfigurationFonts     @"fonts"
+
 @interface CobaltFontManager : NSObject
 
 + (UIImage *)imageWithIcon:(NSString *)identifier
