@@ -32,6 +32,8 @@
 static NSDictionary *sCobaltConfiguration;
 static NSString *sResourcePath;
 
+#define NIB_DEFAULT     @"CobaltViewController"
+
 @implementation Cobalt
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +78,7 @@ static NSString *sResourcePath;
     NSBundle *mainBundle = [NSBundle mainBundle];
     NSBundle *cobaltBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", mainBundle.bundlePath,
                                                        @"/Frameworks/Cobalt.framework"]];
-    NSString *nib = @"CobaltViewController";
+    NSString *nib = NIB_DEFAULT;
     
     NSDictionary *configuration = [Cobalt configurationForController:controller];
     if (configuration == nil) {
@@ -89,31 +91,17 @@ static NSString *sResourcePath;
         viewController.isPullToRefreshEnabled = false;
         viewController.isInfiniteScrollEnabled = false;
         viewController.infiniteScrollOffset = 0;
-        // TODO: uncomment for Bars
-        //viewController.barsConfiguration = [NSMutableDictionary dictionaryWithCapacity:0];
+        viewController.barsConfiguration = nil;
         
         return viewController;
     }
     
-    NSString *class = [configuration objectForKey:kIos];
-    nib = [configuration objectForKey:kIosNibName];
-    BOOL pullToRefreshEnabled = [[configuration objectForKey:@"pullToRefresh"] boolValue];
-    BOOL infiniteScrollEnabled = [[configuration objectForKey:@"infiniteScroll"] boolValue];
-    int infiniteScrollOffset = [configuration objectForKey:kInfiniteScrollOffset] != nil ? [[configuration objectForKey:kInfiniteScrollOffset] intValue] : 0;
-    
-    // TODO: uncomment for Bars
-    /*
-     NSMutableDictionary *barsDictionary = [NSMutableDictionary dictionaryWithDictionary:[configuration objectForKey:kBars]];
-     
-     NSDictionary *barActionsArray = [barsDictionary objectForKey:kBarActions];
-     NSMutableArray *mutableBarActionsArray = [NSMutableArray arrayWithCapacity:barActionsArray.count];
-     for(NSDictionary *barActionDictionary in barActionsArray) {
-     [mutableBarActionsArray addObject:[NSMutableDictionary dictionaryWithDictionary:barActionDictionary]];
-     }
-     
-     [barsDictionary setObject:mutableBarActionsArray
-     forKey:kBarActions];
-     */
+    NSString *class = [configuration objectForKey:kConfigurationIOS];
+    nib = [configuration objectForKey:kConfigurationControllerIOSNibName];
+    BOOL pullToRefreshEnabled = [[configuration objectForKey:kConfigurationControllerPullToRefresh] boolValue];
+    BOOL infiniteScrollEnabled = [[configuration objectForKey:kConfigurationControllerInfiniteScroll] boolValue];
+    int infiniteScrollOffset = [configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] != nil ? [[configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] intValue] : 0;
+    NSDictionary *barsDictionary = [configuration objectForKey:kConfigurationBars];
     
     if (class == nil) {
 #if DEBUG_COBALT
@@ -133,7 +121,7 @@ static NSString *sResourcePath;
             }
             // If nib file does no exists, use default one i.e. CobaltViewController.xib
             else {
-                nib = @"CobaltViewController";
+                nib = NIB_DEFAULT;
                 
                 viewController = [[NSClassFromString(class) alloc] initWithNibName:nib
                                                                             bundle:cobaltBundle];
@@ -143,8 +131,7 @@ static NSString *sResourcePath;
             viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
             viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
             viewController.infiniteScrollOffset = infiniteScrollOffset;
-            // TODO: uncomment for Bars
-            //viewController.barsConfiguration = barsDictionary;
+            viewController.barsConfiguration = barsDictionary;
             
             return viewController;
         }
@@ -156,8 +143,7 @@ static NSString *sResourcePath;
             viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
             viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
             viewController.infiniteScrollOffset = infiniteScrollOffset;
-            // TODO: uncomment for Bars
-            //viewController.barsConfiguration = barsDictionary;
+            viewController.barsConfiguration = barsDictionary;
             
             return viewController;
         }
@@ -176,8 +162,8 @@ static NSString *sResourcePath;
     }
     
     NSBundle *bundle = [NSBundle mainBundle];
-    NSString *class = [configuration objectForKey:kIos];
-    NSString *nib = [configuration objectForKey:kIosNibName];
+    NSString *class = [configuration objectForKey:kConfigurationIOS];
+    NSString *nib = [configuration objectForKey:kConfigurationControllerIOSNibName];
     
     if (class == nil) {
 #if DEBUG_COBALT
@@ -276,7 +262,7 @@ static NSString *sResourcePath;
         return nil;
     }
     
-    NSDictionary *defaultConfiguration = [configuration objectForKey:@"default"];
+    NSDictionary *defaultConfiguration = [configuration objectForKey:kConfigurationControllerDefault];
     if (defaultConfiguration == nil
         || ! [defaultConfiguration isKindOfClass:[NSDictionary class]]) {
 #if DEBUG_COBALT
@@ -319,7 +305,7 @@ static NSString *sResourcePath;
         return nil;
     }
     
-    id controllersConfiguration = [cobaltConfiguration objectForKey:@"controllers"];
+    id controllersConfiguration = [cobaltConfiguration objectForKey:kConfigurationControllers];
     if (controllersConfiguration == nil
         || ! [controllersConfiguration isKindOfClass:[NSDictionary class]]) {
         return nil;

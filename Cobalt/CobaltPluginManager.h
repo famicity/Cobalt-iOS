@@ -31,6 +31,8 @@
 
 #import "CobaltViewController.h"
 
+#define kConfigurationPlugins   @"plugins"
+
 @interface CobaltPluginManager : NSObject
 
 @property (nonatomic, retain) NSDictionary *pluginsDictionary;

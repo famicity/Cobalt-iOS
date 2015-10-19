@@ -73,7 +73,7 @@ static CobaltPluginManager *cobaltPluginManagerInstance = nil;
     BOOL isFromWebLayer = [[[data objectForKey:kJSData] objectForKey:kJSIsWebLayer] boolValue];
     
     if ([pluginName isKindOfClass:[NSString class]]) {
-        NSString *className = [[_pluginsDictionary objectForKey:pluginName] objectForKey:kIos];
+        NSString *className = [[_pluginsDictionary objectForKey:pluginName] objectForKey:kConfigurationIOS];
         Class class = NSClassFromString(className);
         if(class) {
             CobaltAbstractPlugin *plugin = [class sharedInstanceWithCobaltViewController:viewController];
@@ -104,7 +104,7 @@ static CobaltPluginManager *cobaltPluginManagerInstance = nil;
         return nil;
     }
     
-    id pluginsConfiguration = [cobaltConfiguration objectForKey:@"plugins"];
+    id pluginsConfiguration = [cobaltConfiguration objectForKey:kConfigurationPlugins];
     if (pluginsConfiguration == nil
         || ! [pluginsConfiguration isKindOfClass:[NSDictionary class]]) {
         return nil;
