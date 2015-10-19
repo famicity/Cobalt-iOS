@@ -34,11 +34,11 @@
 
 #import "iToast.h"
 
-////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark GET POST REQUEST
-#pragma mark -
-////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 // TODO: uncomment for Bars
 /*
@@ -233,11 +233,11 @@ NSString * webLayerPage;
                                                         object:self];
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark NOTIFICATIONS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)onAppStarted:(NSNotification *)notification {
     [self sendEvent:JSEventOnAppStarted
@@ -260,11 +260,11 @@ NSString * webLayerPage;
         andCallback:nil];
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)setDelegate:(id)delegate
 {
@@ -283,49 +283,6 @@ NSString * webLayerPage;
     NSURL * fileURL = [NSURL fileURLWithPath:[[Cobalt resourcePath] stringByAppendingPathComponent:page]];
     NSURLRequest * requestURL = [NSURLRequest requestWithURL:fileURL];
     [mWebView loadRequest:requestURL];
-}
-
-+ (NSDictionary *)defaultConfiguration {
-    NSDictionary *configuration = [Cobalt getControllersConfiguration];
-    if (configuration) {
-        NSDictionary *defaultConfiguration = [configuration objectForKey:JSNavigationControllerDefault];
-        if (defaultConfiguration
-            && [defaultConfiguration isKindOfClass:[NSDictionary class]]) {
-            return defaultConfiguration;
-        }
-#if DEBUG_COBALT
-        else {
-            NSLog(@"getConfigurationForController: no configuration found for default controller");
-        }
-#endif
-    }
-    
-    return nil;
-}
-
-+ (NSDictionary *)configurationForController:(NSString *)controller {
-    if (! controller) {
-#if DEBUG_COBALT
-        NSLog(@"configurationForController: controller is nil");
-#endif
-        return nil;
-    }
-    
-    NSDictionary *configuration = [Cobalt getControllersConfiguration];
-    if (configuration) {
-        NSDictionary *controllerConfiguration = [configuration objectForKey:controller];
-        if (controllerConfiguration
-            && [controllerConfiguration isKindOfClass:[NSDictionary class]]) {
-            return controllerConfiguration;
-        }
-#if DEBUG_COBALT
-        else {
-            NSLog(@"getConfigurationForController: no configuration found for %@ controller.", controller);
-        }
-#endif
-    }
-    
-    return nil;
 }
 
 - (void)executeScriptInWebView:(WebViewType)webViewType withDictionary:(NSDictionary *)dict
@@ -443,7 +400,7 @@ NSString * webLayerPage;
 }
 
 - (BOOL)onCobaltMessage:(NSString *)message {
-    NSDictionary * jsonObj = [Cobalt JSONObjectWithString:message];
+    NSDictionary * jsonObj = [Cobalt dictionaryWithString:message];
     return [self handleDictionarySentByJavaScript: jsonObj];
 }
 
@@ -585,10 +542,10 @@ NSString * webLayerPage;
                             id controller = [data objectForKey:kJSNavigationController];
                             if (controller
                                 && [controller isKindOfClass:[NSString class]]) {
-                                controllerConfiguration = [CobaltViewController configurationForController:controller];
+                                controllerConfiguration = [Cobalt configurationForController:controller];
                             }
                             else {
-                                controllerConfiguration = [CobaltViewController defaultConfiguration];
+                                controllerConfiguration = [Cobalt defaultConfiguration];
                             }
                             
                             if (controllerConfiguration) {
@@ -950,11 +907,11 @@ NSString * webLayerPage;
 #endif
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark NAVIGATION METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)replaceViewControllerWithData:(NSDictionary *)data {
     id page = [data objectForKey:kJSPage];
@@ -964,8 +921,8 @@ NSString * webLayerPage;
     
     if (page
         && [page isKindOfClass:[NSString class]]) {
-        CobaltViewController *viewController = [CobaltViewController cobaltViewControllerForController:controller
-                                                                                               andPage:page];
+        CobaltViewController *viewController = [Cobalt cobaltViewControllerForController:controller
+                                                                                 andPage:page];
         if (viewController) {
             if (innerData
                 && [innerData isKindOfClass:[NSDictionary class]]) {
@@ -984,7 +941,7 @@ NSString * webLayerPage;
     }
     else if (controller
              && [controller isKindOfClass:[NSString class]]) {
-        UIViewController *viewController = [CobaltViewController nativeViewControllerForController:controller];
+        UIViewController *viewController = [Cobalt nativeViewControllerForController:controller];
         if (viewController) {
             // Push corresponding viewController
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -1010,8 +967,8 @@ NSString * webLayerPage;
     
     if (page
         && [page isKindOfClass:[NSString class]]) {
-        CobaltViewController *viewController = [CobaltViewController cobaltViewControllerForController:controller
-                                                                                               andPage:page];
+        CobaltViewController *viewController = [Cobalt cobaltViewControllerForController:controller
+                                                                                 andPage:page];
         if (viewController) {
             if (innerData
                 && [innerData isKindOfClass:[NSDictionary class]]) {
@@ -1027,7 +984,7 @@ NSString * webLayerPage;
     }
     else if (controller
              && [controller isKindOfClass:[NSString class]]){
-        UIViewController *viewController = [CobaltViewController nativeViewControllerForController:controller];
+        UIViewController *viewController = [Cobalt nativeViewControllerForController:controller];
         if (viewController) {
             // Push corresponding viewController
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -1075,8 +1032,8 @@ NSString * webLayerPage;
     
     if (page
         && [page isKindOfClass:[NSString class]]) {
-        CobaltViewController *viewController = [CobaltViewController cobaltViewControllerForController:controller
-                                                                                               andPage:page];
+        CobaltViewController *viewController = [Cobalt cobaltViewControllerForController:controller
+                                                                                 andPage:page];
         if (viewController) {
             if (innerData
                 && [innerData isKindOfClass:[NSDictionary class]]) {
@@ -1092,7 +1049,7 @@ NSString * webLayerPage;
     }
     else if (controller
              && [controller isKindOfClass:[NSString class]]){
-        UIViewController *viewController = [CobaltViewController nativeViewControllerForController:controller];
+        UIViewController *viewController = [Cobalt nativeViewControllerForController:controller];
         if (viewController) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self presentViewController:[[UINavigationController alloc] initWithRootViewController:viewController]
@@ -1152,211 +1109,11 @@ NSString * webLayerPage;
 #endif
 }
 
-+ (CobaltViewController *)cobaltViewControllerForController:(NSString *)controller
-                                                    andPage:(NSString *)page {
-    if (! page) {
-#if DEBUG_COBALT
-        NSLog(@"getCobaltViewControllerForController: no page specified");
-#endif
-        return nil;
-    }
-    
-    NSBundle *mainBundle = [NSBundle mainBundle];
-    NSBundle *cobaltBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@",   mainBundle.bundlePath,
-                                                                                            @"/Frameworks/Cobalt.framework"]];
-    NSString *nib = @"CobaltViewController";
-    
-    NSDictionary *configuration = [CobaltViewController configurationForController:controller];
-    if (! configuration) {
-        configuration = [CobaltViewController defaultConfiguration];
-    }
-    if (! configuration) {
-        CobaltViewController *viewController = [[CobaltViewController alloc] initWithNibName:nib
-                                                                                      bundle:cobaltBundle];
-        viewController.pageName = page;
-        viewController.isPullToRefreshEnabled = false;
-        viewController.isInfiniteScrollEnabled = false;
-        viewController.infiniteScrollOffset = 0;
-        // TODO: uncomment for Bars
-        //viewController.barsConfiguration = [NSMutableDictionary dictionaryWithCapacity:0];;
-        
-        return viewController;
-    }
-    
-    NSString *class = [configuration objectForKey:kIos];
-    nib = [configuration objectForKey:kIosNibName];
-    BOOL pullToRefreshEnabled = [[configuration objectForKey:kPullToRefreshEnabled] boolValue];
-    BOOL infiniteScrollEnabled = [[configuration objectForKey:kInfiniteScrollEnabled] boolValue];
-    int infiniteScrollOffset = [configuration objectForKey:kInfiniteScrollOffset] != nil ? [[configuration objectForKey:kInfiniteScrollOffset] intValue] : 0;
-    
-    // TODO: uncomment for Bars
-    /*
-     NSMutableDictionary *barsDictionary = [NSMutableDictionary dictionaryWithDictionary:[configuration objectForKey:kBars]];
-     
-     NSDictionary *barActionsArray = [barsDictionary objectForKey:kBarActions];
-     NSMutableArray *mutableBarActionsArray = [NSMutableArray arrayWithCapacity:barActionsArray.count];
-     for(NSDictionary *barActionDictionary in barActionsArray) {
-        [mutableBarActionsArray addObject:[NSMutableDictionary dictionaryWithDictionary:barActionDictionary]];
-     }
-     
-     [barsDictionary setObject:mutableBarActionsArray
-     forKey:kBarActions];
-     */
-    
-    if (! class) {
-#if DEBUG_COBALT
-        NSLog(@"getCobaltViewControllerForController: no class found for %@ controller", controller);
-#endif
-        return nil;
-    }
-    
-    if ([CobaltViewController isValidCobaltViewControllerWithClassName:class]) {
-        if (! nib) {
-            CobaltViewController *viewController;
-            // If nib not defined in configuration file, use same as class if it exists!
-            if ([CobaltViewController isValidNib:class
-                                       forBundle:mainBundle]) {
-                viewController = [[NSClassFromString(class) alloc] initWithNibName:class
-                                                                            bundle:mainBundle];
-            }
-            // If nib file does no exists, use default one i.e. CobaltViewController.xib
-            else {
-                nib = @"CobaltViewController";
-                
-                viewController = [[NSClassFromString(class) alloc] initWithNibName:nib
-                                                                            bundle:cobaltBundle];
-            }
-            
-            viewController.pageName = page;
-            viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
-            viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
-            viewController.infiniteScrollOffset = infiniteScrollOffset;
-            // TODO: uncomment for Bars
-            //viewController.barsConfiguration = barsDictionary;
-            
-            return viewController;
-        }
-        else if ([CobaltViewController isValidNib:nib
-                                        forBundle:mainBundle]) {
-            CobaltViewController *viewController = [[NSClassFromString(class) alloc] initWithNibName:nib
-                                                                                              bundle:mainBundle];
-            viewController.pageName = page;
-            viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
-            viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
-            viewController.infiniteScrollOffset = infiniteScrollOffset;
-            // TODO: uncomment for Bars
-            //viewController.barsConfiguration = barsDictionary;
-            
-            return viewController;
-        }
-    }
-    
-    return nil;
-}
-
-+ (UIViewController *)nativeViewControllerForController:(NSString *)controller {
-    NSDictionary *configuration = [CobaltViewController configurationForController:controller];
-    if (! configuration) {
-        configuration = [CobaltViewController defaultConfiguration];
-    }
-    if (! configuration) {
-        return nil;
-    }
-    
-    NSBundle *bundle = [NSBundle mainBundle];
-    NSString *class = [configuration objectForKey:kIos];
-    NSString *nib = [configuration objectForKey:kIosNibName];
-    
-    if (! class) {
-#if DEBUG_COBALT
-        NSLog(@"getCobaltViewControllerForController: no class found for %@ controller", controller);
-#endif
-        return nil;
-    }
-    
-    if (! [CobaltViewController isValidNativeViewControllerWithClassName:class]) {
-        return nil;
-    }
-    
-    if (! nib) {
-        // If nib not defined in configuration file, use same as class if it exists!
-        if ([CobaltViewController isValidNib:class
-                                   forBundle:bundle]) {
-            return [[NSClassFromString(class) alloc] initWithNibName:class
-                                                              bundle:bundle];
-        }
-        else {
-            return [[NSClassFromString(class) alloc] init];
-        }
-    }
-    else if ([CobaltViewController isValidNib:nib
-                                    forBundle:bundle]) {
-        return [[NSClassFromString(class) alloc] initWithNibName:nib
-                                                          bundle:bundle];
-    }
-    else {
-        return nil;
-    }
-}
-
-+ (BOOL)isValidNativeViewControllerWithClassName:(NSString *)className {
-    Class class = NSClassFromString(className);
-    BOOL isValidViewControllerClass =   class
-                                        && [class isSubclassOfClass:UIViewController.class];
-    BOOL isValidNativeViewControllerClass = class
-                                            && ! [class isSubclassOfClass:CobaltViewController.class];
-    
-#if DEBUG_COBALT
-    if (! isValidViewControllerClass) {
-        NSLog(@"isValidNativeViewControllerWithClassName: class %@ not found", className);
-    }
-    else if (! isValidNativeViewControllerClass) {
-        NSLog(@"isValidNativeViewControllerWithClassName: class %@ inherits from CobaltViewController", className);
-    }
-#endif
-    
-    return isValidViewControllerClass && isValidNativeViewControllerClass;
-}
-
-+ (BOOL)isValidCobaltViewControllerWithClassName:(NSString *)className {
-    Class class = NSClassFromString(className);
-    BOOL isValidViewControllerClass =   class
-                                        && [class isSubclassOfClass:UIViewController.class];
-    BOOL isValidCobaltViewControllerClass = class
-                                            && [class isSubclassOfClass:CobaltViewController.class];
-    
-#if DEBUG_COBALT
-    if (! isValidViewControllerClass) {
-        NSLog(@"isValidNativeViewControllerWithClassName: class %@ not found", className);
-    }
-    else if (! isValidCobaltViewControllerClass) {
-        NSLog(@"isValidCobaltViewControllerWithClassName: class %@ does not inherit from CobaltViewController", className);
-    }
-#endif
-    
-    return isValidViewControllerClass && isValidCobaltViewControllerClass;
-}
-
-+ (BOOL)isValidNib:(NSString *)nib
-         forBundle:(NSBundle *)bundle {
-    BOOL isValidNib = (nib.length > 0
-                       && [bundle pathForResource:nib
-                                           ofType:@"nib"]);
-    
-#if DEBUG_COBALT
-    if(! isValidNib) {
-        NSLog(@"isValidViewControllerWithClass: %@ nib does not exist!", nib);
-    }
-#endif
-    
-    return isValidNib;
-}
-
-////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma mark BACK BARBUTTONITEM DELEGATE
 
-////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)onBackButtonPressed {
     [self sendEvent:JSEventCallbackOnBackButtonPressed
@@ -1364,43 +1121,14 @@ NSString * webLayerPage;
         andCallback:JSEventCallbackOnBackButtonPressed];
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark BARS METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-//TODO put this code (2 following functions) in a UIColor category
-void SKScanHexColor(NSString * hexString, float * red, float * green, float * blue, float * alpha) {
-    NSString *cleanString = [hexString stringByReplacingOccurrencesOfString:@"#" withString:@""];
-    if([cleanString length] == 3) {
-        cleanString = [NSString stringWithFormat:@"%@%@%@%@%@%@",
-                       [cleanString substringWithRange:NSMakeRange(0, 1)],[cleanString substringWithRange:NSMakeRange(0, 1)],
-                       [cleanString substringWithRange:NSMakeRange(1, 1)],[cleanString substringWithRange:NSMakeRange(1, 1)],
-                       [cleanString substringWithRange:NSMakeRange(2, 1)],[cleanString substringWithRange:NSMakeRange(2, 1)]];
-    }
-    if([cleanString length] == 6) {
-        cleanString = [cleanString stringByAppendingString:@"ff"];
-    }
-    
-    unsigned int baseValue;
-    [[NSScanner scannerWithString:cleanString] scanHexInt:&baseValue];
-    
-    if (red) { *red = ((baseValue >> 24) & 0xFF)/255.0f; }
-    if (green) { *green = ((baseValue >> 16) & 0xFF)/255.0f; }
-    if (blue) { *blue = ((baseValue >> 8) & 0xFF)/255.0f; }
-    if (alpha) { *alpha = ((baseValue >> 0) & 0xFF)/255.0f; }
-}
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 // TODO: uncomment for Bars
 /*
-UIColor * SKColorFromHexString(NSString * hexString) {
-    float red, green, blue, alpha;
-    SKScanHexColor(hexString, &red, &green, &blue, &alpha);
-    
-    return [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
-}
 
 - (void)configureBars {
     
@@ -1493,11 +1221,12 @@ UIColor * SKColorFromHexString(NSString * hexString) {
 }
 */
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark ALERTS METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 - (void)showAlert:(NSDictionary *)dict
 {
     NSDictionary * data = [dict objectForKey:kJSData];
@@ -1600,11 +1329,11 @@ UIColor * SKColorFromHexString(NSString * hexString) {
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark WEB LAYER
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)showWebLayer:(NSDictionary *)data
 {
@@ -1673,11 +1402,11 @@ UIColor * SKColorFromHexString(NSString * hexString) {
     [self sendEvent:JSEventWebLayerOnDismiss withData:data andCallback:nil];
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark WEBVIEW DELEGATE METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
 {
@@ -1687,7 +1416,7 @@ UIColor * SKColorFromHexString(NSString * hexString) {
     NSRange range = [requestURL rangeOfString:cobaltSpecialJSKey];
     if (range.location != NSNotFound) {
         NSString * json = [requestURL substringFromIndex:range.location + cobaltSpecialJSKey.length];
-        NSDictionary * jsonObj = [Cobalt JSONObjectWithString:json];
+        NSDictionary * jsonObj = [Cobalt dictionaryWithString:json];
         
         [fromJavaScriptOperationQueue addOperationWithBlock:^{
             dispatch_sync(dispatch_get_main_queue(), ^{
@@ -1731,11 +1460,11 @@ UIColor * SKColorFromHexString(NSString * hexString) {
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark COBALT TOAST DELEGATE METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)toastWillShow:(CobaltToast *)toast
 {
@@ -1755,12 +1484,12 @@ UIColor * SKColorFromHexString(NSString * hexString) {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
 #pragma mark SCROLL VIEW DELEGATE METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 //*************
 // DID SCROLL *
 //*************
@@ -1789,11 +1518,12 @@ UIColor * SKColorFromHexString(NSString * hexString) {
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-#pragma mark PULL TO REFRESH METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark PULL-TO-REFRESH METHODS
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 //**********
 // REFRESH *
 //**********
@@ -1836,11 +1566,11 @@ UIColor * SKColorFromHexString(NSString * hexString) {
     self.refreshControl.tintColor = tintColor;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark INFINITE SCROLL METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 // TODO: How can IS works with these methods? O_o
 - (void)loadMoreItems

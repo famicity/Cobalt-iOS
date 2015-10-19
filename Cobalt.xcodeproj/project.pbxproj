@@ -26,6 +26,13 @@
 		BE1ABE651B71167E0070657C /* iToast.h in Headers */ = {isa = PBXBuildFile; fileRef = BE1ABE611B71167E0070657C /* iToast.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BE1ABE661B71167E0070657C /* iToast.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1ABE621B71167E0070657C /* iToast.m */; };
 		BE1ABEAB1B71EB620070657C /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE1ABEA81B71EB490070657C /* JavaScriptCore.framework */; };
+		BE208FF41BD4E6BB000D2B5F /* CobaltBarButtonItem.h in Headers */ = {isa = PBXBuildFile; fileRef = BE208FF01BD4E6BB000D2B5F /* CobaltBarButtonItem.h */; settings = {ASSET_TAGS = (); }; };
+		BE208FF51BD4E6BB000D2B5F /* CobaltBarButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = BE208FF11BD4E6BB000D2B5F /* CobaltBarButtonItem.m */; settings = {ASSET_TAGS = (); }; };
+		BE208FF61BD4E6BB000D2B5F /* CobaltButton.h in Headers */ = {isa = PBXBuildFile; fileRef = BE208FF21BD4E6BB000D2B5F /* CobaltButton.h */; settings = {ASSET_TAGS = (); }; };
+		BE208FF71BD4E6BB000D2B5F /* CobaltButton.m in Sources */ = {isa = PBXBuildFile; fileRef = BE208FF31BD4E6BB000D2B5F /* CobaltButton.m */; settings = {ASSET_TAGS = (); }; };
+		BE208FFC1BD4E7EC000D2B5F /* CobaltFont.h in Headers */ = {isa = PBXBuildFile; fileRef = BE208FF91BD4E7EC000D2B5F /* CobaltFont.h */; settings = {ASSET_TAGS = (); }; };
+		BE208FFD1BD4E7EC000D2B5F /* CobaltFontManager.h in Headers */ = {isa = PBXBuildFile; fileRef = BE208FFA1BD4E7EC000D2B5F /* CobaltFontManager.h */; settings = {ASSET_TAGS = (); }; };
+		BE208FFE1BD4E7EC000D2B5F /* CobaltFontManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BE208FFB1BD4E7EC000D2B5F /* CobaltFontManager.m */; settings = {ASSET_TAGS = (); }; };
 		BEAE37621BD14CF7006FC8D8 /* BackBarButtonItem.h in Headers */ = {isa = PBXBuildFile; fileRef = BEAE37601BD14CF7006FC8D8 /* BackBarButtonItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEAE37631BD14CF7006FC8D8 /* BackBarButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = BEAE37611BD14CF7006FC8D8 /* BackBarButtonItem.m */; settings = {ASSET_TAGS = (); }; };
 		BEAE37671BD14D6C006FC8D8 /* backButton.png in Resources */ = {isa = PBXBuildFile; fileRef = BEAE37641BD14D6C006FC8D8 /* backButton.png */; settings = {ASSET_TAGS = (); }; };
@@ -67,6 +74,13 @@
 		BE1ABE611B71167E0070657C /* iToast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = iToast.h; path = Cobalt/iToast.h; sourceTree = SOURCE_ROOT; };
 		BE1ABE621B71167E0070657C /* iToast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = iToast.m; path = Cobalt/iToast.m; sourceTree = SOURCE_ROOT; };
 		BE1ABEA81B71EB490070657C /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		BE208FF01BD4E6BB000D2B5F /* CobaltBarButtonItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CobaltBarButtonItem.h; path = Cobalt/CobaltBarButtonItem.h; sourceTree = SOURCE_ROOT; };
+		BE208FF11BD4E6BB000D2B5F /* CobaltBarButtonItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CobaltBarButtonItem.m; path = Cobalt/CobaltBarButtonItem.m; sourceTree = SOURCE_ROOT; };
+		BE208FF21BD4E6BB000D2B5F /* CobaltButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CobaltButton.h; path = Cobalt/CobaltButton.h; sourceTree = SOURCE_ROOT; };
+		BE208FF31BD4E6BB000D2B5F /* CobaltButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CobaltButton.m; path = Cobalt/CobaltButton.m; sourceTree = SOURCE_ROOT; };
+		BE208FF91BD4E7EC000D2B5F /* CobaltFont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CobaltFont.h; sourceTree = "<group>"; };
+		BE208FFA1BD4E7EC000D2B5F /* CobaltFontManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CobaltFontManager.h; sourceTree = "<group>"; };
+		BE208FFB1BD4E7EC000D2B5F /* CobaltFontManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CobaltFontManager.m; sourceTree = "<group>"; };
 		BEAE37601BD14CF7006FC8D8 /* BackBarButtonItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BackBarButtonItem.h; path = Cobalt/BackBarButtonItem.h; sourceTree = SOURCE_ROOT; };
 		BEAE37611BD14CF7006FC8D8 /* BackBarButtonItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BackBarButtonItem.m; path = Cobalt/BackBarButtonItem.m; sourceTree = SOURCE_ROOT; };
 		BEAE37641BD14D6C006FC8D8 /* backButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = backButton.png; path = Cobalt/backButton.png; sourceTree = SOURCE_ROOT; };
@@ -121,6 +135,7 @@
 				BE1ABE071B71105C0070657C /* Cobalt.h */,
 				BE1ABE201B7110B20070657C /* Cobalt.m */,
 				BE1ABE211B7110B20070657C /* Controllers */,
+				BE208FF81BD4E7CE000D2B5F /* Font */,
 				BE1ABE281B7110B20070657C /* Model */,
 				BE1ABE2B1B7110B20070657C /* Plugin */,
 				BE1ABE301B7110B20070657C /* View */,
@@ -190,6 +205,10 @@
 			isa = PBXGroup;
 			children = (
 				BEAE376A1BD14D78006FC8D8 /* BackBarButtonItem */,
+				BE208FF01BD4E6BB000D2B5F /* CobaltBarButtonItem.h */,
+				BE208FF11BD4E6BB000D2B5F /* CobaltBarButtonItem.m */,
+				BE208FF21BD4E6BB000D2B5F /* CobaltButton.h */,
+				BE208FF31BD4E6BB000D2B5F /* CobaltButton.m */,
 				BE1ABE5F1B71167E0070657C /* CobaltToast.h */,
 				BE1ABE601B71167E0070657C /* CobaltToast.m */,
 				BE1ABE611B71167E0070657C /* iToast.h */,
@@ -204,6 +223,16 @@
 				BE1ABEA81B71EB490070657C /* JavaScriptCore.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		BE208FF81BD4E7CE000D2B5F /* Font */ = {
+			isa = PBXGroup;
+			children = (
+				BE208FF91BD4E7EC000D2B5F /* CobaltFont.h */,
+				BE208FFA1BD4E7EC000D2B5F /* CobaltFontManager.h */,
+				BE208FFB1BD4E7EC000D2B5F /* CobaltFontManager.m */,
+			);
+			name = Font;
 			sourceTree = "<group>";
 		};
 		BEAE376A1BD14D78006FC8D8 /* BackBarButtonItem */ = {
@@ -225,12 +254,16 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BE208FFD1BD4E7EC000D2B5F /* CobaltFontManager.h in Headers */,
 				BE1ABE501B71165E0070657C /* CobaltViewController.h in Headers */,
 				BE1ABE551B7116670070657C /* ImageManager.h in Headers */,
 				BE1ABE5B1B7116710070657C /* CobaltAbstractPlugin.h in Headers */,
 				BE1ABE361B7110B20070657C /* Cobalt-Prefix.pch in Headers */,
+				BE208FF61BD4E6BB000D2B5F /* CobaltButton.h in Headers */,
 				BE1ABE631B71167E0070657C /* CobaltToast.h in Headers */,
+				BE208FFC1BD4E7EC000D2B5F /* CobaltFont.h in Headers */,
 				BE1ABE081B71105C0070657C /* Cobalt.h in Headers */,
+				BE208FF41BD4E6BB000D2B5F /* CobaltBarButtonItem.h in Headers */,
 				BE1ABE5D1B7116710070657C /* CobaltPluginManager.h in Headers */,
 				BEAE37621BD14CF7006FC8D8 /* BackBarButtonItem.h in Headers */,
 				BE1ABE651B71167E0070657C /* iToast.h in Headers */,
@@ -340,12 +373,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				BE1ABE641B71167E0070657C /* CobaltToast.m in Sources */,
+				BE208FFE1BD4E7EC000D2B5F /* CobaltFontManager.m in Sources */,
 				BE1ABE511B71165E0070657C /* CobaltViewController.m in Sources */,
 				BE1ABE661B71167E0070657C /* iToast.m in Sources */,
 				BEAE37631BD14CF7006FC8D8 /* BackBarButtonItem.m in Sources */,
 				BE1ABE5E1B7116710070657C /* CobaltPluginManager.m in Sources */,
 				BE1ABE561B7116670070657C /* ImageManager.m in Sources */,
+				BE208FF71BD4E6BB000D2B5F /* CobaltButton.m in Sources */,
 				BE1ABE5C1B7116710070657C /* CobaltAbstractPlugin.m in Sources */,
+				BE208FF51BD4E6BB000D2B5F /* CobaltBarButtonItem.m in Sources */,
 				BE1ABE371B7110B20070657C /* Cobalt.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

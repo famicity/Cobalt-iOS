@@ -27,12 +27,11 @@
  *
  */
 
-
-////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma mark FRAMEWORK STUFF
 
-////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 #import <UIKit/UIKit.h>
 
@@ -44,17 +43,17 @@ FOUNDATION_EXPORT const unsigned char CobaltVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <Cobalt/PublicHeader.h>
 
-////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma mark -
 
-////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma mark ORIGINAL COBALT
 
-////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 #import <Foundation/Foundation.h>
 
@@ -67,13 +66,8 @@ FOUNDATION_EXPORT const unsigned char CobaltVersionString[];
 #define cobaltSpecialJSKey      @"cob@l7#k&y"
 
 // CONFIGURATION FILE
-#define confFileName            @"cobalt.conf"
 #define kIos                    @"ios"
-#define kControllers            @"controllers"
-#define kPlugins                @"plugins"
 #define kIosNibName             @"iosNibName"
-#define kPullToRefreshEnabled   @"pullToRefresh"
-#define kInfiniteScrollEnabled  @"infiniteScroll"
 #define kInfiniteScrollOffset   @"infiniteScrollOffset"
 // TODO: uncomment for Bars
 /*
@@ -91,31 +85,71 @@ FOUNDATION_EXPORT const unsigned char CobaltVersionString[];
 
 @interface Cobalt : NSObject
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-#pragma mark RESOURCE PATH
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*!
+ @method    + (NSString *)resourcePath
+ @abstract  Returns the Cobalt resource path for the whole application (default: /www/),
+            or nil if app bundle could not be created.
+ */
++ (NSString *)resourcePath;
 
 /*!
- @method		+ (void)setResourcePath:(NSString *)resourcePath;
- @param         resourcePath
- @abstract		this method sets the resource path for the whole application
+ @method    + (void)setResourcePath:(NSString *)resourcePath
+ @param     resourcePath
+ @abstract  Sets the Cobalt resource path for the whole application
  */
 + (void)setResourcePath:(NSString *)resourcePath;
 
 /*!
- @method		+ (NSString *)resourcePath;
- @abstract		this method gets the resource path for the whole application
+ @method		+ (CobaltViewController *)cobaltViewControllerForController:(NSString *)controller andPage:(NSString *)page
+ @abstract		Returns an allocated and initialized Cobalt view controller from its id in cobalt configuration file and HTML page.
+ @param         controller: view controller id
+ @param         page: HTML page
  */
-+ (NSString *)resourcePath;
++ (CobaltViewController *)cobaltViewControllerForController:(NSString *)controller
+                                                    andPage:(NSString *)page;
+/*!
+ @method		+ (UIViewController *)nativeViewControllerForController:(NSString *)controller
+ @abstract		Returns an allocated and initialized native view controller from its id in cobalt configuration file.
+ @param         controller: view controller id
+ */
++ (UIViewController *)nativeViewControllerForController:(NSString *)controller;
 
+/*!
+ @method    + (NSDictionary *)defaultConfiguration
+ @abstract  Returns the default controller configuration contained in the cobalt.conf file if any
+            nil otherwise
+ */
++ (NSDictionary *)defaultConfiguration;
 
-+ (NSDictionary *)getControllersConfiguration;
-+ (NSDictionary *)getPluginsConfiguration;
+/*!
+ @method    + (NSDictionary *)configurationForController:(NSString *)controller
+ @param     controller the controller to find the configuration
+ @abstract  Returns the configuration for the specified controller contained in the cobalt.conf file if any
+            nil otherwise
+ */
++ (NSDictionary *)configurationForController:(NSString *)controller;
 
-+ (NSString *)stringWithContentsOfFile:(NSString *)path;
+/*!
+ @method    + (NSDictionary *)cobaltConfiguration
+ @abstract  Returns the Cobalt configuration read from cobalt.conf file in resource path.
+            May be nil vor various reasons.
+ */
++ (NSDictionary *)cobaltConfiguration;
 
-+ (id)JSONObjectWithString:(NSString *)string;
+/*!
+ @method    + (NSDictionary *)dictionaryWithString:(NSString *)string
+ @param     string a JSON as an UTF-8 encoded string
+ @abstract  Parses the JSON sent as an UTF-8 encoded string and returns a NSDictionary.
+            May be nil if an error occured.
+ */
++ (NSDictionary *)dictionaryWithString:(NSString *)string;
+
+/*!
+ @method    + (UIColor *)colorFromHexString:(NSString *)hexString
+ @param     hexString a color as an hexadecimal RGB string. Valid formats are: (#)RGB and (#)RRGGBB(AA).
+ @abstract  Returns an UIColor from a color as an hexadecimal string.
+            May be nil if the input format is not valid.
+ */
++ (UIColor *)colorFromHexString:(NSString *)hexString;
 
 @end

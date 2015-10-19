@@ -1,11 +1,11 @@
 /**
  *
- * CobaltPluginManager.h
+ * CobaltFont.h
  * Cobalt
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Cobaltians
+ * Copyright (c) 2015 Cobaltians
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,20 +28,14 @@
  */
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
-#import "CobaltViewController.h"
+@protocol CobaltFont
 
-@interface CobaltPluginManager : NSObject
+@required
 
-@property (nonatomic, retain) NSDictionary *pluginsDictionary;
-
-/*!
- @method    + (CobaltPluginManager *)sharedInstance
- @abstract  Returns the singleton instance of the Cobalt plugin manager.
- @result    The singleton instance of the Cobalt plugin manager.
- */
-+ (CobaltPluginManager *)sharedInstance;
-- (BOOL)onMessageFromCobaltViewController:(CobaltViewController *)viewController
-                                  andData:(NSDictionary *)data;
++ (UIImage *)imageWithIcon:(NSString *)identifier
+                     color:(UIColor *)color
+                   andSize:(CGSize)size;
 
 @end

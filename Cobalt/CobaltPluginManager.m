@@ -1,86 +1,116 @@
-//
-//  CobaltPluginManager.m
-//  Cobalt
-//
-//  Created by Haploid on 23/07/14.
-//  Copyright (c) 2014 Haploid. All rights reserved.
-//
+/**
+ *
+ * CobaltPluginManager.m
+ * Cobalt
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Cobaltians
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ */
 
 #import "CobaltPluginManager.h"
+
+#import "Cobalt.h"
 #import "CobaltAbstractPlugin.h"
 
 @implementation CobaltPluginManager
 
+////////////////////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
 #pragma mark SINGLETON
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static CobaltPluginManager * cobaltPluginManagerInstance = nil;
+////////////////////////////////////////////////////////////////////////////////////////////////
 
-//******************
-// SHARED INSTANCE *
-//******************
-/*!
- @method		+ (WebServices *)sharedInstance
- @abstract		Returns the singleton instance of web services.
- @result		The singleton instance of web services.
- */
+static CobaltPluginManager *cobaltPluginManagerInstance = nil;
+
 + (CobaltPluginManager *)sharedInstance {
 	@synchronized(self) {
 		if (cobaltPluginManagerInstance == nil) {
 			cobaltPluginManagerInstance = [[self alloc] init];
 		}
 	}
+    
 	return cobaltPluginManagerInstance;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark INITIALISATION
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 
-//********
-// INIT  *
-//********
-//
-// Description :
-//
+#pragma mark INITIALISATION
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 - (id)init{
 	if (self = [super init]) {
-        _pluginsDictionary = [Cobalt getPluginsConfiguration];
+        _pluginsDictionary = [CobaltPluginManager pluginsConfiguration];
         //_pluginsDictionary = [[NSMutableDictionary alloc] initWithContentsOfFile: [[NSBundle mainBundle] pathForResource:@"plugins" ofType:@"plist"]];
     }
+    
 	return self;
 }
 
-- (BOOL)onMessageFromCobaltViewController:(CobaltViewController *)viewController andData: (NSDictionary *)data {
-    NSString * pluginName = [data objectForKey: kJSPluginName];
-    BOOL isFromWebLayer = [[[data objectForKey:kJSData] objectForKey: kJSIsWebLayer] boolValue];
+- (BOOL)onMessageFromCobaltViewController:(CobaltViewController *)viewController
+                                  andData: (NSDictionary *)data {
+    NSString *pluginName = [data objectForKey:kJSPluginName];
+    BOOL isFromWebLayer = [[[data objectForKey:kJSData] objectForKey:kJSIsWebLayer] boolValue];
     
-    if([pluginName isKindOfClass: [NSString class]]) {
-        NSString * className = [[_pluginsDictionary objectForKey: pluginName] objectForKey: kIos];
+    if ([pluginName isKindOfClass:[NSString class]]) {
+        NSString *className = [[_pluginsDictionary objectForKey:pluginName] objectForKey:kIos];
         Class class = NSClassFromString(className);
-        if(class)
-        {
-            CobaltAbstractPlugin * plugin = [class sharedInstanceWithCobaltViewController: viewController];
-            if (!isFromWebLayer)
-                [plugin onMessageFromCobaltController: viewController andData: data];
-            else
-                [plugin onMessageFromWebLayerWithCobaltController: viewController andData: data];
+        if(class) {
+            CobaltAbstractPlugin *plugin = [class sharedInstanceWithCobaltViewController:viewController];
+            if (! isFromWebLayer) {
+                [plugin onMessageFromCobaltController:viewController
+                                              andData:data];
+            }
+            else {
+                [plugin onMessageFromWebLayerWithCobaltController:viewController
+                                                          andData:data];
+            }
             
             return YES;
         }
+#if DEBUG_COBALT
         else {
-            #if DEBUG_COBALT
             NSLog(@"\n***********\n%@ class not found\n***********\n", className);
-            #endif
         }
+#endif
     }
     
     return NO;
 }
 
++ (NSDictionary *)pluginsConfiguration {
+    NSDictionary *cobaltConfiguration = [Cobalt cobaltConfiguration];
+    if (cobaltConfiguration == nil) {
+        return nil;
+    }
+    
+    id pluginsConfiguration = [cobaltConfiguration objectForKey:@"plugins"];
+    if (pluginsConfiguration == nil
+        || ! [pluginsConfiguration isKindOfClass:[NSDictionary class]]) {
+        return nil;
+    }
+    
+    return pluginsConfiguration;
+}
 
 @end

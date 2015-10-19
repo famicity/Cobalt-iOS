@@ -1,11 +1,11 @@
 /**
  *
- * CobaltPluginManager.h
+ * CobaltBarButtonItem.m
  * Cobalt
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Cobaltians
+ * Copyright (c) 2015 Cobaltians
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,21 +27,8 @@
  *
  */
 
-#import <Foundation/Foundation.h>
+#import "CobaltBarButtonItem.h"
 
-#import "CobaltViewController.h"
-
-@interface CobaltPluginManager : NSObject
-
-@property (nonatomic, retain) NSDictionary *pluginsDictionary;
-
-/*!
- @method    + (CobaltPluginManager *)sharedInstance
- @abstract  Returns the singleton instance of the Cobalt plugin manager.
- @result    The singleton instance of the Cobalt plugin manager.
- */
-+ (CobaltPluginManager *)sharedInstance;
-- (BOOL)onMessageFromCobaltViewController:(CobaltViewController *)viewController
-                                  andData:(NSDictionary *)data;
+@implementation CobaltBarButtonItem
 
 @end
