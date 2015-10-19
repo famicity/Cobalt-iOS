@@ -28,12 +28,10 @@
  */
 
 #import <UIKit/UIKit.h>
-
 #import <JavaScriptCore/JavaScriptCore.h>
 
 #import "CobaltToast.h"
-
-#import "FontAwesome.h"
+#import "BackBarButtonItem.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
@@ -78,6 +76,7 @@
 #define kJSActionNavigationReplace          @"replace"
 #define kJSNavigationController             @"controller"
 #define JSNavigationControllerDefault       @"default"
+#define JSEventCallbackOnBackButtonPressed  @"onBackButtonPressed"
 
 #define kJSAnimated                         @"animated"
 
@@ -190,7 +189,7 @@ typedef enum {
  @class			CobaltViewController
  @abstract		Base class for a webView controller that allows javascript/native dialogs
  */
-@interface CobaltViewController : UITableViewController <UIAlertViewDelegate, UIScrollViewDelegate, UIWebViewDelegate, CobaltToastDelegate, CobaltViewControllerJS>
+@interface CobaltViewController : UITableViewController <UIAlertViewDelegate, UIScrollViewDelegate, UIWebViewDelegate, CobaltToastDelegate, CobaltViewControllerJS, BackBarButtonItemDelegate>
 {
     // Javascript queues
     NSOperationQueue * toJavaScriptOperationQueue;

@@ -12,9 +12,6 @@
 		BE1ABE151B71105D0070657C /* CobaltTests.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1ABE141B71105D0070657C /* CobaltTests.m */; };
 		BE1ABE361B7110B20070657C /* Cobalt-Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = BE1ABE1F1B7110B20070657C /* Cobalt-Prefix.pch */; settings = {ATTRIBUTES = (Public, ); }; };
 		BE1ABE371B7110B20070657C /* Cobalt.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1ABE201B7110B20070657C /* Cobalt.m */; };
-		BE1ABE3B1B7110B20070657C /* FontAwesome.h in Headers */ = {isa = PBXBuildFile; fileRef = BE1ABE251B7110B20070657C /* FontAwesome.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		BE1ABE3C1B7110B20070657C /* FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1ABE261B7110B20070657C /* FontAwesome.m */; };
-		BE1ABE3D1B7110B20070657C /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BE1ABE271B7110B20070657C /* FontAwesome.ttf */; };
 		BE1ABE501B71165E0070657C /* CobaltViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = BE1ABE4D1B71165E0070657C /* CobaltViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BE1ABE511B71165E0070657C /* CobaltViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1ABE4E1B71165E0070657C /* CobaltViewController.m */; };
 		BE1ABE521B71165E0070657C /* CobaltViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = BE1ABE4F1B71165E0070657C /* CobaltViewController.xib */; };
@@ -29,6 +26,12 @@
 		BE1ABE651B71167E0070657C /* iToast.h in Headers */ = {isa = PBXBuildFile; fileRef = BE1ABE611B71167E0070657C /* iToast.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BE1ABE661B71167E0070657C /* iToast.m in Sources */ = {isa = PBXBuildFile; fileRef = BE1ABE621B71167E0070657C /* iToast.m */; };
 		BE1ABEAB1B71EB620070657C /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE1ABEA81B71EB490070657C /* JavaScriptCore.framework */; };
+		BEAE37621BD14CF7006FC8D8 /* BackBarButtonItem.h in Headers */ = {isa = PBXBuildFile; fileRef = BEAE37601BD14CF7006FC8D8 /* BackBarButtonItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BEAE37631BD14CF7006FC8D8 /* BackBarButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = BEAE37611BD14CF7006FC8D8 /* BackBarButtonItem.m */; settings = {ASSET_TAGS = (); }; };
+		BEAE37671BD14D6C006FC8D8 /* backButton.png in Resources */ = {isa = PBXBuildFile; fileRef = BEAE37641BD14D6C006FC8D8 /* backButton.png */; settings = {ASSET_TAGS = (); }; };
+		BEAE37681BD14D6C006FC8D8 /* backButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BEAE37651BD14D6C006FC8D8 /* backButton@2x.png */; settings = {ASSET_TAGS = (); }; };
+		BEAE37691BD14D6C006FC8D8 /* backButton@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = BEAE37661BD14D6C006FC8D8 /* backButton@3x.png */; settings = {ASSET_TAGS = (); }; };
+		BEAE376D1BD14E10006FC8D8 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = BEAE376F1BD14E10006FC8D8 /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,9 +53,6 @@
 		BE1ABE141B71105D0070657C /* CobaltTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CobaltTests.m; sourceTree = "<group>"; };
 		BE1ABE1F1B7110B20070657C /* Cobalt-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Cobalt-Prefix.pch"; sourceTree = "<group>"; };
 		BE1ABE201B7110B20070657C /* Cobalt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Cobalt.m; sourceTree = "<group>"; };
-		BE1ABE251B7110B20070657C /* FontAwesome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FontAwesome.h; sourceTree = "<group>"; };
-		BE1ABE261B7110B20070657C /* FontAwesome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FontAwesome.m; sourceTree = "<group>"; };
-		BE1ABE271B7110B20070657C /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = FontAwesome.ttf; sourceTree = "<group>"; };
 		BE1ABE4D1B71165E0070657C /* CobaltViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CobaltViewController.h; path = Cobalt/CobaltViewController.h; sourceTree = SOURCE_ROOT; };
 		BE1ABE4E1B71165E0070657C /* CobaltViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CobaltViewController.m; path = Cobalt/CobaltViewController.m; sourceTree = SOURCE_ROOT; };
 		BE1ABE4F1B71165E0070657C /* CobaltViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = CobaltViewController.xib; path = Cobalt/CobaltViewController.xib; sourceTree = SOURCE_ROOT; };
@@ -67,6 +67,13 @@
 		BE1ABE611B71167E0070657C /* iToast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = iToast.h; path = Cobalt/iToast.h; sourceTree = SOURCE_ROOT; };
 		BE1ABE621B71167E0070657C /* iToast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = iToast.m; path = Cobalt/iToast.m; sourceTree = SOURCE_ROOT; };
 		BE1ABEA81B71EB490070657C /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		BEAE37601BD14CF7006FC8D8 /* BackBarButtonItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BackBarButtonItem.h; path = Cobalt/BackBarButtonItem.h; sourceTree = SOURCE_ROOT; };
+		BEAE37611BD14CF7006FC8D8 /* BackBarButtonItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BackBarButtonItem.m; path = Cobalt/BackBarButtonItem.m; sourceTree = SOURCE_ROOT; };
+		BEAE37641BD14D6C006FC8D8 /* backButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = backButton.png; path = Cobalt/backButton.png; sourceTree = SOURCE_ROOT; };
+		BEAE37651BD14D6C006FC8D8 /* backButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "backButton@2x.png"; path = "Cobalt/backButton@2x.png"; sourceTree = SOURCE_ROOT; };
+		BEAE37661BD14D6C006FC8D8 /* backButton@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "backButton@3x.png"; path = "Cobalt/backButton@3x.png"; sourceTree = SOURCE_ROOT; };
+		BEAE376E1BD14E10006FC8D8 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		BEAE37701BD14E25006FC8D8 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,9 +121,6 @@
 				BE1ABE071B71105C0070657C /* Cobalt.h */,
 				BE1ABE201B7110B20070657C /* Cobalt.m */,
 				BE1ABE211B7110B20070657C /* Controllers */,
-				BE1ABE251B7110B20070657C /* FontAwesome.h */,
-				BE1ABE261B7110B20070657C /* FontAwesome.m */,
-				BE1ABE271B7110B20070657C /* FontAwesome.ttf */,
 				BE1ABE281B7110B20070657C /* Model */,
 				BE1ABE2B1B7110B20070657C /* Plugin */,
 				BE1ABE301B7110B20070657C /* View */,
@@ -130,6 +134,7 @@
 			children = (
 				BE1ABE1F1B7110B20070657C /* Cobalt-Prefix.pch */,
 				BE1ABE061B71105C0070657C /* Info.plist */,
+				BEAE376F1BD14E10006FC8D8 /* Localizable.strings */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -184,6 +189,7 @@
 		BE1ABE301B7110B20070657C /* View */ = {
 			isa = PBXGroup;
 			children = (
+				BEAE376A1BD14D78006FC8D8 /* BackBarButtonItem */,
 				BE1ABE5F1B71167E0070657C /* CobaltToast.h */,
 				BE1ABE601B71167E0070657C /* CobaltToast.m */,
 				BE1ABE611B71167E0070657C /* iToast.h */,
@@ -200,6 +206,18 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		BEAE376A1BD14D78006FC8D8 /* BackBarButtonItem */ = {
+			isa = PBXGroup;
+			children = (
+				BEAE37601BD14CF7006FC8D8 /* BackBarButtonItem.h */,
+				BEAE37611BD14CF7006FC8D8 /* BackBarButtonItem.m */,
+				BEAE37641BD14D6C006FC8D8 /* backButton.png */,
+				BEAE37651BD14D6C006FC8D8 /* backButton@2x.png */,
+				BEAE37661BD14D6C006FC8D8 /* backButton@3x.png */,
+			);
+			name = BackBarButtonItem;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -214,7 +232,7 @@
 				BE1ABE631B71167E0070657C /* CobaltToast.h in Headers */,
 				BE1ABE081B71105C0070657C /* Cobalt.h in Headers */,
 				BE1ABE5D1B7116710070657C /* CobaltPluginManager.h in Headers */,
-				BE1ABE3B1B7110B20070657C /* FontAwesome.h in Headers */,
+				BEAE37621BD14CF7006FC8D8 /* BackBarButtonItem.h in Headers */,
 				BE1ABE651B71167E0070657C /* iToast.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -281,6 +299,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				fr,
 			);
 			mainGroup = BE1ABDF81B71105C0070657C;
 			productRefGroup = BE1ABE031B71105C0070657C /* Products */;
@@ -298,8 +317,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BEAE376D1BD14E10006FC8D8 /* Localizable.strings in Resources */,
+				BEAE37691BD14D6C006FC8D8 /* backButton@3x.png in Resources */,
+				BEAE37671BD14D6C006FC8D8 /* backButton.png in Resources */,
+				BEAE37681BD14D6C006FC8D8 /* backButton@2x.png in Resources */,
 				BE1ABE521B71165E0070657C /* CobaltViewController.xib in Resources */,
-				BE1ABE3D1B7110B20070657C /* FontAwesome.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,9 +342,9 @@
 				BE1ABE641B71167E0070657C /* CobaltToast.m in Sources */,
 				BE1ABE511B71165E0070657C /* CobaltViewController.m in Sources */,
 				BE1ABE661B71167E0070657C /* iToast.m in Sources */,
+				BEAE37631BD14CF7006FC8D8 /* BackBarButtonItem.m in Sources */,
 				BE1ABE5E1B7116710070657C /* CobaltPluginManager.m in Sources */,
 				BE1ABE561B7116670070657C /* ImageManager.m in Sources */,
-				BE1ABE3C1B7110B20070657C /* FontAwesome.m in Sources */,
 				BE1ABE5C1B7116710070657C /* CobaltAbstractPlugin.m in Sources */,
 				BE1ABE371B7110B20070657C /* Cobalt.m in Sources */,
 			);
@@ -345,6 +367,18 @@
 			targetProxy = BE1ABE0F1B71105D0070657C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		BEAE376F1BD14E10006FC8D8 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BEAE376E1BD14E10006FC8D8 /* en */,
+				BEAE37701BD14E25006FC8D8 /* fr */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		BE1ABE161B71105D0070657C /* Debug */ = {

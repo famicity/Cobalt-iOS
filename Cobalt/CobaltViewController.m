@@ -30,9 +30,9 @@
 #import "CobaltViewController.h"
 
 #import "Cobalt.h"
-#import "iToast.h"
-
 #import "CobaltPluginManager.h"
+
+#import "iToast.h"
 
 ////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
@@ -156,6 +156,15 @@ NSString * webLayerPage;
     
     // TODO: uncomment for Bars
     //[self configureBars];
+    
+    // Override back button
+    NSArray *navigationViewControllers = self.navigationController.viewControllers;
+    if (navigationViewControllers.count > 1
+        && [navigationViewControllers indexOfObject:self] != 0) {
+        self.navigationItem.leftBarButtonItem = [[BackBarButtonItem alloc] initWithTintColor:self.navigationController.navigationBar.tintColor
+                                                                                 andDelegate:self];
+        self.navigationItem.hidesBackButton = YES;
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -189,6 +198,10 @@ NSString * webLayerPage;
         
         _poppedData = nil;
     }
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -448,7 +461,10 @@ NSString * webLayerPage;
             
             if (callback
                 && [callback isKindOfClass:[NSString class]]) {
-                if ([callback isEqualToString:JSCallbackPullToRefreshDidRefresh]) {
+                if ([callback isEqualToString:JSEventCallbackOnBackButtonPressed]) {
+                    [self popViewController];
+                }
+                else if ([callback isEqualToString:JSCallbackPullToRefreshDidRefresh]) {
                     [self.refreshControl endRefreshing];
                     self.refreshControl.attributedTitle = _ptrRefreshText;
                     _isRefreshing = NO;
@@ -468,8 +484,6 @@ NSString * webLayerPage;
                         return NO;
                     }
                 }
-                
-                
             }
 #if DEBUG_COBALT
             else {
@@ -1336,6 +1350,18 @@ NSString * webLayerPage;
 #endif
     
     return isValidNib;
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark BACK BARBUTTONITEM DELEGATE
+
+////////////////////////////////////////////////////////////////////////////////////
+
+- (void)onBackButtonPressed {
+    [self sendEvent:JSEventCallbackOnBackButtonPressed
+           withData:nil
+        andCallback:JSEventCallbackOnBackButtonPressed];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
