@@ -162,6 +162,13 @@ NSString * webLayerPage;
         // register CobaltViewController class
         context[@"CobaltViewController"] = self;
     }
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    
+    [self saveBars];
+    [self configureBars];
     
     // Override back button
     NSArray *navigationViewControllers = self.navigationController.viewControllers;
@@ -171,13 +178,7 @@ NSString * webLayerPage;
                                                                                  andDelegate:self];
         self.navigationItem.hidesBackButton = YES;
     }
-}
-
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
     
-    [self saveBars];
-    [self configureBars];
     [self setBarButtonItems];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -392,9 +393,9 @@ NSString * webLayerPage;
                 }
             }
             
-            [topRightBarButtonItems addObject:flexibleSpace];
-            [topLeftBarButtonItems addObject:flexibleSpace];
-            [bottomBarButtonItems addObject:flexibleSpace];
+            if (bottomBarButtonItems.count > 0) {
+                [bottomBarButtonItems addObject:flexibleSpace];
+            }
         }
     }
 }
