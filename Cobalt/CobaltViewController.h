@@ -99,7 +99,7 @@
 // UI
 #define JSTypeUI                            @"ui"
 #define kJSControl                          @"control"
-#define JSControlBars                       @"bars"
+
 #define kJSTypeImage                        @"image"
 #define JSActionPressed                     @"actionPressed"
 
@@ -115,6 +115,11 @@
 #define kJSAlertMessage                     @"message"
 #define kJSAlertButtons                     @"buttons"
 #define kJSAlertButtonIndex                 @"index"
+
+// BARS
+#define JSControlBars                       @"bars"
+#define JSActionSetBars                     @"setBars"
+#define kJSBars                             @"bars"
 
 // TOAST
 #define JSControlToast                      @"toast"
