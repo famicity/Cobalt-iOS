@@ -1216,14 +1216,20 @@ NSString * webLayerPage;
 - (void)pushViewControllerWithData:(NSDictionary *)data {
     id page = [data objectForKey:kJSPage];
     id controller = [data objectForKey:kJSNavigationController];
+    id barsConfiguration = [data objectForKey:kJSBars];
     id innerData = [data objectForKey:kJSData];
     
-    if (page
+    if (page != nil
         && [page isKindOfClass:[NSString class]]) {
         CobaltViewController *viewController = [Cobalt cobaltViewControllerForController:controller
                                                                                  andPage:page];
-        if (viewController) {
-            if (innerData
+        if (viewController != nil) {
+            if (barsConfiguration != nil
+                && [barsConfiguration isKindOfClass:[NSDictionary class]]) {
+                viewController.barsConfiguration = barsConfiguration;
+            }
+            
+            if (innerData != nil
                 && [innerData isKindOfClass:[NSDictionary class]]) {
                 viewController.pushedData = innerData;
             }
@@ -1235,10 +1241,10 @@ NSString * webLayerPage;
             });
         }
     }
-    else if (controller
+    else if (controller != nil
              && [controller isKindOfClass:[NSString class]]){
         UIViewController *viewController = [Cobalt nativeViewControllerForController:controller];
-        if (viewController) {
+        if (viewController != nil) {
             // Push corresponding viewController
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.navigationController pushViewController:viewController
@@ -1313,14 +1319,20 @@ NSString * webLayerPage;
 - (void)presentViewControllerWithData:(NSDictionary *)data {
     id page = [data objectForKey:kJSPage];
     id controller = [data objectForKey:kJSNavigationController];
+    id barsConfiguration = [data objectForKey:kJSBars];
     id innerData = [data objectForKey:kJSData];
     
-    if (page
+    if (page != nil
         && [page isKindOfClass:[NSString class]]) {
         CobaltViewController *viewController = [Cobalt cobaltViewControllerForController:controller
                                                                                  andPage:page];
-        if (viewController) {
-            if (innerData
+        if (viewController != nil) {
+            if (barsConfiguration != nil
+                && [barsConfiguration isKindOfClass:[NSDictionary class]]) {
+                viewController.barsConfiguration = barsConfiguration;
+            }
+            
+            if (innerData != nil
                 && [innerData isKindOfClass:[NSDictionary class]]) {
                 viewController.pushedData = innerData;
             }
@@ -1332,10 +1344,10 @@ NSString * webLayerPage;
             });
         }
     }
-    else if (controller
+    else if (controller != nil
              && [controller isKindOfClass:[NSString class]]){
         UIViewController *viewController = [Cobalt nativeViewControllerForController:controller];
-        if (viewController) {
+        if (viewController != nil) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self presentViewController:[[UINavigationController alloc] initWithRootViewController:viewController]
                                    animated:YES
@@ -1399,15 +1411,21 @@ NSString * webLayerPage;
 - (void)replaceViewControllerWithData:(NSDictionary *)data {
     id page = [data objectForKey:kJSPage];
     id controller = [data objectForKey:kJSNavigationController];
+    id barsConfiguration = [data objectForKey:kJSBars];
     BOOL animated = [[data objectForKey: kJSAnimated] boolValue];
     id innerData = [data objectForKey:kJSData];
     
-    if (page
+    if (page != nil
         && [page isKindOfClass:[NSString class]]) {
         CobaltViewController *viewController = [Cobalt cobaltViewControllerForController:controller
                                                                                  andPage:page];
-        if (viewController) {
-            if (innerData
+        if (viewController != nil) {
+            if (barsConfiguration != nil
+                && [barsConfiguration isKindOfClass:[NSDictionary class]]) {
+                viewController.barsConfiguration = barsConfiguration;
+            }
+            
+            if (innerData != nil
                 && [innerData isKindOfClass:[NSDictionary class]]) {
                 viewController.pushedData = innerData;
             }
@@ -1422,10 +1440,10 @@ NSString * webLayerPage;
             });
         }
     }
-    else if (controller
+    else if (controller != nil
              && [controller isKindOfClass:[NSString class]]) {
         UIViewController *viewController = [Cobalt nativeViewControllerForController:controller];
-        if (viewController) {
+        if (viewController != nil) {
             // Push corresponding viewController
             dispatch_async(dispatch_get_main_queue(), ^{
                 NSMutableArray *viewControllers = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];

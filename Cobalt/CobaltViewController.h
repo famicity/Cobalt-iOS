@@ -77,6 +77,7 @@
 #define JSActionNavigationDismiss           @"dismiss"
 #define kJSActionNavigationReplace          @"replace"
 #define kJSNavigationController             @"controller"
+#define kJSBars                             @"bars"
 #define JSEventCallbackOnBackButtonPressed  @"onBackButtonPressed"
 
 #define kJSAnimated                         @"animated"
