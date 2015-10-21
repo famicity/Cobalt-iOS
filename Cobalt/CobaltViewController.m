@@ -169,16 +169,6 @@ NSString * webLayerPage;
     
     [self saveBars];
     [self configureBars];
-    
-    // Override back button
-    NSArray *navigationViewControllers = self.navigationController.viewControllers;
-    if (navigationViewControllers.count > 1
-        && [navigationViewControllers indexOfObject:self] != 0) {
-        self.navigationItem.leftBarButtonItem = [[BackBarButtonItem alloc] initWithTintColor:self.navigationController.navigationBar.tintColor
-                                                                                 andDelegate:self];
-        self.navigationItem.hidesBackButton = YES;
-    }
-    
     [self setBarButtonItems];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -323,18 +313,22 @@ NSString * webLayerPage;
             
             if (top != nil
                 && [top isKindOfClass:[NSNumber class]]) {
-                self.navigationController.navigationBarHidden = ! [top boolValue];
+                [self.navigationController setNavigationBarHidden:! [top boolValue]
+                                                         animated:YES];
             }
             else {
-                self.navigationController.navigationBarHidden = YES;
+                [self.navigationController setNavigationBarHidden:YES
+                                                         animated:YES];
             }
             
             if (bottom != nil
                 && [bottom isKindOfClass:[NSNumber class]]) {
-                self.navigationController.toolbarHidden = ! [bottom boolValue];
+                [self.navigationController setToolbarHidden:! [bottom boolValue]
+                                                   animated:YES];
             }
             else {
-                self.navigationController.toolbarHidden = YES;
+                [self.navigationController setToolbarHidden:YES
+                                                   animated:YES];
             }
         }
         
@@ -570,6 +564,16 @@ NSString * webLayerPage;
         [self.navigationItem setLeftBarButtonItems:topLeftBarButtonItems
                                           animated:YES];
     }
+    else {
+        // Override back button
+        NSArray *navigationViewControllers = self.navigationController.viewControllers;
+        if (navigationViewControllers.count > 1
+            && [navigationViewControllers indexOfObject:self] != 0) {
+            self.navigationItem.leftBarButtonItem = [[BackBarButtonItem alloc] initWithTintColor:self.navigationController.navigationBar.tintColor
+                                                                                     andDelegate:self];
+            self.navigationItem.hidesBackButton = YES;
+        }
+    }
     
     if (topRightBarButtonItems.count > 0) {
         [self.navigationItem setRightBarButtonItems:topRightBarButtonItems
@@ -580,6 +584,15 @@ NSString * webLayerPage;
         [self setToolbarItems:bottomBarButtonItems
                      animated:YES];
     }
+}
+
+- (void)resetBarButtonItems {
+    [self.navigationItem setLeftBarButtonItems:@[]
+                                      animated:YES];
+    [self.navigationItem setRightBarButtonItems:@[]
+                                       animated:YES];
+    [self setToolbarItems:@[]
+                 animated:YES];
 }
 
 - (void)onBarButtonItemPressed:(id)sender {
@@ -990,6 +1003,26 @@ NSString * webLayerPage;
                                 
                                 [self customizeRefreshControlWithAttributedRefreshText: [[NSAttributedString alloc] initWithString: pullToRefreshText] andAttributedRefreshText: [[NSAttributedString alloc] initWithString: refreshingText] andTintColor: self.refreshControl.tintColor];
                                 
+                            }
+                        }
+                    }
+                }
+                
+                else if ([control isEqualToString:JSControlBars]) {
+                    if (data != nil
+                        && [data isKindOfClass:[NSDictionary class]]) {
+                        id action = [data objectForKey:kJSAction];
+                        if (action != nil
+                            && [action isKindOfClass:[NSString class]]) {
+                            if ([action isEqualToString:JSActionSetBars]) {
+                                id bars = [data objectForKey:kJSBars];
+                                if (bars != nil
+                                    && [bars isKindOfClass:[NSDictionary class]]) {
+                                    _barsConfiguration = bars;
+                                    [self configureBars];
+                                    [self resetBarButtonItems];
+                                    [self setBarButtonItems];
+                                }
                             }
                         }
                     }
