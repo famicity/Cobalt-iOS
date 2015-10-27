@@ -45,9 +45,9 @@
     if (self = [super init]) {
         _delegate = delegate;
         
-        UIImage *backButtonImage = [UIImage imageNamed:@"backButton"
-                                              inBundle:[NSBundle bundleForClass:[Cobalt class]]
-                         compatibleWithTraitCollection:nil];
+        UIImage *backButtonImage = [UIImage imageWithContentsOfFile:[NSString stringWithFormat:@"%@/%@",
+                                                                     [NSBundle bundleForClass:[Cobalt class]].bundlePath,
+                                                                     @"backButton.png"]];
         backButtonImage = [backButtonImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         backButtonImageView = [[UIImageView alloc] initWithImage:backButtonImage];
         
