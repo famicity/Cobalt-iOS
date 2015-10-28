@@ -118,8 +118,11 @@
 
 // BARS
 #define JSControlBars                       @"bars"
+#define JSActionSetBarsVisible              @"setBarsVisible"
+#define JSActionSetBarContent               @"setBarContent"
 #define JSActionSetBars                     @"setBars"
 #define kJSBars                             @"bars"
+#define kJSContent                          @"content"
 
 // TOAST
 #define JSControlToast                      @"toast"
@@ -268,7 +271,7 @@ typedef enum {
  @property		barsConfiguration
  @abstract		bars configuration as defined in cobalt.conf or sent by Web on navigation
  */
-@property NSDictionary *barsConfiguration;
+@property NSMutableDictionary *barsConfiguration;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

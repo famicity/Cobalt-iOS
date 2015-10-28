@@ -107,6 +107,12 @@
     return self;
 }
 
+- (void)setTintColor:(UIColor *)color {
+    [super setTintColor:color];
+    
+    backButtonTitle.textColor = color;
+}
+
 - (void)didTouchDown:(id)sender {
     backButtonImageView.alpha = 0.2;
     backButtonTitle.alpha = 0.2;
