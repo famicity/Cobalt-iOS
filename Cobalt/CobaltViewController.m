@@ -283,7 +283,7 @@ NSString * webLayerPage;
         
         if (title != nil
             && [title isKindOfClass:[NSString class]]) {
-            self.title = title;
+            self.navigationItem.title = title;
         }
         
         if (backgroundColor != nil
@@ -391,6 +391,90 @@ NSString * webLayerPage;
                 [bottomBarButtonItems addObject:flexibleSpace];
             }
         }
+    }
+}
+
+- (void)setBarsVisible:(NSDictionary *)visible {
+    id top = [visible objectForKey:kConfigurationBarsVisibleTop];
+    id bottom = [visible objectForKey:kConfigurationBarsVisibleBottom];
+    
+    NSMutableDictionary *barsConfiguration = _barsConfiguration;
+    if (barsConfiguration == nil) {
+        barsConfiguration = [NSMutableDictionary dictionary];
+    }
+    NSMutableDictionary *barsVisible = [barsConfiguration objectForKey:kConfigurationBarsVisible];
+    if (barsVisible == nil
+        || ! [barsVisible isKindOfClass:[NSDictionary class]]) {
+        barsVisible = [NSMutableDictionary dictionary];
+    }
+    
+    if (top != nil
+        && [top isKindOfClass:[NSNumber class]]) {
+        [self.navigationController setNavigationBarHidden:! [top boolValue]
+                                                 animated:YES];
+        [barsVisible setObject:top
+                        forKey:kConfigurationBarsVisibleTop];
+    }
+    
+    if (bottom != nil
+        && [bottom isKindOfClass:[NSNumber class]]) {
+        [self.navigationController setToolbarHidden:! [bottom boolValue]
+                                           animated:YES];
+        [barsVisible setObject:bottom
+                        forKey:kConfigurationBarsVisibleBottom];
+    }
+    
+    if (barsVisible.count > 0) {
+        [barsConfiguration setObject:barsVisible
+                              forKey:kConfigurationBarsVisible];
+    }
+}
+
+- (void)setBarContent:(NSDictionary *)content {
+    id title = [content objectForKey:kConfigurationBarsTitle];
+    id backgroundColor = [content objectForKey:kConfigurationBarsBackgroundColor];
+    id color = [content objectForKey:kConfigurationBarsColor];
+    
+    NSMutableDictionary *barsConfiguration = _barsConfiguration;
+    if (barsConfiguration == nil) {
+        barsConfiguration = [NSMutableDictionary dictionary];
+    }
+    
+    if (title != nil
+        && [title isKindOfClass:[NSString class]]) {
+        self.navigationItem.title = title;
+        [barsConfiguration setObject:title
+                              forKey:kConfigurationBarsTitle];
+    }
+    
+    if (backgroundColor != nil
+        && [backgroundColor isKindOfClass:[NSString class]]) {
+        UIColor *barTintColor = [Cobalt colorFromHexString:backgroundColor];
+        if (barTintColor != nil) {
+            self.navigationController.navigationBar.barTintColor = barTintColor;
+            self.navigationController.toolbar.barTintColor = barTintColor;
+        }
+        
+        [barsConfiguration setObject:backgroundColor
+                              forKey:kConfigurationBarsBackgroundColor];
+    }
+    
+    if (color != nil
+        && [color isKindOfClass:[NSString class]]) {
+        UIColor *tintColor = [Cobalt colorFromHexString:color];
+        if (tintColor != nil) {
+            self.navigationController.navigationBar.tintColor = tintColor;
+            self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: tintColor};
+            self.navigationController.toolbar.tintColor = tintColor;
+            UIBarButtonItem *leftBarButtonItem = self.navigationItem.leftBarButtonItem;
+            if (leftBarButtonItem != nil
+                && [leftBarButtonItem isKindOfClass:[BackBarButtonItem class]]) {
+                [leftBarButtonItem setTintColor:tintColor];
+            }
+        }
+        
+        [barsConfiguration setObject:color
+                              forKey:kConfigurationBarsColor];
     }
 }
 
@@ -1008,22 +1092,47 @@ NSString * webLayerPage;
                     }
                 }
                 
+                // BARS
                 else if ([control isEqualToString:JSControlBars]) {
                     if (data != nil
                         && [data isKindOfClass:[NSDictionary class]]) {
                         id action = [data objectForKey:kJSAction];
                         if (action != nil
                             && [action isKindOfClass:[NSString class]]) {
+                            // SET BARS
                             if ([action isEqualToString:JSActionSetBars]) {
                                 id bars = [data objectForKey:kJSBars];
                                 if (bars != nil
                                     && [bars isKindOfClass:[NSDictionary class]]) {
                                     _barsConfiguration = bars;
-                                    [self configureBars];
-                                    [self resetBarButtonItems];
-                                    [self setBarButtonItems];
+                                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                                        [self configureBars];
+                                        [self resetBarButtonItems];
+                                        [self setBarButtonItems];
+                                    });
                                 }
                             }
+                            // SET BARS VISIBLE
+                            else if ([action isEqualToString:JSActionSetBarsVisible]) {
+                                id visible = [data objectForKey:kConfigurationBarsVisible];
+                                if (visible != nil
+                                    && [visible isKindOfClass:[NSDictionary class]]) {
+                                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                                        [self setBarsVisible:visible];
+                                    });
+                                }
+                            }
+                            // SET BAR CONTENT
+                            else if ([action isEqualToString:JSActionSetBarContent]) {
+                                id content = [data objectForKey:kJSContent];
+                                if (content != nil
+                                    && [content isKindOfClass:[NSDictionary class]]) {
+                                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                                        [self setBarContent:content];
+                                    });
+                                }
+                            }
+                            
                         }
                     }
                 }

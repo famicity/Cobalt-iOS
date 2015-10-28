@@ -29,6 +29,7 @@
 
 #import "Cobalt.h"
 
+//static NSMutableDictionary *sCobaltConfiguration;
 static NSDictionary *sCobaltConfiguration;
 static NSString *sResourcePath;
 
@@ -375,7 +376,7 @@ static NSString *sResourcePath;
     NSError *error;
     NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
     id dictionary = [NSJSONSerialization JSONObjectWithData:data
-                                                    options:0
+                                                    options:NSJSONReadingMutableContainers
                                                       error:&error];
 
     if (dictionary == nil

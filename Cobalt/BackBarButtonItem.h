@@ -43,5 +43,6 @@
 
 - (instancetype)initWithTintColor:(UIColor *)color
                       andDelegate:(id)delegate;
-    
+- (void)setTintColor:(UIColor *)color;
+
 @end
