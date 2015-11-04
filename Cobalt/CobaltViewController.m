@@ -530,7 +530,7 @@ NSString * webLayerPage;
                 && icon != nil
                 && [icon isKindOfClass:[NSString class]]) {
                 UIImage *image = [CobaltFontManager imageWithIcon:icon
-                                                            color:[Cobalt colorFromHexString:color]
+                                                            color:color != nil ? [Cobalt colorFromHexString:color] : self.navigationController.navigationBar.tintColor
                                                           andSize:CGSizeMake(22, 22)];
                 if (image != nil) {
                     button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, 22, 22)];
@@ -590,7 +590,7 @@ NSString * webLayerPage;
                 && icon != nil
                 && [icon isKindOfClass:[NSString class]]) {
                 UIImage *image = [CobaltFontManager imageWithIcon:icon
-                                                            color:[Cobalt colorFromHexString:color]
+                                                            color:color != nil ? [Cobalt colorFromHexString:color] : self.navigationController.navigationBar.tintColor
                                                           andSize:CGSizeMake(22, 22)];
                 if (image != nil) {
                     barButtonItem = [[CobaltBarButtonItem alloc] initWithImage:image
