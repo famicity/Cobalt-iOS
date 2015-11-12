@@ -1819,7 +1819,7 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     NSRange range = [requestURL rangeOfString:cobaltSpecialJSKey];
     if (range.location != NSNotFound) {
         NSString *json = [requestURL substringFromIndex:range.location + cobaltSpecialJSKey.length];
-        NSDictionary *jsonObj = [Cobalt JSONObjectWithString:json];
+        NSDictionary *jsonObj = [Cobalt dictionaryWithString:json];
         
         [fromJavaScriptOperationQueue addOperationWithBlock:^{
             dispatch_sync(dispatch_get_main_queue(), ^{
