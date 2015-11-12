@@ -1653,15 +1653,16 @@ UIColor * SKColorFromHexString(NSString * hexString) {
 #pragma mark -
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
-{
-    NSString * requestURL = [[[request URL] absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+- (BOOL)webView:(UIWebView *)webView
+shouldStartLoadWithRequest:(NSURLRequest *)request
+ navigationType:(UIWebViewNavigationType)navigationType {
+    NSString *requestURL = [[[request URL] absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     
     // if requestURL contains cobaltSpecialJSKey, extracts the JSON received.
     NSRange range = [requestURL rangeOfString:cobaltSpecialJSKey];
     if (range.location != NSNotFound) {
-        NSString * json = [requestURL substringFromIndex:range.location + cobaltSpecialJSKey.length];
-        NSDictionary * jsonObj = [Cobalt JSONObjectWithString:json];
+        NSString *json = [requestURL substringFromIndex:range.location + cobaltSpecialJSKey.length];
+        NSDictionary *jsonObj = [Cobalt JSONObjectWithString:json];
         
         [fromJavaScriptOperationQueue addOperationWithBlock:^{
             dispatch_sync(dispatch_get_main_queue(), ^{
@@ -1674,24 +1675,22 @@ UIColor * SKColorFromHexString(NSString * hexString) {
         return NO;
     }
     
-    [activityIndicator startAnimating];
-    
-    // Stops queues until Web view is loaded
-    [toJavaScriptOperationQueue setSuspended:YES];
-    
     // Returns YES to ensure regular navigation working as expected.
     return YES;
 }
 
-
-- (void)webViewDidFinishLoad:(UIWebView *)webView
-{
-    // start queue
-    [toJavaScriptOperationQueue setSuspended:NO];
+- (void)webViewDidStartLoad:(UIWebView *)webView {
+    [activityIndicator startAnimating];
     
-    [activityIndicator stopAnimating];
+    // Stops queues until Web view is loaded
+    [toJavaScriptOperationQueue setSuspended:YES];
 }
 
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
+    // start queue
+    [toJavaScriptOperationQueue setSuspended:NO];
+    [activityIndicator stopAnimating];
+}
 
 - (void)sendACK
 {
