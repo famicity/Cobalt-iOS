@@ -81,6 +81,7 @@
 #define JSEventCallbackOnBackButtonPressed  @"onBackButtonPressed"
 
 #define kJSAnimated                         @"animated"
+#define kJSClearHistory                     @"clearHistory"
 
 //LIFE CYCLE
 #define JSEventOnAppStarted                 @"onAppStarted"

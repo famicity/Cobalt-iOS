@@ -1556,6 +1556,7 @@ NSString * webLayerPage;
     id controller = [data objectForKey:kJSNavigationController];
     id barsConfiguration = [data objectForKey:kJSBars];
     BOOL animated = [[data objectForKey: kJSAnimated] boolValue];
+    BOOL clearHistory = [[data objectForKey: kJSClearHistory] boolValue];
     id innerData = [data objectForKey:kJSData];
     
     if (page != nil
@@ -1575,11 +1576,17 @@ NSString * webLayerPage;
             
             // replace current view with corresponding viewController
             dispatch_async(dispatch_get_main_queue(), ^{
-                NSMutableArray *viewControllers = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
-                [viewControllers replaceObjectAtIndex:(viewControllers.count - 1)
-                                           withObject:viewController];
-                [self.navigationController setViewControllers:viewControllers
-                                                     animated:animated];
+                if (clearHistory) {
+                    [self.navigationController setViewControllers:@[viewController]
+                                                         animated:animated];
+                }
+                else {
+                    NSMutableArray *viewControllers = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
+                    [viewControllers replaceObjectAtIndex:(viewControllers.count - 1)
+                                               withObject:viewController];
+                    [self.navigationController setViewControllers:viewControllers
+                                                         animated:animated];
+                }
             });
         }
     }
@@ -1589,12 +1596,19 @@ NSString * webLayerPage;
         if (viewController != nil) {
             // Push corresponding viewController
             dispatch_async(dispatch_get_main_queue(), ^{
-                NSMutableArray *viewControllers = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
-                [viewControllers replaceObjectAtIndex:(viewControllers.count - 1)
-                                           withObject:viewController];
-                [self.navigationController setViewControllers:viewControllers
-                                                     animated:animated];
+                if (clearHistory) {
+                    [self.navigationController setViewControllers:@[viewController]
+                                                         animated:animated];
+                }
+                else {
+                    NSMutableArray *viewControllers = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
+                    [viewControllers replaceObjectAtIndex:(viewControllers.count - 1)
+                                               withObject:viewController];
+                    [self.navigationController setViewControllers:viewControllers
+                                                         animated:animated];
+                }
             });
+                
         }
     }
 #if DEBUG_COBALT
