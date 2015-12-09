@@ -30,9 +30,6 @@
 #import "CobaltViewController.h"
 
 #import "Cobalt.h"
-#import "CobaltBarButtonItem.h"
-#import "CobaltButton.h"
-#import "CobaltFontManager.h"
 #import "CobaltPluginManager.h"
 
 #import "iToast.h"
@@ -500,137 +497,44 @@ NSString * webLayerPage;
 }
 
 - (CobaltBarButtonItem *)barButtonItemForAction:(NSDictionary *)action {
-    CobaltBarButtonItem *barButtonItem = nil;
-    
-    id name = [action objectForKey:kConfigurationBarsActionName];                 //NSString  (mandatory)
-    id iosIcon = [action objectForKey:kConfigurationBarsActionIconIOS];           //NSString  (default: nil, img.png)
-    id icon = [action objectForKey:kConfigurationBarsActionIcon];                 //NSString  (default: nil, "fc fc-*" ou "fa fa-*")
-    id title = [action objectForKey:kConfigurationBarsActionTitle];               //NSString  (mandatory)
-    id color = [action objectForKey:kConfigurationBarsActionColor];               //NSString  (default: nil)
-    id badge = [action objectForKey:kConfigurationBarsActionBadge];               //NSString  (default: nil)
-    id enabled = [action objectForKey:kConfigurationBarsActionEnabled];           //BOOL      (default: true)
-    id visible = [action objectForKey:kConfigurationBarsActionVisible];           //BOOL      (default: true)
-    
-    if (name != nil && [name isKindOfClass:[NSString class]]
-        && title != nil && [title isKindOfClass:[NSString class]]) {
-        if (badge != nil && [badge isKindOfClass:[NSString class]]) {
-            CobaltButton *button;
-            
-            if (iosIcon != nil
-                && [iosIcon isKindOfClass:[NSString class]]) {
-                UIImage *image = [UIImage imageNamed:iosIcon];
-                if (image != nil) {
-                    button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, 22, 22)];
-                    [button setImage:image
-                            forState:UIControlStateNormal];
-                }
-            }
-            
-            if (button == nil
-                && icon != nil
-                && [icon isKindOfClass:[NSString class]]) {
-                UIImage *image = [CobaltFontManager imageWithIcon:icon
-                                                            color:color != nil ? [Cobalt colorFromHexString:color] : self.navigationController.navigationBar.tintColor
-                                                          andSize:CGSizeMake(22, 22)];
-                if (image != nil) {
-                    button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, 22, 22)];
-                    [button setImage:image
-                            forState:UIControlStateNormal];
-                }
-            }
-            
-            if (button == nil) {
-                button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, 22, 22)];
-                [button setTitle:title
-                        forState:UIControlStateNormal];
-            }
-            
-            [button addTarget:self
-                       action:@selector(onBarButtonItemPressed:)
-             forControlEvents:UIControlEventTouchUpInside];
-            button.accessibilityLabel = [NSString stringWithFormat:@"%@ %@", badge, title];
-            button.name = name;
-            
-            UILabel *badgeLabel = [[UILabel alloc] init];
-            badgeLabel.backgroundColor = [UIColor redColor];
-            badgeLabel.textColor = [UIColor whiteColor];
-            badgeLabel.font = [UIFont systemFontOfSize:12.0];
-            badgeLabel.textAlignment = NSTextAlignmentCenter;
-            badgeLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
-            badgeLabel.text = badge;
-            
-            [badgeLabel sizeToFit];
-            
-            CGSize badgeSize = badgeLabel.frame.size;
-            CGFloat width = badgeSize.width + 6.0 < badgeSize.height ? badgeSize.height : badgeSize.width + 6.0;
-            width = width > (button.frame.size.width + badgeSize.height / 2.0) ? button.frame.size.width + badgeSize.height / 2.0 : width;
-            
-            badgeLabel.frame = CGRectMake(button.frame.size.width - (width - badgeSize.height / 2.0), - badgeSize.height / 2.0,
-                                          width, badgeSize.height);
-            badgeLabel.layer.cornerRadius = badgeLabel.frame.size.height / 2.0;
-            badgeLabel.layer.masksToBounds = YES;
-            
-            [button addSubview:badgeLabel];
-            
-            barButtonItem = [[CobaltBarButtonItem alloc] initWithCustomView:button];
-        }
-        else {
-            if (iosIcon != nil
-                && [iosIcon isKindOfClass:[NSString class]]) {
-                UIImage *image = [UIImage imageNamed:iosIcon];
-                if (image != nil) {
-                    barButtonItem = [[CobaltBarButtonItem alloc] initWithImage:image
-                                                                         style:UIBarButtonItemStylePlain
-                                                                        target:self
-                                                                        action:@selector(onBarButtonItemPressed:)];
-                }
-            }
-            
-            if (barButtonItem == nil
-                && icon != nil
-                && [icon isKindOfClass:[NSString class]]) {
-                UIImage *image = [CobaltFontManager imageWithIcon:icon
-                                                            color:color != nil ? [Cobalt colorFromHexString:color] : self.navigationController.navigationBar.tintColor
-                                                          andSize:CGSizeMake(22, 22)];
-                if (image != nil) {
-                    barButtonItem = [[CobaltBarButtonItem alloc] initWithImage:image
-                                                                         style:UIBarButtonItemStylePlain
-                                                                        target:self
-                                                                        action:@selector(onBarButtonItemPressed:)];
-                }
-            }
-            
-            if (barButtonItem == nil) {
-                barButtonItem = [[CobaltBarButtonItem alloc] initWithTitle:title
-                                                                     style:UIBarButtonItemStylePlain
-                                                                    target:self
-                                                                    action:@selector(onBarButtonItemPressed:)];
-            }
-            
-            barButtonItem.accessibilityLabel = title;
-            barButtonItem.name = name;
-        }
-        
-        if (color != nil
-            && [color isKindOfClass:[NSString class]]) {
-            UIColor *tintColor = [Cobalt colorFromHexString:color];
-            if (tintColor != nil) {
-                barButtonItem.tintColor = tintColor;
-            }
-        }
-        
-        if (enabled != nil
-            && [enabled isKindOfClass:[NSNumber class]]) {
-            barButtonItem.enabled = enabled;
-        }
-        
-        if (visible != nil
-            && [visible isKindOfClass:[NSNumber class]]) {
-            barButtonItem.visible = [NSNumber numberWithBool:visible];
+    return [[CobaltBarButtonItem alloc] initWithAction:action
+                                              barColor:self.navigationController.navigationBar.tintColor
+                                           andDelegate:self];
+}
+
+- (CobaltBarButtonItem *)barButtonItemNamed:(NSString *)name {
+    for (CobaltBarButtonItem *barButtonItem in topLeftBarButtonItems) {
+        if ([name isEqualToString:[barButtonItem name]]) {
+            return barButtonItem;
         }
     }
     
-    return barButtonItem;
+    for (CobaltBarButtonItem *barButtonItem in topRightBarButtonItems) {
+        if ([name isEqualToString:[barButtonItem name]]) {
+            return barButtonItem;
+        }
+    }
+    
+    for (CobaltBarButtonItem *barButtonItem in bottomBarButtonItems) {
+        if ([name isEqualToString:[barButtonItem name]]) {
+            return barButtonItem;
+        }
+    }
+    
+    return nil;
+}
+
+- (void)setBadgeLabelText:(NSString *)text
+    forBarButtonItemNamed:(NSString *)name {
+    CobaltBarButtonItem *barButtonItem = [self barButtonItemNamed:name];
+    if (barButtonItem == nil) {
+#if DEBUG_COBALT
+        NSLog(@"setBadgeLabelText:forBarButtonItemNamed: unable to set badge for action named %@ not found", name);
+#endif
+        return;
+    }
+    
+    [barButtonItem setBadge:text];
 }
 
 - (void)resetBars {
@@ -644,8 +548,31 @@ NSString * webLayerPage;
 }
 
 - (void)setBarButtonItems {
-    if (topLeftBarButtonItems.count > 0) {
-        [self.navigationItem setLeftBarButtonItems:topLeftBarButtonItems
+    NSMutableArray *visibleTopLeftBarButtonItems = [[NSMutableArray alloc] initWithCapacity:topLeftBarButtonItems.count];
+    NSMutableArray *visibleTopRightBarButtonItems = [[NSMutableArray alloc] initWithCapacity:topRightBarButtonItems.count];
+    NSMutableArray *visibleBottomBarButtonItems = [[NSMutableArray alloc] initWithCapacity:bottomBarButtonItems.count];
+    
+    for (UIBarButtonItem *barButtonItem in topLeftBarButtonItems) {
+        if (! [barButtonItem isKindOfClass:[CobaltBarButtonItem class]]
+            || [((CobaltBarButtonItem *) barButtonItem).visible boolValue]) {
+            [visibleTopLeftBarButtonItems addObject:barButtonItem];
+        }
+    }
+    for (UIBarButtonItem *barButtonItem in topRightBarButtonItems) {
+        if (! [barButtonItem isKindOfClass:[CobaltBarButtonItem class]]
+            || [((CobaltBarButtonItem *) barButtonItem).visible boolValue]) {
+            [visibleTopRightBarButtonItems addObject:barButtonItem];
+        }
+    }
+    for (UIBarButtonItem *barButtonItem in bottomBarButtonItems) {
+        if (! [barButtonItem isKindOfClass:[CobaltBarButtonItem class]]
+            || [((CobaltBarButtonItem *) barButtonItem).visible  boolValue]) {
+            [visibleBottomBarButtonItems addObject:barButtonItem];
+        }
+    }
+    
+    if (visibleTopLeftBarButtonItems.count > 0) {
+        [self.navigationItem setLeftBarButtonItems:visibleTopLeftBarButtonItems
                                           animated:YES];
     }
     else {
@@ -659,13 +586,13 @@ NSString * webLayerPage;
         }
     }
     
-    if (topRightBarButtonItems.count > 0) {
-        [self.navigationItem setRightBarButtonItems:topRightBarButtonItems
+    if (visibleTopRightBarButtonItems.count > 0) {
+        [self.navigationItem setRightBarButtonItems:visibleTopRightBarButtonItems
                                            animated:YES];
     }
     
-    if (bottomBarButtonItems.count > 0) {
-        [self setToolbarItems:bottomBarButtonItems
+    if (visibleBottomBarButtonItems.count > 0) {
+        [self setToolbarItems:visibleBottomBarButtonItems
                      animated:YES];
     }
 }
@@ -679,13 +606,13 @@ NSString * webLayerPage;
                  animated:YES];
 }
 
-- (void)onBarButtonItemPressed:(id)sender {
+- (void)onBarButtonItemPressed:(NSString *)name {
     [self sendMessage:@{
                         kJSType: JSTypeUI,
                         kJSControl: JSControlBars,
                         kJSData: @{
                                 kJSAction: JSActionPressed,
-                                kJSName: [sender name]
+                                kJSName: name
                                 }
                         }];
 }
@@ -1132,7 +1059,19 @@ NSString * webLayerPage;
                                     });
                                 }
                             }
-                            
+                            // SET ACTION BADGE
+                            else if ([action isEqualToString:JSActionSetActionBadge]) {
+                                id barButtonItemName = [data objectForKey:kJSName];
+                                id badge = [data objectForKey:kJSBadge];
+                                
+                                if (barButtonItemName != nil && [barButtonItemName isKindOfClass:[NSString class]]
+                                    && badge != nil && [badge isKindOfClass:[NSString class]]) {
+                                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                                        [self setBadgeLabelText:badge
+                                          forBarButtonItemNamed:barButtonItemName];
+                                    });
+                                }
+                            }
                         }
                     }
                 }

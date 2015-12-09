@@ -31,6 +31,7 @@
 #import <JavaScriptCore/JavaScriptCore.h>
 
 #import "CobaltToast.h"
+#import "CobaltBarButtonItem.h"
 #import "BackBarButtonItem.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,9 +122,12 @@
 #define JSControlBars                       @"bars"
 #define JSActionSetBarsVisible              @"setBarsVisible"
 #define JSActionSetBarContent               @"setBarContent"
+#define JSActionSetActionBadge              @"setActionBadge"
 #define JSActionSetBars                     @"setBars"
 #define kJSBars                             @"bars"
 #define kJSContent                          @"content"
+#define kJSName                             @"name"
+#define kJSBadge                            @"badge"
 
 // TOAST
 #define JSControlToast                      @"toast"
@@ -192,7 +196,7 @@ typedef enum {
  @class			CobaltViewController
  @abstract		Base class for a webView controller that allows javascript/native dialogs
  */
-@interface CobaltViewController : UITableViewController <UIAlertViewDelegate, UIScrollViewDelegate, UIWebViewDelegate, CobaltToastDelegate, CobaltViewControllerJS, BackBarButtonItemDelegate>
+@interface CobaltViewController : UITableViewController <UIAlertViewDelegate, UIScrollViewDelegate, UIWebViewDelegate, CobaltToastDelegate, CobaltViewControllerJS, CobaltBarButtonItemDelegate, BackBarButtonItemDelegate>
 {
     // Javascript queues
     NSOperationQueue * toJavaScriptOperationQueue;

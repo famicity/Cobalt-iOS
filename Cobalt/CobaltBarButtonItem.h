@@ -29,9 +29,26 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol CobaltBarButtonItemDelegate <NSObject>
+
+@required
+
+- (void)onBarButtonItemPressed:(NSString *)name;
+
+@end
+
 @interface CobaltBarButtonItem : UIBarButtonItem
 
 @property (strong, nonatomic) NSString *name;
 @property (strong, nonatomic) NSNumber *visible;
+@property (weak, nonatomic) id<CobaltBarButtonItemDelegate> delegate;
+@property (strong, nonatomic) UIButton *button;
+@property (strong, nonatomic) UILabel *badgeLabel;
 
+- (instancetype)initWithAction:(NSDictionary *)action
+                      barColor:(UIColor *)barColor
+                   andDelegate:(id<CobaltBarButtonItemDelegate>)delegate;
+
+- (void)setBadge:(NSString *)badge;
+    
 @end
