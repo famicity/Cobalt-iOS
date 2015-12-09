@@ -533,8 +533,16 @@ NSString * webLayerPage;
 #endif
         return;
     }
-    
     [barButtonItem setBadge:text];
+    
+    id actions = [_barsConfiguration objectForKey:kConfigurationBarsActions];
+    for (NSMutableDictionary *action in actions) {
+        if ([[action objectForKey:kConfigurationBarsActionName] isEqualToString:name]) {
+            [action setObject:text
+                       forKey:kConfigurationBarsActionBadge];
+            return;
+        }
+    }
 }
 
 - (void)resetBars {
