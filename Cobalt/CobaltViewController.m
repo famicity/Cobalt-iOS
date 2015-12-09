@@ -503,25 +503,77 @@ NSString * webLayerPage;
 }
 
 - (CobaltBarButtonItem *)barButtonItemNamed:(NSString *)name {
-    for (CobaltBarButtonItem *barButtonItem in topLeftBarButtonItems) {
-        if ([name isEqualToString:[barButtonItem name]]) {
+    for (UIBarButtonItem *barButtonItem in topLeftBarButtonItems) {
+        if ([barButtonItem isKindOfClass:[CobaltBarButtonItem class]]
+            && [name isEqualToString:[(CobaltBarButtonItem *) barButtonItem name]]) {
             return barButtonItem;
         }
     }
     
-    for (CobaltBarButtonItem *barButtonItem in topRightBarButtonItems) {
-        if ([name isEqualToString:[barButtonItem name]]) {
+    for (UIBarButtonItem *barButtonItem in topRightBarButtonItems) {
+        if ([barButtonItem isKindOfClass:[CobaltBarButtonItem class]]
+            && [name isEqualToString:[(CobaltBarButtonItem *) barButtonItem name]]) {
             return barButtonItem;
         }
     }
     
-    for (CobaltBarButtonItem *barButtonItem in bottomBarButtonItems) {
-        if ([name isEqualToString:[barButtonItem name]]) {
+    for (UIBarButtonItem *barButtonItem in bottomBarButtonItems) {
+        if ([barButtonItem isKindOfClass:[CobaltBarButtonItem class]]
+            && [name isEqualToString:[(CobaltBarButtonItem *) barButtonItem name]]) {
             return barButtonItem;
         }
     }
     
     return nil;
+}
+
+- (void)setContent:(NSDictionary *)content
+forBarButtonItemNamed:(NSString *)name {
+    CobaltBarButtonItem *barButtonItem = [self barButtonItemNamed:name];
+    if (barButtonItem == nil) {
+#if DEBUG_COBALT
+        NSLog(@"setContent:forBarButtonItemNamed: unable to set content for action named %@ not found", name);
+#endif
+        return;
+    }
+    [barButtonItem setContent:content];
+    
+    id actions = [_barsConfiguration objectForKey:kConfigurationBarsActions];
+    for (NSMutableDictionary *action in actions) {
+        if ([[action objectForKey:kConfigurationBarsActionName] isEqualToString:name]) {
+            id iosIcon = [content objectForKey:kConfigurationBarsActionIconIOS];
+            id icon = [content objectForKey:kConfigurationBarsActionIcon];
+            id title = [content objectForKey:kConfigurationBarsActionTitle];
+            id color = [content objectForKey:kConfigurationBarsActionColor];
+            
+            if (iosIcon != nil
+                && [iosIcon isKindOfClass:[NSString class]]) {
+                [action setObject:iosIcon
+                           forKey:kConfigurationBarsActionIconIOS];
+            }
+            else if (icon != nil
+                && [icon isKindOfClass:[NSString class]]) {
+                [action setObject:icon
+                           forKey:kConfigurationBarsActionIcon];
+                [action removeObjectForKey:kConfigurationBarsActionIconIOS];
+            }
+            else if (title != nil
+                && [title isKindOfClass:[NSString class]]) {
+                
+                [action setObject:title
+                           forKey:kConfigurationBarsActionTitle];
+                [action removeObjectForKey:kConfigurationBarsActionIconIOS];
+                [action removeObjectForKey:kConfigurationBarsActionIcon];
+            }
+            if (color != nil
+                && [color isKindOfClass:[NSString class]]) {
+                [action setObject:color
+                           forKey:kConfigurationBarsActionColor];
+            }
+            
+            return;
+        }
+    }
 }
 
 - (void)setBadgeLabelText:(NSString *)text
@@ -1077,6 +1129,19 @@ NSString * webLayerPage;
                                     dispatch_async(dispatch_get_main_queue(), ^(void) {
                                         [self setBadgeLabelText:badge
                                           forBarButtonItemNamed:barButtonItemName];
+                                    });
+                                }
+                            }
+                            // SET CONTENT
+                            else if ([action isEqualToString:JSActionSetActionContent]) {
+                                id barButtonItemName = [data objectForKey:kJSName];
+                                id content = [data objectForKey:kJSContent];
+                                
+                                if (barButtonItemName != nil && [barButtonItemName isKindOfClass:[NSString class]]
+                                    && content != nil && [content isKindOfClass:[NSDictionary class]]) {
+                                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                                        [self setContent:content
+                                   forBarButtonItemNamed:barButtonItemName];
                                     });
                                 }
                             }

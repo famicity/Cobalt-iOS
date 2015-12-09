@@ -123,6 +123,7 @@
 #define JSActionSetBarsVisible              @"setBarsVisible"
 #define JSActionSetBarContent               @"setBarContent"
 #define JSActionSetActionBadge              @"setActionBadge"
+#define JSActionSetActionContent            @"setActionContent"
 #define JSActionSetBars                     @"setBars"
 #define kJSBars                             @"bars"
 #define kJSContent                          @"content"

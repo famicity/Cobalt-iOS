@@ -37,7 +37,10 @@
 
 @end
 
-@interface CobaltBarButtonItem : UIBarButtonItem
+@interface CobaltBarButtonItem : UIBarButtonItem {
+    UIColor *_color;
+    UIColor *_barColor;
+}
 
 @property (strong, nonatomic) NSString *name;
 @property (strong, nonatomic) NSNumber *visible;
@@ -49,6 +52,7 @@
                       barColor:(UIColor *)barColor
                    andDelegate:(id<CobaltBarButtonItemDelegate>)delegate;
 
-- (void)setBadge:(NSString *)badge;
-    
+- (void)setBadge:(NSString *)text;
+- (void)setContent:(NSDictionary *)content;
+
 @end
