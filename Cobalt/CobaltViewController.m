@@ -30,28 +30,24 @@
 #import "CobaltViewController.h"
 
 #import "Cobalt.h"
-#import "iToast.h"
-
 #import "CobaltPluginManager.h"
 
-////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-#pragma mark GET POST REQUEST
-#pragma mark -
-////////////////////////////////////////////////////////////////////////////////////
+#import "iToast.h"
 
-// TODO: uncomment for Bars
-/*
-@interface CobaltButton : UIButton
+@interface CobaltViewController () {
+    NSMutableArray *topLeftBarButtonItems;
+    NSMutableArray *topRightBarButtonItems;
+    NSMutableArray *bottomBarButtonItems;
+    
+    UIColor *oldNavigationBarBarTintColor;
+    UIColor *oldToolbarBarTintColor;
+    UIColor *oldNavigationBarTintColor;
+    NSDictionary *oldNavigationBarTitleTextAttributes;
+    UIColor *oldToolbarTintColor;
+    BOOL oldNavigationBarHidden;
+    BOOL oldToolbarHidden;
+}
 
-@property (nonatomic, retain) NSString * iconName;
-@end
-
-@implementation CobaltButton
-@end
-*/
-
-@interface CobaltViewController ()
 /*!
  @method		+(void) executeScriptInWebView:(WebViewType)webViewType withDictionary:(NSDictionary *)dict
  @abstract		this method sends a JSON to the webView to execute a script (allows interactions from the native to the webView)
@@ -65,6 +61,7 @@
 @end
 
 @implementation CobaltViewController
+
 @synthesize activityIndicator,
             isInfiniteScrollEnabled,
             isPullToRefreshEnabled,
@@ -79,8 +76,15 @@ BOOL toastIsShown;
 
 NSString * webLayerPage;
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark LIFECYCLE
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+    if (self = [super initWithNibName:nibNameOrNil
+                               bundle:nibBundleOrNil]) {
         _firstAppearance = YES;
         
         toJavaScriptOperationQueue = [[NSOperationQueue alloc] init] ;
@@ -89,12 +93,6 @@ NSString * webLayerPage;
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(onAppStarted:)
                                                      name:kOnAppStarted object:nil];
-        
-        // TODO: uncomment for Bars
-        /*
-        _navigationBarTintColor = [[UINavigationBar appearance] barTintColor];
-        _toolbarTintColor = [[UIToolbar appearance] barTintColor];
-        */
     }
     
     return self;
@@ -127,19 +125,23 @@ NSString * webLayerPage;
     
     // Add pull-to-refresh table header view
     if (isPullToRefreshEnabled) {
-        UIRefreshControl *refresh = [[UIRefreshControl alloc] init];
-        
-        [refresh addTarget:self action:@selector(refresh) forControlEvents:UIControlEventValueChanged];
-        
-        self.refreshControl = refresh;
-
-        [self customizeRefreshControlWithAttributedRefreshText: [[NSAttributedString alloc] initWithString:@"Pull to refresh"] andAttributedRefreshText: [[NSAttributedString alloc] initWithString:@"Refreshing"] andTintColor: [UIColor grayColor]];
+        self.refreshControl = [[UIRefreshControl alloc] init];
+        [self customizeRefreshControlWithAttributedRefreshText:[[NSAttributedString alloc] initWithString:NSLocalizedStringFromTableInBundle(@"pullToRefresh",
+                                                                                                                                             @"Localizable",
+                                                                                                                                             [NSBundle bundleForClass:[Cobalt class]],
+                                                                                                                                             @"Pull-to-refresh")]
+                                      andAttributedRefreshText:[[NSAttributedString alloc] initWithString:NSLocalizedStringFromTableInBundle(@"refreshing",
+                                                                                                                                             @"Localizable",
+                                                                                                                                             [NSBundle bundleForClass:[Cobalt class]],
+                                                                                                                                             @"Refreshing")]
+                                                  andTintColor:[UIColor grayColor]];
+        [self.refreshControl addTarget:self
+                                action:@selector(refresh)
+                      forControlEvents:UIControlEventValueChanged];
+         [webView.scrollView addSubview:self.refreshControl];
     }
     
     [webView.scrollView setDelegate:self];
-    
-    if(!self.isPullToRefreshEnabled)
-        [self.tableView setScrollEnabled: NO];
     
     [self loadPage:pageName inWebView:webView];
     
@@ -151,22 +153,16 @@ NSString * webLayerPage;
         //}];
     
         // register CobaltViewController class
-        context[@"cobaltViewController"] = self;
+        context[@"CobaltViewController"] = self;
     }
-    
-    // TODO: uncomment for Bars
-    //[self configureBars];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    // TODO: uncomment for Bars
-    /*
-    self.navigationController.navigationBar.barTintColor = _navigationBarTintColor;
-    self.navigationController.toolbar.barTintColor = _toolbarTintColor;
-    self.navigationController.toolbarHidden = ! self.hasToolBar;
-    */
+    [self saveBars];
+    [self configureBars];
+    [self setBarButtonItems];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(onAppBackground:)
@@ -191,8 +187,14 @@ NSString * webLayerPage;
     }
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+}
+
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
+    
+    [self resetBars];
     
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:kOnAppBackgroundNotification
@@ -220,11 +222,11 @@ NSString * webLayerPage;
                                                         object:self];
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark NOTIFICATIONS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)onAppStarted:(NSNotification *)notification {
     [self sendEvent:JSEventOnAppStarted
@@ -247,11 +249,435 @@ NSString * webLayerPage;
         andCallback:nil];
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark BARS
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)saveBars {
+    oldNavigationBarBarTintColor = self.navigationController.navigationBar.barTintColor;
+    oldToolbarBarTintColor = self.navigationController.toolbar.barTintColor;
+    oldNavigationBarTintColor = self.navigationController.navigationBar.tintColor;
+    oldNavigationBarTitleTextAttributes = self.navigationController.navigationBar.titleTextAttributes;
+    oldToolbarTintColor = self.navigationController.toolbar.tintColor;
+    oldNavigationBarHidden = self.navigationController.navigationBarHidden;
+    oldToolbarHidden = self.navigationController.toolbarHidden;
+}
+
+- (void)configureBars {
+    if (_barsConfiguration != nil) {
+        id title = [_barsConfiguration objectForKey:kConfigurationBarsTitle];
+        id backgroundColor = [_barsConfiguration objectForKey:kConfigurationBarsBackgroundColor];
+        id color = [_barsConfiguration objectForKey:kConfigurationBarsColor];
+        id visible = [_barsConfiguration objectForKey:kConfigurationBarsVisible];
+        id actions = [_barsConfiguration objectForKey:kConfigurationBarsActions];
+        
+        if (title != nil
+            && [title isKindOfClass:[NSString class]]) {
+            self.navigationItem.title = title;
+        }
+        
+        if (backgroundColor != nil
+            && [backgroundColor isKindOfClass:[NSString class]]) {
+            UIColor *barTintColor = [Cobalt colorFromHexString:backgroundColor];
+            if (barTintColor != nil) {
+                self.navigationController.navigationBar.barTintColor = barTintColor;
+                self.navigationController.toolbar.barTintColor = barTintColor;
+            }
+        }
+        
+        if (color != nil
+            && [color isKindOfClass:[NSString class]]) {
+            UIColor *tintColor = [Cobalt colorFromHexString:color];
+            if (tintColor != nil) {
+                self.navigationController.navigationBar.tintColor = tintColor;
+                self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: tintColor};
+                self.navigationController.toolbar.tintColor = tintColor;
+            }
+        }
+        
+        if (visible != nil
+            && [visible isKindOfClass:[NSDictionary class]]) {
+            id top = [visible objectForKey:kConfigurationBarsVisibleTop];
+            id bottom = [visible objectForKey:kConfigurationBarsVisibleBottom];
+            
+            
+            if (top != nil
+                && [top isKindOfClass:[NSNumber class]]) {
+                [self.navigationController setNavigationBarHidden:! [top boolValue]
+                                                         animated:YES];
+            }
+            else {
+                [self.navigationController setNavigationBarHidden:YES
+                                                         animated:YES];
+            }
+            
+            if (bottom != nil
+                && [bottom isKindOfClass:[NSNumber class]]) {
+                [self.navigationController setToolbarHidden:! [bottom boolValue]
+                                                   animated:YES];
+            }
+            else {
+                [self.navigationController setToolbarHidden:YES
+                                                   animated:YES];
+            }
+        }
+        
+        if (actions != nil
+            && [actions isKindOfClass:[NSArray class]]) {
+            topLeftBarButtonItems = [NSMutableArray array];
+            topRightBarButtonItems = [NSMutableArray array];
+            bottomBarButtonItems = [NSMutableArray array];
+            
+            UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
+                                                                                           target:nil
+                                                                                           action:nil];
+            
+            for (id action in actions) {
+                if (action != nil
+                    && [action isKindOfClass:[NSDictionary class]]) {
+                    id iosPosition = [action objectForKey:kConfigurationBarsActionPosition];  //NSString  (mandatory: topLeft|topRight|bottom)
+                    
+                    if (iosPosition != nil
+                        && [iosPosition isKindOfClass:[NSString class]]) {
+                        id groupActions = [action objectForKey:kConfigurationBarsActions];
+                        
+                        if (groupActions != nil
+                            && [groupActions isKindOfClass:[NSArray class]]) {
+                            NSArray *barButtonItems = [self barButtonItemsForGroup:action];
+                            
+                            if ([iosPosition isEqualToString:kConfigurationBarsActionPositionTopRight]) {
+                                [topRightBarButtonItems addObjectsFromArray:barButtonItems];
+                            }
+                            else if ([iosPosition isEqualToString:kConfigurationBarsActionPositionTopLeft]) {
+                                [topLeftBarButtonItems addObjectsFromArray:barButtonItems];
+                            }
+                            else if ([iosPosition isEqualToString:kConfigurationBarsActionPositionBottom]) {
+                                if (barButtonItems.count > 0) {
+                                    [bottomBarButtonItems addObject:flexibleSpace];
+                                    [bottomBarButtonItems addObjectsFromArray:barButtonItems];
+                                }
+                            }
+                        }
+                        else {
+                            CobaltBarButtonItem *barButtonItem = [self barButtonItemForAction:action];
+                            if (barButtonItem != nil) {
+                                if ([iosPosition isEqualToString:kConfigurationBarsActionPositionTopRight]) {
+                                    [topRightBarButtonItems addObject:barButtonItem];
+                                }
+                                else if ([iosPosition isEqualToString:kConfigurationBarsActionPositionTopLeft]) {
+                                    [topLeftBarButtonItems addObject:barButtonItem];
+                                }
+                                else if ([iosPosition isEqualToString:kConfigurationBarsActionPositionBottom]) {
+                                    [bottomBarButtonItems addObject:flexibleSpace];
+                                    [bottomBarButtonItems addObject:barButtonItem];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (bottomBarButtonItems.count > 0) {
+                [bottomBarButtonItems addObject:flexibleSpace];
+            }
+        }
+    }
+}
+
+- (void)setBarsVisible:(NSDictionary *)visible {
+    id top = [visible objectForKey:kConfigurationBarsVisibleTop];
+    id bottom = [visible objectForKey:kConfigurationBarsVisibleBottom];
+    
+    NSMutableDictionary *barsConfiguration = _barsConfiguration;
+    if (barsConfiguration == nil) {
+        barsConfiguration = [NSMutableDictionary dictionary];
+    }
+    NSMutableDictionary *barsVisible = [barsConfiguration objectForKey:kConfigurationBarsVisible];
+    if (barsVisible == nil
+        || ! [barsVisible isKindOfClass:[NSDictionary class]]) {
+        barsVisible = [NSMutableDictionary dictionary];
+    }
+    
+    if (top != nil
+        && [top isKindOfClass:[NSNumber class]]) {
+        [self.navigationController setNavigationBarHidden:! [top boolValue]
+                                                 animated:YES];
+        [barsVisible setObject:top
+                        forKey:kConfigurationBarsVisibleTop];
+    }
+    
+    if (bottom != nil
+        && [bottom isKindOfClass:[NSNumber class]]) {
+        [self.navigationController setToolbarHidden:! [bottom boolValue]
+                                           animated:YES];
+        [barsVisible setObject:bottom
+                        forKey:kConfigurationBarsVisibleBottom];
+    }
+    
+    if (barsVisible.count > 0) {
+        [barsConfiguration setObject:barsVisible
+                              forKey:kConfigurationBarsVisible];
+    }
+}
+
+- (void)setBarContent:(NSDictionary *)content {
+    id title = [content objectForKey:kConfigurationBarsTitle];
+    id backgroundColor = [content objectForKey:kConfigurationBarsBackgroundColor];
+    id color = [content objectForKey:kConfigurationBarsColor];
+    
+    NSMutableDictionary *barsConfiguration = _barsConfiguration;
+    if (barsConfiguration == nil) {
+        barsConfiguration = [NSMutableDictionary dictionary];
+    }
+    
+    if (title != nil
+        && [title isKindOfClass:[NSString class]]) {
+        self.navigationItem.title = title;
+        [barsConfiguration setObject:title
+                              forKey:kConfigurationBarsTitle];
+    }
+    
+    if (backgroundColor != nil
+        && [backgroundColor isKindOfClass:[NSString class]]) {
+        UIColor *barTintColor = [Cobalt colorFromHexString:backgroundColor];
+        if (barTintColor != nil) {
+            self.navigationController.navigationBar.barTintColor = barTintColor;
+            self.navigationController.toolbar.barTintColor = barTintColor;
+        }
+        
+        [barsConfiguration setObject:backgroundColor
+                              forKey:kConfigurationBarsBackgroundColor];
+    }
+    
+    if (color != nil
+        && [color isKindOfClass:[NSString class]]) {
+        UIColor *tintColor = [Cobalt colorFromHexString:color];
+        if (tintColor != nil) {
+            self.navigationController.navigationBar.tintColor = tintColor;
+            self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: tintColor};
+            self.navigationController.toolbar.tintColor = tintColor;
+            UIBarButtonItem *leftBarButtonItem = self.navigationItem.leftBarButtonItem;
+            if (leftBarButtonItem != nil
+                && [leftBarButtonItem isKindOfClass:[BackBarButtonItem class]]) {
+                [leftBarButtonItem setTintColor:tintColor];
+            }
+        }
+        
+        [barsConfiguration setObject:color
+                              forKey:kConfigurationBarsColor];
+    }
+}
+
+- (NSArray *)barButtonItemsForGroup:(NSDictionary *)group {
+    NSMutableArray *barButtonItems = [NSMutableArray array];
+    
+    id actions = [group objectForKey:kConfigurationBarsActions];
+    
+    if (actions != nil
+        && [actions isKindOfClass:[NSArray class]]) {
+        for (id action in actions) {
+            if (action != nil
+                && [action isKindOfClass:[NSDictionary class]]) {
+                CobaltBarButtonItem *barButtonItem = [self barButtonItemForAction:action];
+                if (barButtonItem != nil) {
+                    [barButtonItems addObject:barButtonItem];
+                }
+            }
+        }
+    }
+    
+    return barButtonItems;
+}
+
+- (CobaltBarButtonItem *)barButtonItemForAction:(NSDictionary *)action {
+    return [[CobaltBarButtonItem alloc] initWithAction:action
+                                              barColor:self.navigationController.navigationBar.tintColor
+                                           andDelegate:self];
+}
+
+- (CobaltBarButtonItem *)barButtonItemNamed:(NSString *)name {
+    for (UIBarButtonItem *barButtonItem in topLeftBarButtonItems) {
+        if ([barButtonItem isKindOfClass:[CobaltBarButtonItem class]]
+            && [name isEqualToString:[(CobaltBarButtonItem *) barButtonItem name]]) {
+            return barButtonItem;
+        }
+    }
+    
+    for (UIBarButtonItem *barButtonItem in topRightBarButtonItems) {
+        if ([barButtonItem isKindOfClass:[CobaltBarButtonItem class]]
+            && [name isEqualToString:[(CobaltBarButtonItem *) barButtonItem name]]) {
+            return barButtonItem;
+        }
+    }
+    
+    for (UIBarButtonItem *barButtonItem in bottomBarButtonItems) {
+        if ([barButtonItem isKindOfClass:[CobaltBarButtonItem class]]
+            && [name isEqualToString:[(CobaltBarButtonItem *) barButtonItem name]]) {
+            return barButtonItem;
+        }
+    }
+    
+    return nil;
+}
+
+- (void)setContent:(NSDictionary *)content
+forBarButtonItemNamed:(NSString *)name {
+    CobaltBarButtonItem *barButtonItem = [self barButtonItemNamed:name];
+    if (barButtonItem == nil) {
+#if DEBUG_COBALT
+        NSLog(@"setContent:forBarButtonItemNamed: unable to set content for action named %@ not found", name);
+#endif
+        return;
+    }
+    [barButtonItem setContent:content];
+    
+    id actions = [_barsConfiguration objectForKey:kConfigurationBarsActions];
+    for (NSMutableDictionary *action in actions) {
+        if ([[action objectForKey:kConfigurationBarsActionName] isEqualToString:name]) {
+            id iosIcon = [content objectForKey:kConfigurationBarsActionIconIOS];
+            id icon = [content objectForKey:kConfigurationBarsActionIcon];
+            id title = [content objectForKey:kConfigurationBarsActionTitle];
+            id color = [content objectForKey:kConfigurationBarsActionColor];
+            
+            if (iosIcon != nil
+                && [iosIcon isKindOfClass:[NSString class]]) {
+                [action setObject:iosIcon
+                           forKey:kConfigurationBarsActionIconIOS];
+            }
+            else if (icon != nil
+                && [icon isKindOfClass:[NSString class]]) {
+                [action setObject:icon
+                           forKey:kConfigurationBarsActionIcon];
+                [action removeObjectForKey:kConfigurationBarsActionIconIOS];
+            }
+            else if (title != nil
+                && [title isKindOfClass:[NSString class]]) {
+                
+                [action setObject:title
+                           forKey:kConfigurationBarsActionTitle];
+                [action removeObjectForKey:kConfigurationBarsActionIconIOS];
+                [action removeObjectForKey:kConfigurationBarsActionIcon];
+            }
+            if (color != nil
+                && [color isKindOfClass:[NSString class]]) {
+                [action setObject:color
+                           forKey:kConfigurationBarsActionColor];
+            }
+            
+            return;
+        }
+    }
+}
+
+- (void)setBadgeLabelText:(NSString *)text
+    forBarButtonItemNamed:(NSString *)name {
+    CobaltBarButtonItem *barButtonItem = [self barButtonItemNamed:name];
+    if (barButtonItem == nil) {
+#if DEBUG_COBALT
+        NSLog(@"setBadgeLabelText:forBarButtonItemNamed: unable to set badge for action named %@ not found", name);
+#endif
+        return;
+    }
+    [barButtonItem setBadge:text];
+    
+    id actions = [_barsConfiguration objectForKey:kConfigurationBarsActions];
+    for (NSMutableDictionary *action in actions) {
+        if ([[action objectForKey:kConfigurationBarsActionName] isEqualToString:name]) {
+            [action setObject:text
+                       forKey:kConfigurationBarsActionBadge];
+            return;
+        }
+    }
+}
+
+- (void)resetBars {
+    self.navigationController.navigationBar.barTintColor = oldNavigationBarBarTintColor;
+    self.navigationController.toolbar.barTintColor = oldToolbarBarTintColor;
+    self.navigationController.navigationBar.tintColor = oldNavigationBarTintColor;
+    self.navigationController.navigationBar.titleTextAttributes = oldNavigationBarTitleTextAttributes;
+    self.navigationController.toolbar.tintColor = oldToolbarTintColor;
+    self.navigationController.navigationBarHidden = oldNavigationBarHidden;
+    self.navigationController.toolbarHidden = oldToolbarHidden;
+}
+
+- (void)setBarButtonItems {
+    NSMutableArray *visibleTopLeftBarButtonItems = [[NSMutableArray alloc] initWithCapacity:topLeftBarButtonItems.count];
+    NSMutableArray *visibleTopRightBarButtonItems = [[NSMutableArray alloc] initWithCapacity:topRightBarButtonItems.count];
+    NSMutableArray *visibleBottomBarButtonItems = [[NSMutableArray alloc] initWithCapacity:bottomBarButtonItems.count];
+    
+    for (UIBarButtonItem *barButtonItem in topLeftBarButtonItems) {
+        if (! [barButtonItem isKindOfClass:[CobaltBarButtonItem class]]
+            || [((CobaltBarButtonItem *) barButtonItem).visible boolValue]) {
+            [visibleTopLeftBarButtonItems addObject:barButtonItem];
+        }
+    }
+    for (UIBarButtonItem *barButtonItem in topRightBarButtonItems) {
+        if (! [barButtonItem isKindOfClass:[CobaltBarButtonItem class]]
+            || [((CobaltBarButtonItem *) barButtonItem).visible boolValue]) {
+            [visibleTopRightBarButtonItems addObject:barButtonItem];
+        }
+    }
+    for (UIBarButtonItem *barButtonItem in bottomBarButtonItems) {
+        if (! [barButtonItem isKindOfClass:[CobaltBarButtonItem class]]
+            || [((CobaltBarButtonItem *) barButtonItem).visible  boolValue]) {
+            [visibleBottomBarButtonItems addObject:barButtonItem];
+        }
+    }
+    
+    if (visibleTopLeftBarButtonItems.count > 0) {
+        [self.navigationItem setLeftBarButtonItems:visibleTopLeftBarButtonItems
+                                          animated:YES];
+    }
+    else {
+        // Override back button
+        NSArray *navigationViewControllers = self.navigationController.viewControllers;
+        if (navigationViewControllers.count > 1
+            && [navigationViewControllers indexOfObject:self] != 0) {
+            self.navigationItem.leftBarButtonItem = [[BackBarButtonItem alloc] initWithTintColor:self.navigationController.navigationBar.tintColor
+                                                                                     andDelegate:self];
+            self.navigationItem.hidesBackButton = YES;
+        }
+    }
+    
+    if (visibleTopRightBarButtonItems.count > 0) {
+        [self.navigationItem setRightBarButtonItems:visibleTopRightBarButtonItems
+                                           animated:YES];
+    }
+    
+    if (visibleBottomBarButtonItems.count > 0) {
+        [self setToolbarItems:visibleBottomBarButtonItems
+                     animated:YES];
+    }
+}
+
+- (void)resetBarButtonItems {
+    [self.navigationItem setLeftBarButtonItems:@[]
+                                      animated:YES];
+    [self.navigationItem setRightBarButtonItems:@[]
+                                       animated:YES];
+    [self setToolbarItems:@[]
+                 animated:YES];
+}
+
+- (void)onBarButtonItemPressed:(NSString *)name {
+    [self sendMessage:@{
+                        kJSType: JSTypeUI,
+                        kJSControl: JSControlBars,
+                        kJSData: @{
+                                kJSAction: JSActionPressed,
+                                kJSName: name
+                                }
+                        }];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)setDelegate:(id)delegate
 {
@@ -270,49 +696,6 @@ NSString * webLayerPage;
     NSURL * fileURL = [NSURL fileURLWithPath:[[Cobalt resourcePath] stringByAppendingPathComponent:page]];
     NSURLRequest * requestURL = [NSURLRequest requestWithURL:fileURL];
     [mWebView loadRequest:requestURL];
-}
-
-+ (NSDictionary *)defaultConfiguration {
-    NSDictionary *configuration = [Cobalt getControllersConfiguration];
-    if (configuration) {
-        NSDictionary *defaultConfiguration = [configuration objectForKey:JSNavigationControllerDefault];
-        if (defaultConfiguration
-            && [defaultConfiguration isKindOfClass:[NSDictionary class]]) {
-            return defaultConfiguration;
-        }
-#if DEBUG_COBALT
-        else {
-            NSLog(@"getConfigurationForController: no configuration found for default controller");
-        }
-#endif
-    }
-    
-    return nil;
-}
-
-+ (NSDictionary *)configurationForController:(NSString *)controller {
-    if (! controller) {
-#if DEBUG_COBALT
-        NSLog(@"configurationForController: controller is nil");
-#endif
-        return nil;
-    }
-    
-    NSDictionary *configuration = [Cobalt getControllersConfiguration];
-    if (configuration) {
-        NSDictionary *controllerConfiguration = [configuration objectForKey:controller];
-        if (controllerConfiguration
-            && [controllerConfiguration isKindOfClass:[NSDictionary class]]) {
-            return controllerConfiguration;
-        }
-#if DEBUG_COBALT
-        else {
-            NSLog(@"getConfigurationForController: no configuration found for %@ controller.", controller);
-        }
-#endif
-    }
-    
-    return nil;
 }
 
 - (void)executeScriptInWebView:(WebViewType)webViewType withDictionary:(NSDictionary *)dict
@@ -430,7 +813,7 @@ NSString * webLayerPage;
 }
 
 - (BOOL)onCobaltMessage:(NSString *)message {
-    NSDictionary * jsonObj = [Cobalt JSONObjectWithString:message];
+    NSDictionary * jsonObj = [Cobalt dictionaryWithString:message];
     return [self handleDictionarySentByJavaScript: jsonObj];
 }
 
@@ -448,7 +831,10 @@ NSString * webLayerPage;
             
             if (callback
                 && [callback isKindOfClass:[NSString class]]) {
-                if ([callback isEqualToString:JSCallbackPullToRefreshDidRefresh]) {
+                if ([callback isEqualToString:JSEventCallbackOnBackButtonPressed]) {
+                    [self popViewController];
+                }
+                else if ([callback isEqualToString:JSCallbackPullToRefreshDidRefresh]) {
                     [self.refreshControl endRefreshing];
                     self.refreshControl.attributedTitle = _ptrRefreshText;
                     _isRefreshing = NO;
@@ -468,8 +854,6 @@ NSString * webLayerPage;
                         return NO;
                     }
                 }
-                
-                
             }
 #if DEBUG_COBALT
             else {
@@ -560,41 +944,9 @@ NSString * webLayerPage;
                 //POP
                 else if ([action isEqualToString:JSActionNavigationPop]) {
                     id data = [dict objectForKey:kJSData];
-                    
-                    if (data
+                    if (data != nil
                         && [data isKindOfClass:[NSDictionary class]]) {
-                        id page = [data objectForKey:kJSPage];
-                        
-                        if (page
-                            && [page isKindOfClass:[NSString class]]) {
-                            NSDictionary *controllerConfiguration;
-                            id controller = [data objectForKey:kJSNavigationController];
-                            if (controller
-                                && [controller isKindOfClass:[NSString class]]) {
-                                controllerConfiguration = [CobaltViewController configurationForController:controller];
-                            }
-                            else {
-                                controllerConfiguration = [CobaltViewController defaultConfiguration];
-                            }
-                            
-                            if (controllerConfiguration) {
-                                NSString *controllerClassName = [controllerConfiguration objectForKey:kIos];
-                                
-                                for (UIViewController *viewController in self.navigationController.viewControllers) {
-                                    if ([viewController isKindOfClass:NSClassFromString(controllerClassName)]
-                                        && (! [viewController isKindOfClass:[CobaltViewController class]]
-                                            || ([viewController isKindOfClass:[CobaltViewController class]]
-                                                && [((CobaltViewController *)viewController).pageName isEqualToString:page]))) {
-                                                [self.navigationController popToViewController:viewController
-                                                                                      animated:YES];
-                                                break;
-                                    }
-                                }
-                            }
-                        }
-                        else {
-                            [self popViewControllerWithData:data];
-                        }
+                        [self popViewControllerWithData:data];
                     }
                     else {
                         [self popViewController];
@@ -659,8 +1011,8 @@ NSString * webLayerPage;
         }
         
         // UI
-        else if ([type isEqualToString:kJSTypeUI]) {
-            NSString * control = [dict objectForKey:kJSUIControl];
+        else if ([type isEqualToString:JSTypeUI]) {
+            NSString * control = [dict objectForKey:kJSControl];
             NSDictionary * data = [dict objectForKey:kJSData];
             
             if (control
@@ -701,7 +1053,7 @@ NSString * webLayerPage;
                 }
                 
                 // PULL TO REFRESH
-                else if([control isEqualToString:JSControlpullToRefresh]) {
+                else if([control isEqualToString:JSControlPullToRefresh]) {
                     if (data
                         && [data isKindOfClass:[NSDictionary class]]) {
                         
@@ -711,10 +1063,10 @@ NSString * webLayerPage;
                             && [action isKindOfClass: [NSString class]]) {
                             
                             
-                            if([action isEqualToString: @"setTexts"]) {
+                            if([action isEqualToString:JSActionSetTexts]) {
                                 NSDictionary * texts = [data objectForKey: kJSTexts];
-                                NSString * pullToRefreshText = [texts objectForKey: @"pullToRefresh"];
-                                NSString * refreshingText = [texts objectForKey: @"refreshing"];
+                                NSString * pullToRefreshText = [texts objectForKey:kJSTextsPullToRefresh];
+                                NSString * refreshingText = [texts objectForKey:kJSTextsRefreshing];
                                 
                                 [self customizeRefreshControlWithAttributedRefreshText: [[NSAttributedString alloc] initWithString: pullToRefreshText] andAttributedRefreshText: [[NSAttributedString alloc] initWithString: refreshingText] andTintColor: self.refreshControl.tintColor];
                                 
@@ -724,13 +1076,83 @@ NSString * webLayerPage;
                 }
                 
                 // BARS
+                else if ([control isEqualToString:JSControlBars]) {
+                    if (data != nil
+                        && [data isKindOfClass:[NSDictionary class]]) {
+                        id action = [data objectForKey:kJSAction];
+                        if (action != nil
+                            && [action isKindOfClass:[NSString class]]) {
+                            // SET BARS
+                            if ([action isEqualToString:JSActionSetBars]) {
+                                id bars = [data objectForKey:kJSBars];
+                                if (bars != nil
+                                    && [bars isKindOfClass:[NSDictionary class]]) {
+                                    _barsConfiguration = bars;
+                                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                                        [self configureBars];
+                                        [self resetBarButtonItems];
+                                        [self setBarButtonItems];
+                                    });
+                                }
+                            }
+                            // SET BARS VISIBLE
+                            else if ([action isEqualToString:JSActionSetBarsVisible]) {
+                                id visible = [data objectForKey:kConfigurationBarsVisible];
+                                if (visible != nil
+                                    && [visible isKindOfClass:[NSDictionary class]]) {
+                                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                                        [self setBarsVisible:visible];
+                                    });
+                                }
+                            }
+                            // SET BAR CONTENT
+                            else if ([action isEqualToString:JSActionSetBarContent]) {
+                                id content = [data objectForKey:kJSContent];
+                                if (content != nil
+                                    && [content isKindOfClass:[NSDictionary class]]) {
+                                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                                        [self setBarContent:content];
+                                    });
+                                }
+                            }
+                            // SET ACTION BADGE
+                            else if ([action isEqualToString:JSActionSetActionBadge]) {
+                                id barButtonItemName = [data objectForKey:kJSName];
+                                id badge = [data objectForKey:kJSBadge];
+                                
+                                if (barButtonItemName != nil && [barButtonItemName isKindOfClass:[NSString class]]
+                                    && badge != nil && [badge isKindOfClass:[NSString class]]) {
+                                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                                        [self setBadgeLabelText:badge
+                                          forBarButtonItemNamed:barButtonItemName];
+                                    });
+                                }
+                            }
+                            // SET CONTENT
+                            else if ([action isEqualToString:JSActionSetActionContent]) {
+                                id barButtonItemName = [data objectForKey:kJSName];
+                                id content = [data objectForKey:kJSContent];
+                                
+                                if (barButtonItemName != nil && [barButtonItemName isKindOfClass:[NSString class]]
+                                    && content != nil && [content isKindOfClass:[NSDictionary class]]) {
+                                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                                        [self setContent:content
+                                   forBarButtonItemNamed:barButtonItemName];
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // BARS
                 // TODO: uncomment for Bars
                 /*
-                else if ([control isEqualToString: JSControlBars]) {
+                else if ([control isEqualToString:@"bars"]) {
                     if (data
                         && [data isKindOfClass:[NSDictionary class]]) {
                         NSString * action = [data objectForKey: kJSAction];
-                        NSString * button = [data objectForKey: kJSButton];
+                        NSString * button = [data objectForKey:@"button"];
                         
                         if (action
                             && [action isKindOfClass: [NSString class]]) {
@@ -775,9 +1197,9 @@ NSString * webLayerPage;
                             } else if([action isEqualToString: @"setTexts"]) {
                                 NSDictionary * texts = [data objectForKey: kJSTexts];
                                 for(NSString * key in [texts allKeys]) {
-                                    if([key isEqualToString: kJSTitleBar])
+                                    if([key isEqualToString: @"title"])
                                     {
-                                        [self.navigationItem setTitle: [texts objectForKey: kJSTitleBar]];
+                                        [self.navigationItem setTitle: [texts objectForKey: @"title"]];
                                     } else {
                                         NSMutableArray * barActionsArray = [self.barsConfiguration objectForKey: kBarActions];
                                         for(NSMutableDictionary * barAction in barActionsArray) {
@@ -791,9 +1213,9 @@ NSString * webLayerPage;
                                     }
                                 }
                             } else if ([action isEqualToString: @"setVisibility"]) {
-                                NSDictionary * visibilities = [data objectForKey: kJSVisibility];
-                                BOOL topVisible = [[visibilities objectForKey: kJSTop] boolValue];
-                                BOOL bottomVisible = [[visibilities objectForKey: kJSBottom] boolValue];
+                                NSDictionary * visibilities = [data objectForKey: @"visibility"];
+                                BOOL topVisible = [[visibilities objectForKey: @"top"] boolValue];
+                                BOOL bottomVisible = [[visibilities objectForKey: @"bottom"] boolValue];
                                 
                                 [self.navigationController setNavigationBarHidden: !topVisible animated:YES];
                                 [self.navigationController setToolbarHidden: !bottomVisible animated:YES];
@@ -936,70 +1358,29 @@ NSString * webLayerPage;
 #endif
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-#pragma mark NAVIGATION METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)replaceViewControllerWithData:(NSDictionary *)data {
-    id page = [data objectForKey:kJSPage];
-    id controller = [data objectForKey:kJSNavigationController];
-    BOOL animated = [[data objectForKey: kJSAnimated] boolValue];
-    id innerData = [data objectForKey:kJSData];
-    
-    if (page
-        && [page isKindOfClass:[NSString class]]) {
-        CobaltViewController *viewController = [CobaltViewController cobaltViewControllerForController:controller
-                                                                                               andPage:page];
-        if (viewController) {
-            if (innerData
-                && [innerData isKindOfClass:[NSDictionary class]]) {
-                viewController.pushedData = innerData;
-            }
-            
-            // replace current view with corresponding viewController
-            dispatch_async(dispatch_get_main_queue(), ^{
-                NSMutableArray *viewControllers = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
-                [viewControllers replaceObjectAtIndex:(viewControllers.count - 1)
-                                           withObject:viewController];
-                [self.navigationController setViewControllers:viewControllers
-                                                     animated:animated];
-            });
-        }
-    }
-    else if (controller
-             && [controller isKindOfClass:[NSString class]]) {
-        UIViewController *viewController = [CobaltViewController nativeViewControllerForController:controller];
-        if (viewController) {
-            // Push corresponding viewController
-            dispatch_async(dispatch_get_main_queue(), ^{
-                NSMutableArray *viewControllers = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
-                [viewControllers replaceObjectAtIndex:(viewControllers.count - 1)
-                                           withObject:viewController];
-                [self.navigationController setViewControllers:viewControllers
-                                                     animated:animated];
-            });
-        }
-    }
-#if DEBUG_COBALT
-    else {
-        NSLog(@"replaceViewControllerWithData: one of page or controller fields must be specified at least.");
-    }
-#endif
-}
+#pragma mark NAVIGATION METHODS
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)pushViewControllerWithData:(NSDictionary *)data {
     id page = [data objectForKey:kJSPage];
     id controller = [data objectForKey:kJSNavigationController];
+    id barsConfiguration = [data objectForKey:kJSBars];
     id innerData = [data objectForKey:kJSData];
     
-    if (page
+    if (page != nil
         && [page isKindOfClass:[NSString class]]) {
-        CobaltViewController *viewController = [CobaltViewController cobaltViewControllerForController:controller
-                                                                                               andPage:page];
-        if (viewController) {
-            if (innerData
+        CobaltViewController *viewController = [Cobalt cobaltViewControllerForController:controller
+                                                                                 andPage:page];
+        if (viewController != nil) {
+            if (barsConfiguration != nil
+                && [barsConfiguration isKindOfClass:[NSDictionary class]]) {
+                viewController.barsConfiguration = barsConfiguration;
+            }
+            
+            if (innerData != nil
                 && [innerData isKindOfClass:[NSDictionary class]]) {
                 viewController.pushedData = innerData;
             }
@@ -1011,10 +1392,10 @@ NSString * webLayerPage;
             });
         }
     }
-    else if (controller
+    else if (controller != nil
              && [controller isKindOfClass:[NSString class]]){
-        UIViewController *viewController = [CobaltViewController nativeViewControllerForController:controller];
-        if (viewController) {
+        UIViewController *viewController = [Cobalt nativeViewControllerForController:controller];
+        if (viewController != nil) {
             // Push corresponding viewController
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.navigationController pushViewController:viewController
@@ -1030,41 +1411,79 @@ NSString * webLayerPage;
 }
 
 
-- (void)popViewController
-{
-    [self.navigationController popViewControllerAnimated:YES];
-}
-
-- (void)popViewControllerWithData:(NSDictionary *)data {
-    id innerData = [data objectForKey:kJSData];
-    
-    if (innerData
-        && [innerData isKindOfClass:[NSDictionary class]]) {
-        NSArray *viewControllers = self.navigationController.viewControllers;
-        if (viewControllers.count > 1) {
-            UIViewController *popToViewController = [viewControllers objectAtIndex:viewControllers.count - 2];
-            if ([popToViewController isKindOfClass:[CobaltViewController class]]) {
-                ((CobaltViewController *)popToViewController).poppedData = innerData;
-            }
-        }
-    }
-    
+- (void)popViewController {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.navigationController popViewControllerAnimated:YES];
     });
 }
 
-- (void)presentViewControllerWithData:(NSDictionary *)data {
+- (void)popViewControllerWithData:(NSDictionary *)data {
     id page = [data objectForKey:kJSPage];
     id controller = [data objectForKey:kJSNavigationController];
     id innerData = [data objectForKey:kJSData];
     
-    if (page
+    if (page == nil
+        && controller == nil) {
+        if (innerData != nil
+            && [innerData isKindOfClass:[NSDictionary class]]) {
+            NSArray *viewControllers = self.navigationController.viewControllers;
+            if (viewControllers.count > 1) {
+                UIViewController *popToViewController = [viewControllers objectAtIndex:viewControllers.count - 2];
+                if ([popToViewController isKindOfClass:[CobaltViewController class]]) {
+                    ((CobaltViewController *)popToViewController).poppedData = innerData;
+                }
+            }
+        }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.navigationController popViewControllerAnimated:YES];
+        });
+    }
+    else {
+        NSString *controllerClassName;
+        if (controller
+            && [controller isKindOfClass:[NSString class]]) {
+            NSDictionary *controllerConfiguration = [Cobalt configurationForController:controller];
+            if (controllerConfiguration != nil) {
+                controllerClassName = [controllerConfiguration objectForKey:kConfigurationIOS];
+            }
+        }
+        
+        for (UIViewController *viewController in self.navigationController.viewControllers) {
+            if (((controllerClassName == nil && controller == nil) || [viewController isKindOfClass:NSClassFromString(controllerClassName)])
+                && (page == nil || ([viewController isKindOfClass:[CobaltViewController class]] && [((CobaltViewController *)viewController).pageName isEqualToString:page]))) {
+                if ([viewController isKindOfClass:[CobaltViewController class]]
+                    && innerData != nil && [innerData isKindOfClass:[NSDictionary class]]) {
+                    ((CobaltViewController *)viewController).poppedData = innerData;
+                }
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.navigationController popToViewController:viewController
+                                                          animated:YES];
+                });
+                break;
+            }
+        }
+    }
+}
+
+- (void)presentViewControllerWithData:(NSDictionary *)data {
+    id page = [data objectForKey:kJSPage];
+    id controller = [data objectForKey:kJSNavigationController];
+    id barsConfiguration = [data objectForKey:kJSBars];
+    id innerData = [data objectForKey:kJSData];
+    
+    if (page != nil
         && [page isKindOfClass:[NSString class]]) {
-        CobaltViewController *viewController = [CobaltViewController cobaltViewControllerForController:controller
-                                                                                               andPage:page];
-        if (viewController) {
-            if (innerData
+        CobaltViewController *viewController = [Cobalt cobaltViewControllerForController:controller
+                                                                                 andPage:page];
+        if (viewController != nil) {
+            if (barsConfiguration != nil
+                && [barsConfiguration isKindOfClass:[NSDictionary class]]) {
+                viewController.barsConfiguration = barsConfiguration;
+            }
+            
+            if (innerData != nil
                 && [innerData isKindOfClass:[NSDictionary class]]) {
                 viewController.pushedData = innerData;
             }
@@ -1076,10 +1495,10 @@ NSString * webLayerPage;
             });
         }
     }
-    else if (controller
+    else if (controller != nil
              && [controller isKindOfClass:[NSString class]]){
-        UIViewController *viewController = [CobaltViewController nativeViewControllerForController:controller];
-        if (viewController) {
+        UIViewController *viewController = [Cobalt nativeViewControllerForController:controller];
+        if (viewController != nil) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self presentViewController:[[UINavigationController alloc] initWithRootViewController:viewController]
                                    animated:YES
@@ -1094,10 +1513,12 @@ NSString * webLayerPage;
 #endif
 }
 
-- (void)dismissViewController
-{
+- (void)dismissViewController {
     if (self.presentingViewController) {
-        [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.presentingViewController dismissViewControllerAnimated:YES
+                                                              completion:nil];
+        });
     }
 #if DEBUG_COBALT
     else {
@@ -1138,340 +1559,91 @@ NSString * webLayerPage;
 #endif
 }
 
-+ (CobaltViewController *)cobaltViewControllerForController:(NSString *)controller
-                                                    andPage:(NSString *)page {
-    if (! page) {
-#if DEBUG_COBALT
-        NSLog(@"getCobaltViewControllerForController: no page specified");
-#endif
-        return nil;
-    }
+- (void)replaceViewControllerWithData:(NSDictionary *)data {
+    id page = [data objectForKey:kJSPage];
+    id controller = [data objectForKey:kJSNavigationController];
+    id barsConfiguration = [data objectForKey:kJSBars];
+    BOOL animated = [[data objectForKey: kJSAnimated] boolValue];
+    BOOL clearHistory = [[data objectForKey: kJSClearHistory] boolValue];
+    id innerData = [data objectForKey:kJSData];
     
-    NSBundle *mainBundle = [NSBundle mainBundle];
-    NSBundle *cobaltBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@",   mainBundle.bundlePath,
-                                                                                            @"/Frameworks/Cobalt.framework"]];
-    NSString *nib = @"CobaltViewController";
-    
-    NSDictionary *configuration = [CobaltViewController configurationForController:controller];
-    if (! configuration) {
-        configuration = [CobaltViewController defaultConfiguration];
-    }
-    if (! configuration) {
-        CobaltViewController *viewController = [[CobaltViewController alloc] initWithNibName:nib
-                                                                                      bundle:cobaltBundle];
-        viewController.pageName = page;
-        viewController.isPullToRefreshEnabled = false;
-        viewController.isInfiniteScrollEnabled = false;
-        viewController.infiniteScrollOffset = 0;
-        // TODO: uncomment for Bars
-        //viewController.barsConfiguration = [NSMutableDictionary dictionaryWithCapacity:0];;
-        
-        return viewController;
-    }
-    
-    NSString *class = [configuration objectForKey:kIos];
-    nib = [configuration objectForKey:kIosNibName];
-    BOOL pullToRefreshEnabled = [[configuration objectForKey:kPullToRefreshEnabled] boolValue];
-    BOOL infiniteScrollEnabled = [[configuration objectForKey:kInfiniteScrollEnabled] boolValue];
-    int infiniteScrollOffset = [configuration objectForKey:kInfiniteScrollOffset] != nil ? [[configuration objectForKey:kInfiniteScrollOffset] intValue] : 0;
-    
-    // TODO: uncomment for Bars
-    /*
-     NSMutableDictionary *barsDictionary = [NSMutableDictionary dictionaryWithDictionary:[configuration objectForKey:kBars]];
-     
-     NSDictionary *barActionsArray = [barsDictionary objectForKey:kBarActions];
-     NSMutableArray *mutableBarActionsArray = [NSMutableArray arrayWithCapacity:barActionsArray.count];
-     for(NSDictionary *barActionDictionary in barActionsArray) {
-        [mutableBarActionsArray addObject:[NSMutableDictionary dictionaryWithDictionary:barActionDictionary]];
-     }
-     
-     [barsDictionary setObject:mutableBarActionsArray
-     forKey:kBarActions];
-     */
-    
-    if (! class) {
-#if DEBUG_COBALT
-        NSLog(@"getCobaltViewControllerForController: no class found for %@ controller", controller);
-#endif
-        return nil;
-    }
-    
-    if ([CobaltViewController isValidCobaltViewControllerWithClassName:class]) {
-        if (! nib) {
-            CobaltViewController *viewController;
-            // If nib not defined in configuration file, use same as class if it exists!
-            if ([CobaltViewController isValidNib:class
-                                       forBundle:mainBundle]) {
-                viewController = [[NSClassFromString(class) alloc] initWithNibName:class
-                                                                            bundle:mainBundle];
+    if (page != nil
+        && [page isKindOfClass:[NSString class]]) {
+        CobaltViewController *viewController = [Cobalt cobaltViewControllerForController:controller
+                                                                                 andPage:page];
+        if (viewController != nil) {
+            if (barsConfiguration != nil
+                && [barsConfiguration isKindOfClass:[NSDictionary class]]) {
+                viewController.barsConfiguration = barsConfiguration;
             }
-            // If nib file does no exists, use default one i.e. CobaltViewController.xib
-            else {
-                nib = @"CobaltViewController";
+            
+            if (innerData != nil
+                && [innerData isKindOfClass:[NSDictionary class]]) {
+                viewController.pushedData = innerData;
+            }
+            
+            // replace current view with corresponding viewController
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (clearHistory) {
+                    [self.navigationController setViewControllers:@[viewController]
+                                                         animated:animated];
+                }
+                else {
+                    NSMutableArray *viewControllers = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
+                    [viewControllers replaceObjectAtIndex:(viewControllers.count - 1)
+                                               withObject:viewController];
+                    [self.navigationController setViewControllers:viewControllers
+                                                         animated:animated];
+                }
+            });
+        }
+    }
+    else if (controller != nil
+             && [controller isKindOfClass:[NSString class]]) {
+        UIViewController *viewController = [Cobalt nativeViewControllerForController:controller];
+        if (viewController != nil) {
+            // Push corresponding viewController
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (clearHistory) {
+                    [self.navigationController setViewControllers:@[viewController]
+                                                         animated:animated];
+                }
+                else {
+                    NSMutableArray *viewControllers = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
+                    [viewControllers replaceObjectAtIndex:(viewControllers.count - 1)
+                                               withObject:viewController];
+                    [self.navigationController setViewControllers:viewControllers
+                                                         animated:animated];
+                }
+            });
                 
-                viewController = [[NSClassFromString(class) alloc] initWithNibName:nib
-                                                                            bundle:cobaltBundle];
-            }
-            
-            viewController.pageName = page;
-            viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
-            viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
-            viewController.infiniteScrollOffset = infiniteScrollOffset;
-            // TODO: uncomment for Bars
-            //viewController.barsConfiguration = barsDictionary;
-            
-            return viewController;
-        }
-        else if ([CobaltViewController isValidNib:nib
-                                        forBundle:mainBundle]) {
-            CobaltViewController *viewController = [[NSClassFromString(class) alloc] initWithNibName:nib
-                                                                                              bundle:mainBundle];
-            viewController.pageName = page;
-            viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
-            viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
-            viewController.infiniteScrollOffset = infiniteScrollOffset;
-            // TODO: uncomment for Bars
-            //viewController.barsConfiguration = barsDictionary;
-            
-            return viewController;
         }
     }
-    
-    return nil;
-}
-
-+ (UIViewController *)nativeViewControllerForController:(NSString *)controller {
-    NSDictionary *configuration = [CobaltViewController configurationForController:controller];
-    if (! configuration) {
-        configuration = [CobaltViewController defaultConfiguration];
-    }
-    if (! configuration) {
-        return nil;
-    }
-    
-    NSBundle *bundle = [NSBundle mainBundle];
-    NSString *class = [configuration objectForKey:kIos];
-    NSString *nib = [configuration objectForKey:kIosNibName];
-    
-    if (! class) {
 #if DEBUG_COBALT
-        NSLog(@"getCobaltViewControllerForController: no class found for %@ controller", controller);
-#endif
-        return nil;
-    }
-    
-    if (! [CobaltViewController isValidNativeViewControllerWithClassName:class]) {
-        return nil;
-    }
-    
-    if (! nib) {
-        // If nib not defined in configuration file, use same as class if it exists!
-        if ([CobaltViewController isValidNib:class
-                                   forBundle:bundle]) {
-            return [[NSClassFromString(class) alloc] initWithNibName:class
-                                                              bundle:bundle];
-        }
-        else {
-            return [[NSClassFromString(class) alloc] init];
-        }
-    }
-    else if ([CobaltViewController isValidNib:nib
-                                    forBundle:bundle]) {
-        return [[NSClassFromString(class) alloc] initWithNibName:nib
-                                                          bundle:bundle];
-    }
     else {
-        return nil;
-    }
-}
-
-+ (BOOL)isValidNativeViewControllerWithClassName:(NSString *)className {
-    Class class = NSClassFromString(className);
-    BOOL isValidViewControllerClass =   class
-                                        && [class isSubclassOfClass:UIViewController.class];
-    BOOL isValidNativeViewControllerClass = class
-                                            && ! [class isSubclassOfClass:CobaltViewController.class];
-    
-#if DEBUG_COBALT
-    if (! isValidViewControllerClass) {
-        NSLog(@"isValidNativeViewControllerWithClassName: class %@ not found", className);
-    }
-    else if (! isValidNativeViewControllerClass) {
-        NSLog(@"isValidNativeViewControllerWithClassName: class %@ inherits from CobaltViewController", className);
+        NSLog(@"replaceViewControllerWithData: one of page or controller fields must be specified at least.");
     }
 #endif
-    
-    return isValidViewControllerClass && isValidNativeViewControllerClass;
 }
 
-+ (BOOL)isValidCobaltViewControllerWithClassName:(NSString *)className {
-    Class class = NSClassFromString(className);
-    BOOL isValidViewControllerClass =   class
-                                        && [class isSubclassOfClass:UIViewController.class];
-    BOOL isValidCobaltViewControllerClass = class
-                                            && [class isSubclassOfClass:CobaltViewController.class];
-    
-#if DEBUG_COBALT
-    if (! isValidViewControllerClass) {
-        NSLog(@"isValidNativeViewControllerWithClassName: class %@ not found", className);
-    }
-    else if (! isValidCobaltViewControllerClass) {
-        NSLog(@"isValidCobaltViewControllerWithClassName: class %@ does not inherit from CobaltViewController", className);
-    }
-#endif
-    
-    return isValidViewControllerClass && isValidCobaltViewControllerClass;
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark BACK BARBUTTONITEM DELEGATE
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)onBackButtonPressed {
+    [self sendEvent:JSEventCallbackOnBackButtonPressed
+           withData:nil
+        andCallback:JSEventCallbackOnBackButtonPressed];
 }
 
-+ (BOOL)isValidNib:(NSString *)nib
-         forBundle:(NSBundle *)bundle {
-    BOOL isValidNib = (nib.length > 0
-                       && [bundle pathForResource:nib
-                                           ofType:@"nib"]);
-    
-#if DEBUG_COBALT
-    if(! isValidNib) {
-        NSLog(@"isValidViewControllerWithClass: %@ nib does not exist!", nib);
-    }
-#endif
-    
-    return isValidNib;
-}
+////////////////////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-#pragma mark BARS METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-//TODO put this code (2 following functions) in a UIColor category
-void SKScanHexColor(NSString * hexString, float * red, float * green, float * blue, float * alpha) {
-    NSString *cleanString = [hexString stringByReplacingOccurrencesOfString:@"#" withString:@""];
-    if([cleanString length] == 3) {
-        cleanString = [NSString stringWithFormat:@"%@%@%@%@%@%@",
-                       [cleanString substringWithRange:NSMakeRange(0, 1)],[cleanString substringWithRange:NSMakeRange(0, 1)],
-                       [cleanString substringWithRange:NSMakeRange(1, 1)],[cleanString substringWithRange:NSMakeRange(1, 1)],
-                       [cleanString substringWithRange:NSMakeRange(2, 1)],[cleanString substringWithRange:NSMakeRange(2, 1)]];
-    }
-    if([cleanString length] == 6) {
-        cleanString = [cleanString stringByAppendingString:@"ff"];
-    }
-    
-    unsigned int baseValue;
-    [[NSScanner scannerWithString:cleanString] scanHexInt:&baseValue];
-    
-    if (red) { *red = ((baseValue >> 24) & 0xFF)/255.0f; }
-    if (green) { *green = ((baseValue >> 16) & 0xFF)/255.0f; }
-    if (blue) { *blue = ((baseValue >> 8) & 0xFF)/255.0f; }
-    if (alpha) { *alpha = ((baseValue >> 0) & 0xFF)/255.0f; }
-}
-
-// TODO: uncomment for Bars
-/*
-UIColor * SKColorFromHexString(NSString * hexString) {
-    float red, green, blue, alpha;
-    SKScanHexColor(hexString, &red, &green, &blue, &alpha);
-    
-    return [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
-}
-
-- (void)configureBars {
-    
-    NSDictionary * visibilities = [self.barsConfiguration objectForKey: kJSVisibility];
-    BOOL topVisible = [[visibilities objectForKey: kJSTop] boolValue] || ![visibilities objectForKey: kJSTop];
-    BOOL bottomVisible = [[visibilities objectForKey: kJSBottom] boolValue];
-    
-    [self.navigationController setNavigationBarHidden: !topVisible animated: NO];
-    self.hasToolBar = bottomVisible;
-    
-    NSString * backgroundColorString = [self.barsConfiguration objectForKey: kBarBackgroundColor];
-    
-    if(backgroundColorString.length > 0) {
-        UIColor * backgroundColor = SKColorFromHexString(backgroundColorString);
-    
-        _navigationBarTintColor = backgroundColor;
-        _toolbarTintColor = backgroundColor;
-    }
-    
-    NSArray * barsAction = [self.barsConfiguration objectForKey: kBarActions];
-    
-    NSMutableArray * topLeftButtonsArray = [NSMutableArray arrayWithCapacity: 5];
-    NSMutableArray * topRightButtonsArray = [NSMutableArray arrayWithCapacity: 5];
-    NSMutableArray * bottomLeftButtonsArray = [NSMutableArray arrayWithCapacity: 5];
-    NSMutableArray * bottomRightButtonsArray = [NSMutableArray arrayWithCapacity: 5];
-    
-    for(NSDictionary * barActionConfiguration in barsAction) {
-        if([[barActionConfiguration objectForKey: kBarActionVisible] isEqualToString: @"false"])
-            continue;
-        
-        CobaltButton *barButtonAction =  [[CobaltButton alloc] initWithFrame:CGRectMake(0.0, 0.0, 22.0, 22.0)];
-        barButtonAction.iconName = [barActionConfiguration objectForKey: kBarActionName];
-        
-        NSString * barButtonImageName = [barActionConfiguration objectForKey: kBarActionIcon];
-        UIImage * barButtonImage = nil;
-        
-        
-        if([barButtonImageName hasPrefix: @"fa-"]) {
-            barButtonImage = [UIImage imageWithIcon:barButtonImageName backgroundColor:[UIColor clearColor] iconColor:[UIColor whiteColor] iconScale:[[UIScreen mainScreen] scale] andSize: barButtonAction.frame.size];
-        } else {
-            barButtonImage = [UIImage imageNamed: barButtonImageName];
-        }
-        
-        if(barButtonImage) {
-            [barButtonAction setImage: barButtonImage forState:UIControlStateNormal];
-        }
-        else
-        {
-            NSString * barButtonTitle = [barActionConfiguration objectForKey: kBarActionTitle];
-            [barButtonAction setTitle: barButtonTitle forState: UIControlStateNormal];
-            [barButtonAction sizeToFit];
-        }
-        
-        UIBarButtonItem * barButtonItemAction = [[UIBarButtonItem alloc] initWithCustomView:barButtonAction];
-        
-        NSString * barActionPosition = [barActionConfiguration objectForKey: kBarActionPosition];
-        
-        if([barActionPosition isEqualToString: @"topLeft"]) {
-            [topLeftButtonsArray addObject: barButtonItemAction];
-        } else if([barActionPosition isEqualToString: @"topRight"]) {
-            [topRightButtonsArray addObject: barButtonItemAction];
-        } else if([barActionPosition isEqualToString: @"bottomLeft"]) {
-            [bottomLeftButtonsArray addObject: barButtonItemAction];
-        } else if([barActionPosition isEqualToString: @"bottomRight"]) {
-            [bottomRightButtonsArray addObject: barButtonItemAction];
-        }
-        
-        [barButtonAction addTarget:self action:@selector(onBarButtonItem:) forControlEvents:UIControlEventTouchUpInside];
-    }
-    
-    self.navigationItem.leftItemsSupplementBackButton = YES;
-    
-    [self.navigationItem setLeftBarButtonItems: topLeftButtonsArray animated: YES];
-    [self.navigationItem setRightBarButtonItems: topRightButtonsArray animated: YES];
-    
-    NSMutableArray * bottomButtonsArray = [NSMutableArray arrayWithCapacity: bottomLeftButtonsArray.count + bottomRightButtonsArray.count + 1];
-    UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-
-    [bottomButtonsArray addObjectsFromArray: bottomLeftButtonsArray];
-    [bottomButtonsArray addObject: flexibleSpace];
-    [bottomButtonsArray addObjectsFromArray: bottomRightButtonsArray];
-    
-    [self setToolbarItems: bottomButtonsArray animated: YES];
-}
-
-- (void)onBarButtonItem: (CobaltButton *)button {
-    NSDictionary * data = @{ @"type" : @"ui", @"control" : @"bars", @"data" : @{ @"action" : @"buttonPressed", @"button" : button.iconName }};
-    
-    [self sendMessage: data];
-}
-*/
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
 #pragma mark ALERTS METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 - (void)showAlert:(NSDictionary *)dict
 {
     NSDictionary * data = [dict objectForKey:kJSData];
@@ -1488,7 +1660,10 @@ UIColor * SKColorFromHexString(NSString * hexString) {
                                                                                       message:message
                                                                                preferredStyle:UIAlertControllerStyleAlert];
             if (! buttons.count) {
-                UIAlertAction * cancelAction = [UIAlertAction actionWithTitle:@"OK"
+                UIAlertAction * cancelAction = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"OK",
+                                                                                                                 @"Localizable",
+                                                                                                                 [NSBundle bundleForClass:[Cobalt class]],
+                                                                                                                 @"OK")
                                                                         style:UIAlertActionStyleCancel
                                                                       handler:^(UIAlertAction * action) {
                         if (callback && [callback isKindOfClass:[NSString class]]) {
@@ -1528,7 +1703,10 @@ UIColor * SKColorFromHexString(NSString * hexString) {
                 alertView = [[UIAlertView alloc] initWithTitle:title
                                                        message:message
                                                       delegate:delegate
-                                             cancelButtonTitle:@"OK"
+                                             cancelButtonTitle:NSLocalizedStringFromTableInBundle(@"OK",
+                                                                                                  @"Localizable",
+                                                                                                  [NSBundle bundleForClass:[Cobalt class]],
+                                                                                                  @"OK")
                                              otherButtonTitles:nil];
             }
             else {
@@ -1574,11 +1752,11 @@ UIColor * SKColorFromHexString(NSString * hexString) {
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark WEB LAYER
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)showWebLayer:(NSDictionary *)data
 {
@@ -1623,7 +1801,7 @@ UIColor * SKColorFromHexString(NSString * hexString) {
 - (void)dismissWebLayer:(NSDictionary *)data
 {
     // Guillaume told me that having a customizable fadeDuration is a bad idea. So, it's a fixed fadeDuration...
-    // REMEMBER, So if Guillaume tell me the opposite, it owe me a chocolate croissant :)
+    // REMEMBER, So if Guillaume tells me the opposite, he owes me a chocolate croissant :)
     NSNumber * fadeDuration = [NSNumber numberWithFloat:0.3];
     //NSNumber * fadeDuration = (dict && [dict objectForKey:kJSWebLayerFadeDuration] && [[dict objectForKey:kJSWebLayerFadeDuration] isKindOfClass:[NSNumber class]]) ? [dict objectForKey:kJSWebLayerFadeDuration] : [NSNumber numberWithFloat:0.3];
     
@@ -1647,11 +1825,11 @@ UIColor * SKColorFromHexString(NSString * hexString) {
     [self sendEvent:JSEventWebLayerOnDismiss withData:data andCallback:nil];
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark WEBVIEW DELEGATE METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (BOOL)webView:(UIWebView *)webView
 shouldStartLoadWithRequest:(NSURLRequest *)request
@@ -1659,10 +1837,11 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     NSString *requestURL = [[[request URL] absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     
     // if requestURL contains cobaltSpecialJSKey, extracts the JSON received.
+    NSString *cobaltSpecialJSKey = @"cob@l7#k&y";
     NSRange range = [requestURL rangeOfString:cobaltSpecialJSKey];
     if (range.location != NSNotFound) {
         NSString *json = [requestURL substringFromIndex:range.location + cobaltSpecialJSKey.length];
-        NSDictionary *jsonObj = [Cobalt JSONObjectWithString:json];
+        NSDictionary *jsonObj = [Cobalt dictionaryWithString:json];
         
         [fromJavaScriptOperationQueue addOperationWithBlock:^{
             dispatch_sync(dispatch_get_main_queue(), ^{
@@ -1704,11 +1883,11 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark COBALT TOAST DELEGATE METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)toastWillShow:(CobaltToast *)toast
 {
@@ -1728,12 +1907,12 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
 #pragma mark SCROLL VIEW DELEGATE METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 //*************
 // DID SCROLL *
 //*************
@@ -1748,9 +1927,6 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
         float contentHeight = _scrollView.contentSize.height;
         float contentOffset = _scrollView.contentOffset.y;
         
-        if (contentOffset > 0) [((UITableView *) self.view) setScrollEnabled:NO];
-        else [((UITableView *) self.view) setScrollEnabled:YES];
-        
         if (isInfiniteScrollEnabled
             && ! _isLoadingMore
             && _scrollView.isDragging && contentOffset > _lastWebviewContentOffset
@@ -1762,11 +1938,12 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-#pragma mark PULL TO REFRESH METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark PULL-TO-REFRESH METHODS
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 //**********
 // REFRESH *
 //**********
@@ -1809,11 +1986,11 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     self.refreshControl.tintColor = tintColor;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark INFINITE SCROLL METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 // TODO: How can IS works with these methods? O_o
 - (void)loadMoreItems

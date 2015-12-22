@@ -28,18 +28,18 @@
  */
 
 #import <UIKit/UIKit.h>
-
 #import <JavaScriptCore/JavaScriptCore.h>
 
 #import "CobaltToast.h"
+#import "CobaltBarButtonItem.h"
+#import "BackBarButtonItem.h"
 
-#import "FontAwesome.h"
+////////////////////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
 #pragma mark JAVASCRIPT KEYS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 //COBALT VERSION
 #define IOSCurrentVersion                   @"0.4.1"
 
@@ -47,6 +47,7 @@
 #define kJSAction                           @"action"
 #define kJSCallback                         @"callback"
 #define kJSData                             @"data"
+#define kJSName                             @"name"
 #define kJSPage                             @"page"
 #define kJSTexts                            @"texts"
 #define kJSType                             @"type"
@@ -77,9 +78,11 @@
 #define JSActionNavigationDismiss           @"dismiss"
 #define kJSActionNavigationReplace          @"replace"
 #define kJSNavigationController             @"controller"
-#define JSNavigationControllerDefault       @"default"
+#define kJSBars                             @"bars"
+#define JSEventCallbackOnBackButtonPressed  @"onBackButtonPressed"
 
 #define kJSAnimated                         @"animated"
+#define kJSClearHistory                     @"clearHistory"
 
 //LIFE CYCLE
 #define JSEventOnAppStarted                 @"onAppStarted"
@@ -96,14 +99,17 @@
 #define JSCallbackInfiniteScrollDidRefresh  @"infiniteScrollDidRefresh"
 
 // UI
-#define kJSTypeUI                           @"ui"
-#define kJSUIControl                        @"control"
-#define kJSTypeImage                        @"image"
+#define JSTypeUI                            @"ui"
+#define kJSControl                          @"control"
 
+#define kJSTypeImage                        @"image"
+#define JSActionPressed                     @"actionPressed"
 
 // PULL TO REFRESH
-
-#define JSControlpullToRefresh              @"pullToRefresh"
+#define JSControlPullToRefresh              @"pullToRefresh"
+#define JSActionSetTexts                    @"setTexts"
+#define kJSTextsPullToRefresh               @"pullToRefresh"
+#define kJSTextsRefreshing                  @"refreshing"
 
 // ALERT
 #define JSControlAlert                      @"alert"
@@ -112,19 +118,20 @@
 #define kJSAlertButtons                     @"buttons"
 #define kJSAlertButtonIndex                 @"index"
 
+// BARS
+#define JSControlBars                       @"bars"
+#define JSActionSetBarsVisible              @"setBarsVisible"
+#define JSActionSetBarContent               @"setBarContent"
+#define JSActionSetActionBadge              @"setActionBadge"
+#define JSActionSetActionContent            @"setActionContent"
+#define JSActionSetBars                     @"setBars"
+#define kJSBars                             @"bars"
+#define kJSContent                          @"content"
+#define kJSName                             @"name"
+#define kJSBadge                            @"badge"
+
 // TOAST
 #define JSControlToast                      @"toast"
-
-//BARS
-// TODO: uncomment for Bars
-/*
-#define JSControlBars                       @"bars"
-#define kJSButton                           @"button"
-#define kJSTitleBar                         @"title"
-#define kJSVisibility                       @"visibility"
-#define kJSTop                              @"top"
-#define kJSBottom                           @"bottom"
-*/
 
 // WEB LAYER
 #define JSTypeWebLayer                      @"webLayer"
@@ -151,11 +158,11 @@
 #define kOnAppForegroundNotification        @"onAppForegroundNotification"
 #define kOnAppBackgroundNotification        @"onAppBackgroundNotification"
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark PROTOCOL
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 @protocol CobaltDelegate <NSObject>
 
@@ -175,11 +182,11 @@
 
 @end
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark INTERFACE
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef enum {
     WEB_VIEW,
@@ -190,17 +197,11 @@ typedef enum {
  @class			CobaltViewController
  @abstract		Base class for a webView controller that allows javascript/native dialogs
  */
-@interface CobaltViewController : UITableViewController <UIAlertViewDelegate, UIScrollViewDelegate, UIWebViewDelegate, CobaltToastDelegate, CobaltViewControllerJS>
+@interface CobaltViewController : UIViewController <UIAlertViewDelegate, UIScrollViewDelegate, UIWebViewDelegate, CobaltToastDelegate, CobaltViewControllerJS, CobaltBarButtonItemDelegate, BackBarButtonItemDelegate>
 {
     // Javascript queues
     NSOperationQueue * toJavaScriptOperationQueue;
     NSOperationQueue * fromJavaScriptOperationQueue;
-    
-    // TODO: uncomment for Bars
-    /*
-    UIColor * _navigationBarTintColor;
-    UIColor * _toolbarTintColor;
-    */
     
 @private
     
@@ -215,11 +216,12 @@ typedef enum {
     NSAttributedString * _ptrRefreshingText;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark PROPERTIES
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*!
  @property		webView
  @abstract		the webView displaying content
@@ -254,6 +256,12 @@ typedef enum {
 @property (strong, nonatomic) UIWebView * webLayer;
 
 /*!
+ @property		refreshControl
+ @abstract		a refresh control shown for Pull-to-refresh feature
+ */
+@property (strong, nonatomic) UIRefreshControl *refreshControl;
+
+/*!
  @property		isPullToRefreshEnabled
  @abstract		allows or not the pullToRefresh functionality
  */
@@ -271,25 +279,17 @@ typedef enum {
  */
 @property int infiniteScrollOffset;
 
-// TODO: uncomment for Bars
-/*!
- @property		hasToolBar
- @abstract		allows or not the toolbar display
- */
-//@property BOOL hasToolBar;
-
 /*!
  @property		barsConfiguration
- @abstract		bars configuration as defined in cobalt.conf
+ @abstract		bars configuration as defined in cobalt.conf or sent by Web on navigation
  */
-//@property NSMutableDictionary * barsConfiguration;
+@property NSMutableDictionary *barsConfiguration;
 
+////////////////////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
 #pragma mark COBALT METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*!
  @method		- (void)setDelegate:(id)delegate
@@ -362,27 +362,12 @@ typedef enum {
  */
 - (void)sendACK;
 
-/*!
- @method		+ (CobaltViewController *)cobaltViewControllerForController:(NSString *)controller andPage:(NSString *)page;
- @abstract		Returns an allocated and initialized Cobalt view controller from its id in cobalt configuration file and HTML page
- @param         controller: view controller id
- @param         page: HTML page
- */
-+ (CobaltViewController *)cobaltViewControllerForController:(NSString *)controller
-                                                    andPage:(NSString *)page;
+////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*!
- @method		+ (UIViewController *)nativeViewControllerForController:(NSString *)controller;
- @abstract		Returns an allocated and initialized native view controller from its id in cobalt configuration file
- @param         controller: view controller id
- */
-+ (UIViewController *)nativeViewControllerForController:(NSString *)controller;
+#pragma mark PULL-TO-REFRESH METHODS
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-#pragma mark PULL TO REFRESH METHODS
-#pragma mark -
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*!
  @method		- (void)refresh
  @abstract		Tells the webview to be refresh its content.
@@ -402,11 +387,12 @@ typedef enum {
  */
 - (void)customizeRefreshControlWithAttributedRefreshText:(NSAttributedString *)attributedRefreshText andAttributedRefreshText:(NSAttributedString *)attributedRefreshingText andTintColor: (UIColor *)tintColor;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark INFINITE SCROLL METHOS
-#pragma mark -
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*!
  @method		- (void)loadMoreItems
  @abstract		Tells the webview to be load more datas
@@ -420,5 +406,3 @@ typedef enum {
 - (void)loadMoreContentInWebview;
 
 @end
-
-
