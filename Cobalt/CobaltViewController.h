@@ -197,7 +197,7 @@ typedef enum {
  @class			CobaltViewController
  @abstract		Base class for a webView controller that allows javascript/native dialogs
  */
-@interface CobaltViewController : UITableViewController <UIAlertViewDelegate, UIScrollViewDelegate, UIWebViewDelegate, CobaltToastDelegate, CobaltViewControllerJS, CobaltBarButtonItemDelegate, BackBarButtonItemDelegate>
+@interface CobaltViewController : UIViewController <UIAlertViewDelegate, UIScrollViewDelegate, UIWebViewDelegate, CobaltToastDelegate, CobaltViewControllerJS, CobaltBarButtonItemDelegate, BackBarButtonItemDelegate>
 {
     // Javascript queues
     NSOperationQueue * toJavaScriptOperationQueue;
@@ -254,6 +254,12 @@ typedef enum {
 @property (strong, nonatomic) NSDictionary *poppedData;
 
 @property (strong, nonatomic) UIWebView * webLayer;
+
+/*!
+ @property		refreshControl
+ @abstract		a refresh control shown for Pull-to-refresh feature
+ */
+@property (strong, nonatomic) UIRefreshControl *refreshControl;
 
 /*!
  @property		isPullToRefreshEnabled

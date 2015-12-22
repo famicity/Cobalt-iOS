@@ -125,12 +125,7 @@ NSString * webLayerPage;
     
     // Add pull-to-refresh table header view
     if (isPullToRefreshEnabled) {
-        UIRefreshControl *refresh = [[UIRefreshControl alloc] init];
-        
-        [refresh addTarget:self action:@selector(refresh) forControlEvents:UIControlEventValueChanged];
-        
-        self.refreshControl = refresh;
-
+        self.refreshControl = [[UIRefreshControl alloc] init];
         [self customizeRefreshControlWithAttributedRefreshText:[[NSAttributedString alloc] initWithString:NSLocalizedStringFromTableInBundle(@"pullToRefresh",
                                                                                                                                              @"Localizable",
                                                                                                                                              [NSBundle bundleForClass:[Cobalt class]],
@@ -140,12 +135,13 @@ NSString * webLayerPage;
                                                                                                                                              [NSBundle bundleForClass:[Cobalt class]],
                                                                                                                                              @"Refreshing")]
                                                   andTintColor:[UIColor grayColor]];
+        [self.refreshControl addTarget:self
+                                action:@selector(refresh)
+                      forControlEvents:UIControlEventValueChanged];
+         [webView.scrollView addSubview:self.refreshControl];
     }
     
     [webView.scrollView setDelegate:self];
-    
-    if(!self.isPullToRefreshEnabled)
-        [self.tableView setScrollEnabled: NO];
     
     [self loadPage:pageName inWebView:webView];
     
@@ -412,7 +408,6 @@ NSString * webLayerPage;
         [barsVisible setObject:top
                         forKey:kConfigurationBarsVisibleTop];
     }
-    
     if (bottom != nil
         && [bottom isKindOfClass:[NSNumber class]]) {
         [self.navigationController setToolbarHidden:! [bottom boolValue]
@@ -1930,9 +1925,6 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
         float height = _scrollView.frame.size.height;
         float contentHeight = _scrollView.contentSize.height;
         float contentOffset = _scrollView.contentOffset.y;
-        
-        if (contentOffset > 0) [((UITableView *) self.view) setScrollEnabled:NO];
-        else [((UITableView *) self.view) setScrollEnabled:YES];
         
         if (isInfiniteScrollEnabled
             && ! _isLoadingMore
