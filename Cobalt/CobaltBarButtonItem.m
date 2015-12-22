@@ -57,7 +57,7 @@
         _color = [Cobalt colorFromHexString:color];
     }
     _barColor = barColor;
-    self.tintColor = _color != nil ? _color : _barColor;;
+    self.tintColor = _color != nil ? _color : _barColor;
     
     if (name != nil && [name isKindOfClass:[NSString class]]
         && title != nil && [title isKindOfClass:[NSString class]]) {

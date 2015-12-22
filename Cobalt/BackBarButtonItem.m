@@ -68,6 +68,9 @@
         [backButton addTarget:self
                        action:@selector(didTouchUp:)
              forControlEvents:UIControlEventTouchUpInside];
+        [backButton addTarget:self
+                       action:@selector(didTouchUp:)
+             forControlEvents:UIControlEventTouchUpOutside];
         
         backButtonImageView.translatesAutoresizingMaskIntoConstraints = NO;
         backButtonTitle.translatesAutoresizingMaskIntoConstraints = NO;
