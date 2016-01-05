@@ -119,6 +119,7 @@
 #define kJSAlertButtonIndex                 @"index"
 
 // BARS
+#define FLEXIBLE_SPACE_TAG                  1
 #define JSControlBars                       @"bars"
 #define JSActionSetBarsVisible              @"setBarsVisible"
 #define JSActionSetBarContent               @"setBarContent"
@@ -203,6 +204,11 @@ typedef enum {
     NSOperationQueue * toJavaScriptOperationQueue;
     NSOperationQueue * fromJavaScriptOperationQueue;
     
+    // Bar button items
+    NSMutableArray *topLeftBarButtonItems;
+    NSMutableArray *topRightBarButtonItems;
+    NSMutableArray *bottomBarButtonItems;
+    
 @private
     
     id<CobaltDelegate> _delegate;
@@ -256,8 +262,8 @@ typedef enum {
 @property (strong, nonatomic) UIWebView * webLayer;
 
 /*!
- @property		refreshControl
- @abstract		a refresh control shown for Pull-to-refresh feature
+ @property             refreshControl
+ @abstract             a refresh control shown for Pull-to-refresh feature
  */
 @property (strong, nonatomic) UIRefreshControl *refreshControl;
 
@@ -362,6 +368,15 @@ typedef enum {
  */
 - (void)sendACK;
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark BARS
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)configureBars;
+- (CobaltBarButtonItem *)barButtonItemForAction:(NSDictionary *)action;
+    
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma mark PULL-TO-REFRESH METHODS
