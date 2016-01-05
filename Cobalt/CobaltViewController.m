@@ -35,9 +35,11 @@
 #import "iToast.h"
 
 @interface CobaltViewController () {
+    /*
     NSMutableArray *topLeftBarButtonItems;
     NSMutableArray *topRightBarButtonItems;
     NSMutableArray *bottomBarButtonItems;
+    */
     
     UIColor *oldNavigationBarBarTintColor;
     UIColor *oldToolbarBarTintColor;
@@ -126,6 +128,7 @@ NSString * webLayerPage;
     // Add pull-to-refresh table header view
     if (isPullToRefreshEnabled) {
         self.refreshControl = [[UIRefreshControl alloc] init];
+
         [self customizeRefreshControlWithAttributedRefreshText:[[NSAttributedString alloc] initWithString:NSLocalizedStringFromTableInBundle(@"pullToRefresh",
                                                                                                                                              @"Localizable",
                                                                                                                                              [NSBundle bundleForClass:[Cobalt class]],
@@ -135,10 +138,11 @@ NSString * webLayerPage;
                                                                                                                                              [NSBundle bundleForClass:[Cobalt class]],
                                                                                                                                              @"Refreshing")]
                                                   andTintColor:[UIColor grayColor]];
+        
         [self.refreshControl addTarget:self
                                 action:@selector(refresh)
                       forControlEvents:UIControlEventValueChanged];
-         [webView.scrollView addSubview:self.refreshControl];
+        [webView.scrollView addSubview:self.refreshControl];
     }
     
     [webView.scrollView setDelegate:self];
@@ -334,6 +338,7 @@ NSString * webLayerPage;
             UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
                                                                                            target:nil
                                                                                            action:nil];
+            flexibleSpace.tag = FLEXIBLE_SPACE_TAG;
             
             for (id action in actions) {
                 if (action != nil
