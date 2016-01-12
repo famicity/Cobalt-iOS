@@ -127,15 +127,16 @@ NSString * webLayerPage;
     
     // Add pull-to-refresh table header view
     if (isPullToRefreshEnabled) {
+        NSBundle *cobaltBundle = [Cobalt bundleResources];
+        
         self.refreshControl = [[UIRefreshControl alloc] init];
-
         [self customizeRefreshControlWithAttributedRefreshText:[[NSAttributedString alloc] initWithString:NSLocalizedStringFromTableInBundle(@"pullToRefresh",
                                                                                                                                              @"Localizable",
-                                                                                                                                             [NSBundle bundleForClass:[Cobalt class]],
+                                                                                                                                             cobaltBundle,
                                                                                                                                              @"Pull-to-refresh")]
                                       andAttributedRefreshText:[[NSAttributedString alloc] initWithString:NSLocalizedStringFromTableInBundle(@"refreshing",
                                                                                                                                              @"Localizable",
-                                                                                                                                             [NSBundle bundleForClass:[Cobalt class]],
+                                                                                                                                             cobaltBundle,
                                                                                                                                              @"Refreshing")]
                                                   andTintColor:[UIColor grayColor]];
         
@@ -1666,7 +1667,7 @@ forBarButtonItemNamed:(NSString *)name {
             if (! buttons.count) {
                 UIAlertAction * cancelAction = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"OK",
                                                                                                                  @"Localizable",
-                                                                                                                 [NSBundle bundleForClass:[Cobalt class]],
+                                                                                                                 [Cobalt bundleResources],
                                                                                                                  @"OK")
                                                                         style:UIAlertActionStyleCancel
                                                                       handler:^(UIAlertAction * action) {
@@ -1709,7 +1710,7 @@ forBarButtonItemNamed:(NSString *)name {
                                                       delegate:delegate
                                              cancelButtonTitle:NSLocalizedStringFromTableInBundle(@"OK",
                                                                                                   @"Localizable",
-                                                                                                  [NSBundle bundleForClass:[Cobalt class]],
+                                                                                                  [Cobalt bundleResources],
                                                                                                   @"OK")
                                              otherButtonTitles:nil];
             }

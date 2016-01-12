@@ -61,6 +61,11 @@ static NSString *sResourcePath;
     sResourcePath = resourcePath;
 }
 
++ (NSBundle *)bundleResources {
+    return [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath,
+                                                       @"/Cobalt.bundle"]];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma mark CONTROLLERS
@@ -77,8 +82,7 @@ static NSString *sResourcePath;
     }
     
     NSBundle *mainBundle = [NSBundle mainBundle];
-    NSBundle *cobaltBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", mainBundle.bundlePath,
-                                                       @"/Frameworks/Cobalt.framework"]];
+    NSBundle *cobaltBundle = [Cobalt bundleResources];
     NSString *nib = NIB_DEFAULT;
     
     NSDictionary *configuration = [Cobalt configurationForController:controller];

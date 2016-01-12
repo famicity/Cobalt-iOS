@@ -30,7 +30,7 @@
 #import <UIKit/UIKit.h>
 #import <JavaScriptCore/JavaScriptCore.h>
 
-#import "CobaltToast.h"
+#import <Cobalt/CobaltToast.h>
 #import "CobaltBarButtonItem.h"
 #import "BackBarButtonItem.h"
 

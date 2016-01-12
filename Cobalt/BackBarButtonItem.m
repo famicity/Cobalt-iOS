@@ -45,8 +45,10 @@
     if (self = [super init]) {
         _delegate = delegate;
         
+        NSBundle *cobaltBundle = [Cobalt bundleResources];
+        
         UIImage *backButtonImage = [UIImage imageWithContentsOfFile:[NSString stringWithFormat:@"%@/%@",
-                                                                     [NSBundle bundleForClass:[Cobalt class]].bundlePath,
+                                                                     cobaltBundle.bundlePath,
                                                                      @"backButton.png"]];
         backButtonImage = [backButtonImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         backButtonImageView = [[UIImageView alloc] initWithImage:backButtonImage];
@@ -56,7 +58,7 @@
         backButtonTitle.textColor = color;
         backButtonTitle.text = NSLocalizedStringFromTableInBundle(@"back",
                                                                   @"Localizable",
-                                                                  [NSBundle bundleForClass:[Cobalt class]],
+                                                                  cobaltBundle,
                                                                   @"Back");
         
         UIButton *backButton = [UIButton buttonWithType:UIButtonTypeSystem];

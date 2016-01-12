@@ -109,6 +109,12 @@ FOUNDATION_EXPORT const unsigned char CobaltVersionString[];
 + (void)setResourcePath:(NSString *)resourcePath;
 
 /*!
+ @method    + (NSBundle *)bundleResources
+ @abstract  Returns the Cobalt bundle for resources or nil if not found.
+ */
++ (NSBundle *)bundleResources;
+
+/*!
  @method		+ (CobaltViewController *)cobaltViewControllerForController:(NSString *)controller andPage:(NSString *)page
  @abstract		Returns an allocated and initialized Cobalt view controller from its id in cobalt configuration file and HTML page.
  @param         controller: view controller id
