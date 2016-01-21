@@ -123,12 +123,14 @@
 #define JSControlBars                       @"bars"
 #define JSActionSetBarsVisible              @"setBarsVisible"
 #define JSActionSetBarContent               @"setBarContent"
+#define JSActionSetActionVisible            @"setActionVisible"
 #define JSActionSetActionBadge              @"setActionBadge"
 #define JSActionSetActionContent            @"setActionContent"
 #define JSActionSetBars                     @"setBars"
 #define kJSBars                             @"bars"
 #define kJSContent                          @"content"
 #define kJSName                             @"name"
+#define kJSVisible                          @"visible"
 #define kJSBadge                            @"badge"
 
 // TOAST
