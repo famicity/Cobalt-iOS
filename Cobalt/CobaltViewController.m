@@ -601,6 +601,27 @@ forBarButtonItemNamed:(NSString *)name {
     }
 }
 
+- (void)setEnabled:(BOOL)enabled
+forBarButtonItemNamed:(NSString *)name {
+    CobaltBarButtonItem *barButtonItem = [self barButtonItemNamed:name];
+    if (barButtonItem == nil) {
+#if DEBUG_COBALT
+        NSLog(@"setEnabled:forBarButtonItemNamed: unable to set enabled for action named %@ not found", name);
+#endif
+        return;
+    }
+    [barButtonItem setEnabled:enabled];
+    
+    id actions = [_barsConfiguration objectForKey:kConfigurationBarsActions];
+    for (NSMutableDictionary *action in actions) {
+        if ([[action objectForKey:kConfigurationBarsActionName] isEqualToString:name]) {
+            [action setObject:[NSNumber numberWithBool:enabled]
+                       forKey:kConfigurationBarsActionEnabled];
+            return;
+        }
+    }
+}
+
 - (void)setBadgeLabelText:(NSString *)text
     forBarButtonItemNamed:(NSString *)name {
     CobaltBarButtonItem *barButtonItem = [self barButtonItemNamed:name];
@@ -1167,6 +1188,19 @@ forBarButtonItemNamed:(NSString *)name {
                                     dispatch_async(dispatch_get_main_queue(), ^(void) {
                                         [self setVisible:[visible boolValue]
                                           forBarButtonItemNamed:barButtonItemName];
+                                    });
+                                }
+                            }
+                            // SET ACTION ENABLED
+                            else if ([action isEqualToString:JSActionSetActionEnabled]) {
+                                id barButtonItemName = [data objectForKey:kJSName];
+                                id enabled = [data objectForKey:kJSEnabled];
+                                
+                                if (barButtonItemName != nil && [barButtonItemName isKindOfClass:[NSString class]]
+                                    && enabled != nil && [enabled isKindOfClass:[NSNumber class]]) {
+                                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                                        [self setEnabled:[enabled boolValue]
+                                   forBarButtonItemNamed:barButtonItemName];
                                     });
                                 }
                             }
