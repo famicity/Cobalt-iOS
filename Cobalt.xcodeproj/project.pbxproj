@@ -23,7 +23,6 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		BE31EB1F1C3EC52100141B6E /* Cobalt.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BE31EB1E1C3EC52100141B6E /* Cobalt.h */; };
 		BE31EB211C3EC52100141B6E /* Cobalt.m in Sources */ = {isa = PBXBuildFile; fileRef = BE31EB201C3EC52100141B6E /* Cobalt.m */; };
 		BE31EB3D1C3EC62900141B6E /* BackBarButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = BE31EB281C3EC62900141B6E /* BackBarButtonItem.m */; };
 		BE31EB3E1C3EC62900141B6E /* CobaltAbstractPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = BE31EB2B1C3EC62900141B6E /* CobaltAbstractPlugin.m */; };
@@ -40,10 +39,10 @@
 		BEFF88091C3EC8F40063AA18 /* Cobalt.h in Headers */ = {isa = PBXBuildFile; fileRef = BE31EB1E1C3EC52100141B6E /* Cobalt.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEFF880A1C3EC93B0063AA18 /* CobaltViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = BE31EB371C3EC62900141B6E /* CobaltViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEFF880B1C3EC9490063AA18 /* CobaltFont.h in Headers */ = {isa = PBXBuildFile; fileRef = BE31EB301C3EC62900141B6E /* CobaltFont.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		BEFF880C1C3EC9500063AA18 /* CobaltFontManager.h in Headers */ = {isa = PBXBuildFile; fileRef = BE31EB311C3EC62900141B6E /* CobaltFontManager.h */; };
-		BEFF880D1C3EC9590063AA18 /* ImageManager.h in Headers */ = {isa = PBXBuildFile; fileRef = BE31EB391C3EC62900141B6E /* ImageManager.h */; };
+		BEFF880C1C3EC9500063AA18 /* CobaltFontManager.h in Headers */ = {isa = PBXBuildFile; fileRef = BE31EB311C3EC62900141B6E /* CobaltFontManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BEFF880D1C3EC9590063AA18 /* ImageManager.h in Headers */ = {isa = PBXBuildFile; fileRef = BE31EB391C3EC62900141B6E /* ImageManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEFF880E1C3EC9610063AA18 /* CobaltAbstractPlugin.h in Headers */ = {isa = PBXBuildFile; fileRef = BE31EB2A1C3EC62900141B6E /* CobaltAbstractPlugin.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		BEFF880F1C3EC9640063AA18 /* CobaltPluginManager.h in Headers */ = {isa = PBXBuildFile; fileRef = BE31EB331C3EC62900141B6E /* CobaltPluginManager.h */; };
+		BEFF880F1C3EC9640063AA18 /* CobaltPluginManager.h in Headers */ = {isa = PBXBuildFile; fileRef = BE31EB331C3EC62900141B6E /* CobaltPluginManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEFF88101C3EC96D0063AA18 /* BackBarButtonItem.h in Headers */ = {isa = PBXBuildFile; fileRef = BE31EB271C3EC62900141B6E /* BackBarButtonItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEFF88111C3EC9730063AA18 /* CobaltBarButtonItem.h in Headers */ = {isa = PBXBuildFile; fileRef = BE31EB2C1C3EC62900141B6E /* CobaltBarButtonItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEFF88121C3EC9830063AA18 /* CobaltButton.h in Headers */ = {isa = PBXBuildFile; fileRef = BE31EB2E1C3EC62900141B6E /* CobaltButton.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -72,19 +71,6 @@
 			remoteInfo = CobaltResources;
 		};
 /* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		BE31EB191C3EC52100141B6E /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "include/$(PRODUCT_NAME)";
-			dstSubfolderSpec = 16;
-			files = (
-				BE31EB1F1C3EC52100141B6E /* Cobalt.h in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		BE31EB1B1C3EC52100141B6E /* libCobalt.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libCobalt.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -312,7 +298,6 @@
 			buildPhases = (
 				BE31EB171C3EC52100141B6E /* Sources */,
 				BE31EB181C3EC52100141B6E /* Frameworks */,
-				BE31EB191C3EC52100141B6E /* CopyFiles */,
 				BEFF88081C3EC8E20063AA18 /* Headers */,
 				BEFF882E1C3ED1F40063AA18 /* Build Framework */,
 			);
@@ -410,7 +395,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\n\nexport FRAMEWORK_LOCN=\"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.framework\"\n\n# Create the path to the real Headers die\nmkdir -p \"${FRAMEWORK_LOCN}/Versions/A/Headers\"\n\n# Create the required symlinks\n/bin/ln -sfh A \"${FRAMEWORK_LOCN}/Versions/Current\"\n/bin/ln -sfh Versions/Current/Headers \"${FRAMEWORK_LOCN}/Headers\"\n/bin/ln -sfh \"Versions/Current/${PRODUCT_NAME}\" \\\n\"${FRAMEWORK_LOCN}/${PRODUCT_NAME}\"\n\n# Copy the public headers into the framework\n/bin/cp -a \"${TARGET_BUILD_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}/\" \\\n\"${FRAMEWORK_LOCN}/Versions/A/Headers\"";
+			shellScript = "# Delete copy files build phase: Cobalt.h in include/$(PRODUCT_NAME)\n\nset -e\n\nexport FRAMEWORK_LOCN=\"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.framework\"\n\n# Create the path to the real Headers die\nmkdir -p \"${FRAMEWORK_LOCN}/Versions/A/Headers\"\n\n# Create the required symlinks\n/bin/ln -sfh A \"${FRAMEWORK_LOCN}/Versions/Current\"\n/bin/ln -sfh Versions/Current/Headers \"${FRAMEWORK_LOCN}/Headers\"\n/bin/ln -sfh \"Versions/Current/${PRODUCT_NAME}\" \\\n\"${FRAMEWORK_LOCN}/${PRODUCT_NAME}\"\n\n# Copy the public headers into the framework\n#/bin/cp -a \"${TARGET_BUILD_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}/\" \\\n#\"${FRAMEWORK_LOCN}/Versions/A/Headers\"\n/bin/cp -a \"${DSTROOT}/include/Cobalt/\" \\\n\"${FRAMEWORK_LOCN}/Versions/A/Headers\"";
 		};
 		BEFF88351C3ED3FB0063AA18 /* MultiPlatform Build */ = {
 			isa = PBXShellScriptBuildPhase;
