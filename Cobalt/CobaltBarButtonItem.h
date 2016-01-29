@@ -53,6 +53,7 @@
                    andDelegate:(id<CobaltBarButtonItemDelegate>)delegate;
 
 - (void)setBadge:(NSString *)text;
+- (void)resizeBadge;
 - (void)setContent:(NSDictionary *)content;
 
 @end
