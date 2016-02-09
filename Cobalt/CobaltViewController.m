@@ -1081,7 +1081,9 @@ forBarButtonItemNamed:(NSString *)name {
                                 [toastsToShow addObject:toast];
                             }
                             else {
-                                [toast show];
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                    [toast show];
+                                });
                             }
                         }
 #if DEBUG_COBALT
