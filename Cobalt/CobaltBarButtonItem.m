@@ -153,10 +153,10 @@
         
         if (visible != nil
             && [visible isKindOfClass:[NSNumber class]]) {
-            _visible = visible;
+            _visible = [visible boolValue];
         }
         else {
-            _visible = [NSNumber numberWithInt:1];
+            _visible = YES;
         }
         
         return self;

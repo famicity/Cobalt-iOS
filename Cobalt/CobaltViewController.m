@@ -577,6 +577,51 @@ forBarButtonItemNamed:(NSString *)name {
     }
 }
 
+- (void)setVisible:(BOOL)visible
+forBarButtonItemNamed:(NSString *)name {
+    CobaltBarButtonItem *barButtonItem = [self barButtonItemNamed:name];
+    if (barButtonItem == nil) {
+#if DEBUG_COBALT
+        NSLog(@"setVisible:forBarButtonItemNamed: unable to set visible for action named %@ not found", name);
+#endif
+        return;
+    }
+    [barButtonItem setVisible:visible];
+    
+    [self resetBarButtonItems];
+    [self setBarButtonItems];
+    
+    id actions = [_barsConfiguration objectForKey:kConfigurationBarsActions];
+    for (NSMutableDictionary *action in actions) {
+        if ([[action objectForKey:kConfigurationBarsActionName] isEqualToString:name]) {
+            [action setObject:[NSNumber numberWithBool:visible]
+                       forKey:kConfigurationBarsActionVisible];
+            return;
+        }
+    }
+}
+
+- (void)setEnabled:(BOOL)enabled
+forBarButtonItemNamed:(NSString *)name {
+    CobaltBarButtonItem *barButtonItem = [self barButtonItemNamed:name];
+    if (barButtonItem == nil) {
+#if DEBUG_COBALT
+        NSLog(@"setEnabled:forBarButtonItemNamed: unable to set enabled for action named %@ not found", name);
+#endif
+        return;
+    }
+    [barButtonItem setEnabled:enabled];
+    
+    id actions = [_barsConfiguration objectForKey:kConfigurationBarsActions];
+    for (NSMutableDictionary *action in actions) {
+        if ([[action objectForKey:kConfigurationBarsActionName] isEqualToString:name]) {
+            [action setObject:[NSNumber numberWithBool:enabled]
+                       forKey:kConfigurationBarsActionEnabled];
+            return;
+        }
+    }
+}
+
 - (void)setBadgeLabelText:(NSString *)text
     forBarButtonItemNamed:(NSString *)name {
     CobaltBarButtonItem *barButtonItem = [self barButtonItemNamed:name];
@@ -615,19 +660,19 @@ forBarButtonItemNamed:(NSString *)name {
     
     for (UIBarButtonItem *barButtonItem in topLeftBarButtonItems) {
         if (! [barButtonItem isKindOfClass:[CobaltBarButtonItem class]]
-            || [((CobaltBarButtonItem *) barButtonItem).visible boolValue]) {
+            || ((CobaltBarButtonItem *) barButtonItem).visible) {
             [visibleTopLeftBarButtonItems addObject:barButtonItem];
         }
     }
     for (UIBarButtonItem *barButtonItem in topRightBarButtonItems) {
         if (! [barButtonItem isKindOfClass:[CobaltBarButtonItem class]]
-            || [((CobaltBarButtonItem *) barButtonItem).visible boolValue]) {
+            || ((CobaltBarButtonItem *) barButtonItem).visible) {
             [visibleTopRightBarButtonItems addObject:barButtonItem];
         }
     }
     for (UIBarButtonItem *barButtonItem in bottomBarButtonItems) {
         if (! [barButtonItem isKindOfClass:[CobaltBarButtonItem class]]
-            || [((CobaltBarButtonItem *) barButtonItem).visible  boolValue]) {
+            || ((CobaltBarButtonItem *) barButtonItem).visible) {
             [visibleBottomBarButtonItems addObject:barButtonItem];
         }
     }
@@ -1036,7 +1081,9 @@ forBarButtonItemNamed:(NSString *)name {
                                 [toastsToShow addObject:toast];
                             }
                             else {
-                                [toast show];
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                    [toast show];
+                                });
                             }
                         }
 #if DEBUG_COBALT
@@ -1133,7 +1180,33 @@ forBarButtonItemNamed:(NSString *)name {
                                     });
                                 }
                             }
-                            // SET CONTENT
+                            // SET ACTION VISIBLE
+                            else if ([action isEqualToString:JSActionSetActionVisible]) {
+                                id barButtonItemName = [data objectForKey:kJSName];
+                                id visible = [data objectForKey:kJSVisible];
+                                
+                                if (barButtonItemName != nil && [barButtonItemName isKindOfClass:[NSString class]]
+                                    && visible != nil && [visible isKindOfClass:[NSNumber class]]) {
+                                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                                        [self setVisible:[visible boolValue]
+                                          forBarButtonItemNamed:barButtonItemName];
+                                    });
+                                }
+                            }
+                            // SET ACTION ENABLED
+                            else if ([action isEqualToString:JSActionSetActionEnabled]) {
+                                id barButtonItemName = [data objectForKey:kJSName];
+                                id enabled = [data objectForKey:kJSEnabled];
+                                
+                                if (barButtonItemName != nil && [barButtonItemName isKindOfClass:[NSString class]]
+                                    && enabled != nil && [enabled isKindOfClass:[NSNumber class]]) {
+                                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                                        [self setEnabled:[enabled boolValue]
+                                   forBarButtonItemNamed:barButtonItemName];
+                                    });
+                                }
+                            }
+                            // SET ACTION CONTENT
                             else if ([action isEqualToString:JSActionSetActionContent]) {
                                 id barButtonItemName = [data objectForKey:kJSName];
                                 id content = [data objectForKey:kJSContent];
