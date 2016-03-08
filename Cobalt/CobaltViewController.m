@@ -341,7 +341,9 @@ NSString * webLayerPage;
                                                                                            action:nil];
             flexibleSpace.tag = FLEXIBLE_SPACE_TAG;
             
-            for (id action in actions) {
+            
+            [actions enumerateObjectsWithOptions:NSEnumerationReverse
+                                      usingBlock:^(id  _Nonnull action, NSUInteger idx, BOOL * _Nonnull stop) {
                 if (action != nil
                     && [action isKindOfClass:[NSDictionary class]]) {
                     id iosPosition = [action objectForKey:kConfigurationBarsActionPosition];  //NSString  (mandatory: topLeft|topRight|bottom)
@@ -384,7 +386,7 @@ NSString * webLayerPage;
                         }
                     }
                 }
-            }
+            }];
             
             if (bottomBarButtonItems.count > 0) {
                 [bottomBarButtonItems addObject:flexibleSpace];
