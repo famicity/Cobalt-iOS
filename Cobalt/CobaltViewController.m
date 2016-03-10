@@ -144,6 +144,7 @@ NSString * webLayerPage;
                                 action:@selector(refresh)
                       forControlEvents:UIControlEventValueChanged];
         [webView.scrollView addSubview:self.refreshControl];
+        [webView.scrollView sendSubviewToBack:self.refreshControl];
     }
     
     [webView.scrollView setDelegate:self];
