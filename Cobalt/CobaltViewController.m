@@ -343,8 +343,7 @@ NSString * webLayerPage;
             flexibleSpace.tag = FLEXIBLE_SPACE_TAG;
             
             
-            [actions enumerateObjectsWithOptions:NSEnumerationReverse
-                                      usingBlock:^(id  _Nonnull action, NSUInteger idx, BOOL * _Nonnull stop) {
+            for (id action in actions) {
                 if (action != nil
                     && [action isKindOfClass:[NSDictionary class]]) {
                     id iosPosition = [action objectForKey:kConfigurationBarsActionPosition];  //NSString  (mandatory: topLeft|topRight|bottom)
@@ -387,7 +386,14 @@ NSString * webLayerPage;
                         }
                     }
                 }
-            }];
+            }
+            
+            NSMutableArray *barButtonItems = [NSMutableArray arrayWithCapacity:topRightBarButtonItems.count];
+            [topRightBarButtonItems enumerateObjectsWithOptions:NSEnumerationReverse
+                                                     usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                                                         [barButtonItems addObject:obj];
+                                                     }];
+            topRightBarButtonItems = barButtonItems;
             
             if (bottomBarButtonItems.count > 0) {
                 [bottomBarButtonItems addObject:flexibleSpace];
