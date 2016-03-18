@@ -216,7 +216,6 @@ typedef enum {
 @private
     
     id<CobaltDelegate> _delegate;
-    BOOL _firstAppearance;
     int _alertViewCounter;
     float _lastWebviewContentOffset;
 	BOOL _isLoadingMore;
@@ -252,16 +251,10 @@ typedef enum {
 @property (strong, nonatomic) NSString * pageName;
 
 /*!
- @property		pushedData
- @abstract		the data to pass to the webview in onPageShown event when pushed or modaled
+ @property		navigationData
+ @abstract		the data to pass to the webview in onPageShown event on navigation
  */
-@property (strong, nonatomic) NSDictionary *pushedData;
-
-/*!
- @property		poppedData
- @abstract		the data to pass to the webview in onPageShown event when popped or dismissed
- */
-@property (strong, nonatomic) NSDictionary *poppedData;
+@property (strong, nonatomic) NSDictionary *navigationData;
 
 @property (strong, nonatomic) UIWebView * webLayer;
 

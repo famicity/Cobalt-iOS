@@ -87,8 +87,6 @@ NSString * webLayerPage;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     if (self = [super initWithNibName:nibNameOrNil
                                bundle:nibBundleOrNil]) {
-        _firstAppearance = YES;
-        
         toJavaScriptOperationQueue = [[NSOperationQueue alloc] init] ;
         [toJavaScriptOperationQueue setSuspended:YES];
         
@@ -177,20 +175,11 @@ NSString * webLayerPage;
                                              selector:@selector(onAppForeground:)
                                                  name:kOnAppForegroundNotification object:nil];
     
-    if (_firstAppearance) {
-        _firstAppearance = NO;
-        
-        [self sendEvent:JSEventOnPageShown
-               withData:_pushedData
-            andCallback:nil];
-    }
-    else {
-        [self sendEvent:JSEventOnPageShown
-               withData:_poppedData
-            andCallback:nil];
-        
-        _poppedData = nil;
-    }
+    [self sendEvent:JSEventOnPageShown
+           withData:_navigationData
+        andCallback:nil];
+    
+    _navigationData = nil;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -1469,7 +1458,7 @@ forBarButtonItemNamed:(NSString *)name {
             
             if (innerData != nil
                 && [innerData isKindOfClass:[NSDictionary class]]) {
-                viewController.pushedData = innerData;
+                viewController.navigationData = innerData;
             }
             
             // Push corresponding viewController
@@ -1517,7 +1506,7 @@ forBarButtonItemNamed:(NSString *)name {
             if (viewControllers.count > 1) {
                 UIViewController *popToViewController = [viewControllers objectAtIndex:viewControllers.count - 2];
                 if ([popToViewController isKindOfClass:[CobaltViewController class]]) {
-                    ((CobaltViewController *)popToViewController).poppedData = innerData;
+                    ((CobaltViewController *)popToViewController).navigationData = innerData;
                 }
             }
         }
@@ -1541,7 +1530,7 @@ forBarButtonItemNamed:(NSString *)name {
                 && (page == nil || ([viewController isKindOfClass:[CobaltViewController class]] && [((CobaltViewController *)viewController).pageName isEqualToString:page]))) {
                 if ([viewController isKindOfClass:[CobaltViewController class]]
                     && innerData != nil && [innerData isKindOfClass:[NSDictionary class]]) {
-                    ((CobaltViewController *)viewController).poppedData = innerData;
+                    ((CobaltViewController *)viewController).navigationData = innerData;
                 }
                 
                 dispatch_async(dispatch_get_main_queue(), ^{
@@ -1572,7 +1561,7 @@ forBarButtonItemNamed:(NSString *)name {
             
             if (innerData != nil
                 && [innerData isKindOfClass:[NSDictionary class]]) {
-                viewController.pushedData = innerData;
+                viewController.navigationData = innerData;
             }
             
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -1630,7 +1619,7 @@ forBarButtonItemNamed:(NSString *)name {
             
             if (popToViewController
                 && [popToViewController isKindOfClass:[CobaltViewController class]]) {
-                ((CobaltViewController *)popToViewController).poppedData = innerData;
+                ((CobaltViewController *)popToViewController).navigationData = innerData;
             }
         }
         
@@ -1666,7 +1655,7 @@ forBarButtonItemNamed:(NSString *)name {
             
             if (innerData != nil
                 && [innerData isKindOfClass:[NSDictionary class]]) {
-                viewController.pushedData = innerData;
+                viewController.navigationData = innerData;
             }
             
             // replace current view with corresponding viewController
