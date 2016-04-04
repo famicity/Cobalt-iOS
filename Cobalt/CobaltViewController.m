@@ -84,18 +84,59 @@ NSString * webLayerPage;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    if (self = [super initWithNibName:nibNameOrNil
-                               bundle:nibBundleOrNil]) {
-        toJavaScriptOperationQueue = [[NSOperationQueue alloc] init] ;
-        [toJavaScriptOperationQueue setSuspended:YES];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(onAppStarted:)
-                                                     name:kOnAppStarted object:nil];
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    if (self = [super initWithCoder:aDecoder]) {
+        [self initCobalt];
     }
     
     return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil
+               bundle:(NSBundle *)nibBundleOrNil {
+    if (self = [super initWithNibName:nibNameOrNil
+                               bundle:nibBundleOrNil]) {
+        [self initCobalt];
+    }
+    
+    return self;
+}
+
+- (void)initCobalt {
+    toJavaScriptOperationQueue = [[NSOperationQueue alloc] init] ;
+    [toJavaScriptOperationQueue setSuspended:YES];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(onAppStarted:)
+                                                 name:kOnAppStarted object:nil];
+}
+
+- (void)initWithPage:(nonnull NSString *)page
+       andController:(nullable NSString *)controller {
+    self.pageName = page;
+    
+    NSDictionary *configuration = [Cobalt configurationForController:controller];
+    if (configuration == nil) {
+        configuration = [Cobalt defaultConfiguration];
+    }
+    
+    if (configuration == nil) {
+        self.isPullToRefreshEnabled = false;
+        self.isInfiniteScrollEnabled = false;
+        self.infiniteScrollOffset = 0;
+        self.barsConfiguration = nil;
+    }
+    else {
+        BOOL pullToRefreshEnabled = [[configuration objectForKey:kConfigurationControllerPullToRefresh] boolValue];
+        BOOL infiniteScrollEnabled = [[configuration objectForKey:kConfigurationControllerInfiniteScroll] boolValue];
+        int infiniteScrollOffset = [configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] != nil ? [[configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] intValue] : 0;
+        NSDictionary *barsDictionary = [configuration objectForKey:kConfigurationBars];
+
+        self.isPullToRefreshEnabled = pullToRefreshEnabled;
+        self.isInfiniteScrollEnabled = infiniteScrollEnabled;
+        self.infiniteScrollOffset = infiniteScrollOffset;
+        self.barsConfiguration = [barsDictionary mutableCopy];
+    }
 }
 
 - (void)viewDidLoad

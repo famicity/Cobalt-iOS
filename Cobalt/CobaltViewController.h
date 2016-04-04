@@ -251,8 +251,8 @@ typedef enum {
 @property (strong, nonatomic) NSString * pageName;
 
 /*!
- @property		navigationData
- @abstract		the data to pass to the webview in onPageShown event on navigation
+ @property             navigationData
+ @abstract             the data to pass to the webview in onPageShown event on navigation
  */
 @property (strong, nonatomic) NSDictionary *navigationData;
 
@@ -294,6 +294,13 @@ typedef enum {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*!
+ @method		- (void)initWithPage:(nonnull NSString *)page andController:(nullable NSString *)controller
+ @abstract		this method sets the configuration of the native controller. If the controller is instantiated from a storyboard, override the initWithCoder: method and call it in instead of instantiate it programmatically
+ */
+- (void)initWithPage:(nonnull NSString *)page
+       andController:(nullable NSString *)controller;
+    
 /*!
  @method		- (void)setDelegate:(id)delegate
  @abstract		this method sets the delegate which responds to CobaltDelegate protocol
