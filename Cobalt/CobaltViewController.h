@@ -29,6 +29,7 @@
 
 #import <UIKit/UIKit.h>
 #import <JavaScriptCore/JavaScriptCore.h>
+#import <WebKit/WKWebView.h>
 
 #import "CobaltToast.h"
 #import "CobaltBarButtonItem.h"
@@ -202,7 +203,7 @@ typedef enum {
  @class			CobaltViewController
  @abstract		Base class for a webView controller that allows javascript/native dialogs
  */
-@interface CobaltViewController : UIViewController <UIAlertViewDelegate, UIScrollViewDelegate, UIWebViewDelegate, CobaltToastDelegate, CobaltViewControllerJS, CobaltBarButtonItemDelegate, BackBarButtonItemDelegate>
+@interface CobaltViewController : UIViewController <UIAlertViewDelegate, UIScrollViewDelegate, UIWebViewDelegate, WKNavigationDelegate, CobaltToastDelegate, CobaltViewControllerJS, CobaltBarButtonItemDelegate, BackBarButtonItemDelegate>
 {
     // Javascript queues
     NSOperationQueue * toJavaScriptOperationQueue;
@@ -223,6 +224,8 @@ typedef enum {
     
     NSAttributedString * _ptrRefreshText;
     NSAttributedString * _ptrRefreshingText;
+    
+    
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -232,10 +235,22 @@ typedef enum {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*!
- @property		webView
- @abstract		the webView displaying content
+ @property		webViewPlaceholder
+ @abstract		the view containing the webView displaying content.
  */
-@property (strong, nonatomic) IBOutlet UIWebView * webView;
+@property (strong, nonatomic) IBOutlet UIView *webViewPlaceholder;
+
+/*!
+ @property		webView
+ @abstract		the webView displaying content. Could be a UIWebView or WKWebView
+ */
+@property (strong, nonatomic) UIView *webView;
+
+/*!
+ @property		webLayer
+ @abstract		the webLayer displaying content. Could be a UIWebView or WKWebView
+ */
+@property (strong, nonatomic) UIView *webLayer;
 
 /*!
  @property		activityIndicator
@@ -255,8 +270,6 @@ typedef enum {
  @abstract             the data to pass to the webview in onPageShown event on navigation
  */
 @property (strong, nonatomic) NSDictionary *navigationData;
-
-@property (strong, nonatomic) UIWebView * webLayer;
 
 /*!
  @property             refreshControl
@@ -315,12 +328,12 @@ typedef enum {
 - (void)customWebView;
 
 /*!
- @method		- (void)loadPage:(NSString *)page inWebView:(UIWebView *)mWebView
+ @method		- (void)loadPage:(NSString *)page inWebView:(UIView *)mWebView
  @abstract		this method loads the page in ressourcePath in the Web view.
  @param         mWebView : Web view to load the page into
  @param         page: the page file
  */
-- (void)loadPage:(NSString *)page inWebView:(UIWebView *)mWebView;
+- (void)loadPage:(NSString *)page inWebView:(UIView *)mWebView;
 
 
 /*!
