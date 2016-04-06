@@ -29,7 +29,7 @@
 
 #import <UIKit/UIKit.h>
 #import <JavaScriptCore/JavaScriptCore.h>
-#import <WebKit/WKWebView.h>
+#import <WebKit/WebKit.h>
 
 #import "CobaltToast.h"
 #import "CobaltBarButtonItem.h"

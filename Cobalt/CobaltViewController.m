@@ -29,8 +29,6 @@
 
 #import "CobaltViewController.h"
 
-#import <WebKit/WKWebViewConfiguration.h>
-
 #import "Cobalt.h"
 #import "CobaltPluginManager.h"
 
@@ -201,7 +199,9 @@ NSString * webLayerPage;
         }
     }
     
-    [self.view addSubview:_webView];
+    _webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    
+    [_webViewPlaceholder addSubview:_webView];
     
     [self customWebView];
     
@@ -211,7 +211,7 @@ NSString * webLayerPage;
     alertCallbacks = [[NSMutableDictionary alloc] init];
     toastsToShow = [[NSMutableArray alloc] init];
     
-    if (pageName != nil
+    if (pageName == nil
         || pageName.length == 0) {
         pageName = defaultHtmlPage;
     }
@@ -1913,9 +1913,55 @@ forBarButtonItemNamed:(NSString *)name {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark UIWebView
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 - (BOOL)webView:(UIWebView *)webView
 shouldStartLoadWithRequest:(NSURLRequest *)request
  navigationType:(UIWebViewNavigationType)navigationType {
+    return [self webViewShouldLoadPageWithRequest:request];
+}
+
+- (void)webViewDidStartLoad:(UIWebView *)webView {
+    [self webViewStartLoadingPage];
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
+    [self webViewDidLoadPage];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark WKWebView
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)webView:(WKWebView *)webView
+decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction
+decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+    [self webViewShouldLoadPageWithRequest:navigationAction.request] ? decisionHandler(WKNavigationActionPolicyAllow) : decisionHandler(WKNavigationActionPolicyCancel);
+}
+
+- (void)webView:(WKWebView *)webView
+didCommitNavigation:(WKNavigation *)navigation {
+    [self webViewStartLoadingPage];
+}
+
+- (void)webView:(WKWebView *)webView
+didFinishNavigation:(WKNavigation *)navigation {
+    [self webViewDidLoadPage];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark Common
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (BOOL)webViewShouldLoadPageWithRequest:(NSURLRequest *)request {
     NSString *requestURL = [[[request URL] absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     
     // if requestURL contains cobaltSpecialJSKey, extracts the JSON received.
@@ -1940,14 +1986,14 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     return YES;
 }
 
-- (void)webViewDidStartLoad:(UIWebView *)webView {
+- (void)webViewStartLoadingPage {
     [activityIndicator startAnimating];
     
     // Stops queues until Web view is loaded
     [toJavaScriptOperationQueue setSuspended:YES];
 }
 
-- (void)webViewDidFinishLoad:(UIWebView *)webView {
+- (void)webViewDidLoadPage {
     // start queue
     [toJavaScriptOperationQueue setSuspended:NO];
     [activityIndicator stopAnimating];
