@@ -162,7 +162,14 @@ NSString * webLayerPage;
     }
     
     if ([WKWebView class]) {
-        _webView = [[WKWebView alloc] initWithFrame:_webViewPlaceholder.frame];
+        WKUserContentController *controller = [[WKUserContentController alloc] init];
+        [controller addScriptMessageHandler:self
+                                       name:@"cobalt"];
+        WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
+        configuration.userContentController = controller;
+        
+        _webView = [[WKWebView alloc] initWithFrame:_webViewPlaceholder.frame
+                                      configuration:configuration];
         ((WKWebView *)_webView).navigationDelegate = self;
         
         UIScrollView *scrollView = ((WKWebView *) _webView).scrollView;
@@ -935,6 +942,12 @@ forBarButtonItemNamed:(NSString *)name {
 - (BOOL)onCobaltMessage:(NSString *)message {
     NSDictionary * jsonObj = [Cobalt dictionaryWithString:message];
     return [self handleDictionarySentByJavaScript: jsonObj];
+}
+
+- (void)userContentController:(WKUserContentController *)userContentController
+      didReceiveScriptMessage:(WKScriptMessage *)message {
+    NSDictionary *jsonObj = [Cobalt dictionaryWithString:message.body];
+    [self handleDictionarySentByJavaScript:jsonObj];
 }
 
 - (BOOL)handleDictionarySentByJavaScript:(NSDictionary *)dict
