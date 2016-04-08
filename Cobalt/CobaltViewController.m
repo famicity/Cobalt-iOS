@@ -808,7 +808,7 @@ forBarButtonItemNamed:(NSString *)name {
     if ([WKWebView class]) {
         //[(WKWebView *)webView loadRequest:requestURL];
         [(WKWebView *)webView loadFileURL:fileURL
-                  allowingReadAccessToURL:[NSURL fileURLWithPath:[Cobalt resourcePath]]];
+                  allowingReadAccessToURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]]];
     }
     else {
         [(UIWebView *)webView loadRequest:requestURL];
