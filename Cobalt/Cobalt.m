@@ -62,8 +62,7 @@ static NSString *sResourcePath;
 }
 
 + (NSBundle *)bundleResources {
-    return [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath,
-                                                       @"/Cobalt.bundle"]];
+    return [NSBundle bundleForClass:[Cobalt class]];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
