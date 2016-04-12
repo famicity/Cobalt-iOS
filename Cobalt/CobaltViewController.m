@@ -29,6 +29,8 @@
 
 #import "CobaltViewController.h"
 
+#import <XWalkView/XWalkView.h>
+
 #import "Cobalt.h"
 #import "CobaltPluginManager.h"
 
@@ -161,18 +163,18 @@ NSString * webLayerPage;
                   forControlEvents:UIControlEventValueChanged];
     }
     
-    if ([WKWebView class]) {
+    if ([XWalkView class]) {
         WKUserContentController *controller = [[WKUserContentController alloc] init];
         [controller addScriptMessageHandler:self
                                        name:@"cobalt"];
         WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
         configuration.userContentController = controller;
         
-        _webView = [[WKWebView alloc] initWithFrame:_webViewPlaceholder.frame
+        _webView = [[XWalkView alloc] initWithFrame:_webViewPlaceholder.frame
                                       configuration:configuration];
-        ((WKWebView *)_webView).navigationDelegate = self;
+        ((XWalkView *)_webView).navigationDelegate = self;
         
-        UIScrollView *scrollView = ((WKWebView *) _webView).scrollView;
+        UIScrollView *scrollView = ((XWalkView *) _webView).scrollView;
         scrollView.delegate = self;
         if (_refreshControl != nil) {
             [scrollView addSubview:_refreshControl];
@@ -805,9 +807,9 @@ forBarButtonItemNamed:(NSString *)name {
     NSURL *fileURL = [NSURL fileURLWithPath:[[Cobalt resourcePath] stringByAppendingPathComponent:page]];
     NSURLRequest *requestURL = [NSURLRequest requestWithURL:fileURL];
     
-    if ([WKWebView class]) {
+    if ([XWalkView class]) {
         //[(WKWebView *)webView loadRequest:requestURL];
-        [(WKWebView *)webView loadFileURL:fileURL
+        [(XWalkView *)webView loadFileURL:fileURL
                   allowingReadAccessToURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]]];
     }
     else {
@@ -842,9 +844,12 @@ forBarButtonItemNamed:(NSString *)name {
                         break;
                 }
                 
-                if ([WKWebView class]) {
-                    [(WKWebView *)webViewToExecute evaluateJavaScript:script
+                if ([XWalkView class]) {
+                    /*
+                    [(XWalkView *)webViewToExecute evaluateJavaScript:script
                                                     completionHandler:nil];
+                     */
+                    [(XWalkView *)webViewToExecute injectScript:script];
                 }
                 else {
                     [(UIWebView *)webViewToExecute performSelectorOnMainThread:@selector(stringByEvaluatingJavaScriptFromString:)
@@ -1838,8 +1843,8 @@ forBarButtonItemNamed:(NSString *)name {
     if (_webLayer != nil
         && _webLayer.superview != nil) {
         [_webLayer removeFromSuperview];
-        if ([WKWebView class]) {
-            ((WKWebView *)_webLayer).navigationDelegate = nil;
+        if ([XWalkView class]) {
+            ((XWalkView *)_webLayer).navigationDelegate = nil;
         }
         else {
             ((UIWebView *)_webLayer).delegate = nil;
@@ -1851,10 +1856,10 @@ forBarButtonItemNamed:(NSString *)name {
     NSNumber * fadeDuration = ([data objectForKey:kJSWebLayerFadeDuration] && [[data objectForKey:kJSWebLayerFadeDuration] isKindOfClass:[NSNumber class]]) ? [data objectForKey:kJSWebLayerFadeDuration] : [NSNumber numberWithFloat:0.3];
     
     if (webLayerPage) {
-        if ([WKWebView class]) {
-            _webLayer = [[WKWebView alloc] initWithFrame:_webViewPlaceholder.frame];
-            ((WKWebView *) _webLayer).navigationDelegate = self;
-            ((WKWebView *) _webLayer).scrollView.bounces = NO;
+        if ([XWalkView class]) {
+            _webLayer = [[XWalkView alloc] initWithFrame:_webViewPlaceholder.frame];
+            ((XWalkView *) _webLayer).navigationDelegate = self;
+            ((XWalkView *) _webLayer).scrollView.bounces = NO;
         }
         else {
             _webLayer = [[UIWebView alloc] initWithFrame:_webViewPlaceholder.frame];
@@ -1901,8 +1906,8 @@ forBarButtonItemNamed:(NSString *)name {
                      }
                      completion:^(BOOL finished) {
                          [_webLayer removeFromSuperview];
-                         if ([WKWebView class]) {
-                             ((WKWebView *)_webLayer).navigationDelegate = nil;
+                         if ([XWalkView class]) {
+                             ((XWalkView *)_webLayer).navigationDelegate = nil;
                          }
                          else {
                              ((UIWebView *)_webLayer).delegate = nil;
@@ -2065,8 +2070,8 @@ didFinishNavigation:(WKNavigation *)navigation {
  */
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     UIScrollView *webScrollView = nil;
-    if ([WKWebView class]) {
-        webScrollView = ((WKWebView *) _webView).scrollView;
+    if ([XWalkView class]) {
+        webScrollView = ((XWalkView *) _webView).scrollView;
     }
     else {
         webScrollView = ((UIWebView *) _webView).scrollView;

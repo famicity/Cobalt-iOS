@@ -242,13 +242,13 @@ typedef enum {
 
 /*!
  @property		webView
- @abstract		the webView displaying content. Could be a UIWebView or WKWebView
+ @abstract		the webView displaying content. Could be a UIWebView or XWalkView
  */
 @property (strong, nonatomic) UIView *webView;
 
 /*!
  @property		webLayer
- @abstract		the webLayer displaying content. Could be a UIWebView or WKWebView
+ @abstract		the webLayer displaying content. Could be a UIWebView or XWalkView
  */
 @property (strong, nonatomic) UIView *webLayer;
 
