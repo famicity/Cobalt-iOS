@@ -96,7 +96,7 @@ FOUNDATION_EXPORT const unsigned char CobaltVersionString[];
 
 /*!
  @method    + (NSString *)resourcePath
- @abstract  Returns the Cobalt resource path for the whole application (default: /www/),
+ @abstract  Returns the Cobalt full resource path for the whole application (default: /private/var/mobile/Containers/Bundle/Application/UUID/MyApp.app/www/),
             or nil if app bundle could not be created.
  */
 + (NSString *)resourcePath;
@@ -104,7 +104,7 @@ FOUNDATION_EXPORT const unsigned char CobaltVersionString[];
 /*!
  @method    + (void)setResourcePath:(NSString *)resourcePath
  @param     resourcePath
- @abstract  Sets the Cobalt resource path for the whole application
+ @abstract  Sets the Cobalt resource last path component for the whole application (default: www)
  */
 + (void)setResourcePath:(NSString *)resourcePath;
 

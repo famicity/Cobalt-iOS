@@ -802,13 +802,17 @@ forBarButtonItemNamed:(NSString *)name {
 
 - (void)loadPage:(NSString *)page
        inWebView:(UIView *)webView {
-    NSURL *fileURL = [NSURL fileURLWithPath:[[Cobalt resourcePath] stringByAppendingPathComponent:page]];
-    NSURLRequest *requestURL = [NSURLRequest requestWithURL:fileURL];
+    NSURL *pageURL = [NSURL fileURLWithPath:[[Cobalt resourcePath] stringByAppendingPathComponent:page]];
+    NSURLRequest *requestURL = [NSURLRequest requestWithURL:pageURL];
     
     if ([WKWebView class]) {
-        //[(WKWebView *)webView loadRequest:requestURL];
-        [(WKWebView *)webView loadFileURL:fileURL
-                  allowingReadAccessToURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]]];
+        if ([(WKWebView *)webView respondsToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
+            [(WKWebView *)webView loadFileURL:pageURL
+                      allowingReadAccessToURL:[NSURL fileURLWithPath:[NSBundle mainBundle].bundlePath]];
+        }
+        else {
+            [(WKWebView *)webView loadRequest:requestURL];
+        }
     }
     else {
         [(UIWebView *)webView loadRequest:requestURL];

@@ -29,9 +29,12 @@
 
 #import "Cobalt.h"
 
+#import <WebKit/WebKit.h>
+
 //static NSMutableDictionary *sCobaltConfiguration;
 static NSDictionary *sCobaltConfiguration;
-static NSString *sResourcePath;
+static NSString *sResourcePath = @"www";
+static NSString *sFullResourcePath;
 
 #define NIB_DEFAULT     @"CobaltViewController"
 
@@ -44,9 +47,13 @@ static NSString *sResourcePath;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 + (NSString *)resourcePath {
-    if (sResourcePath != nil) {
-        return sResourcePath;
+    if (sFullResourcePath != nil) {
+        return sFullResourcePath;
     }
+    
+    // TODO: check if sFullResourcePath exists in UserDefaults,
+    // if yes, set sFullResourcePath and return it,
+    // else run code below and register sFullResourcePath in UserDefaults
     
     NSBundle *mainBundle = [NSBundle mainBundle];
     if (mainBundle == nil) {
@@ -54,7 +61,46 @@ static NSString *sResourcePath;
         return nil;
     }
     
-    return [NSString stringWithFormat:@"%@%@", [mainBundle resourcePath], @"/www/"];
+    if ([WKWebView class]
+        && ! [WKWebView instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
+        NSURL *resourceDirectoryURL = [NSURL fileURLWithPath:[mainBundle.bundlePath stringByAppendingPathComponent:sResourcePath]];
+        
+        NSString *temporaryDirectoryPath = NSTemporaryDirectory();
+        if (temporaryDirectoryPath != nil) {
+            NSFileManager *fileManager = [NSFileManager defaultManager];
+            
+            CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);
+            CFStringRef uuidString = CFUUIDCreateString(kCFAllocatorDefault, uuidRef);
+            temporaryDirectoryPath = [temporaryDirectoryPath stringByAppendingPathComponent:(__bridge NSString *)uuidString];
+            CFRelease(uuidString);
+            CFRelease(uuidRef);
+            
+            if ([fileManager createDirectoryAtPath:temporaryDirectoryPath
+                       withIntermediateDirectories:YES
+                                        attributes:nil
+                                             error:nil]) {
+                temporaryDirectoryPath = [temporaryDirectoryPath stringByAppendingPathComponent:sResourcePath];
+                
+                if ([fileManager copyItemAtPath:resourceDirectoryURL.path
+                                         toPath:temporaryDirectoryPath
+                                          error:nil]) {
+                    NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:temporaryDirectoryPath];
+                    NSString *filename;
+                    while((filename = [dirEnum nextObject])) {
+                        NSLog(@"%@", filename);
+                    }
+                    
+                    sFullResourcePath = temporaryDirectoryPath;
+                    return sFullResourcePath;
+                }
+            }
+        }
+        
+        return nil;
+    }
+    
+    sFullResourcePath = [mainBundle.resourcePath stringByAppendingPathComponent:sResourcePath];
+    return sFullResourcePath;
 }
 
 + (void)setResourcePath:(NSString *)resourcePath {
@@ -329,9 +375,7 @@ static NSString *sResourcePath;
         return nil;
     }
     
-    NSData *data = [Cobalt dataWithContentsOfFile:[NSString stringWithFormat:@"%@%@",
-                                                   cobaltResourcePath,
-                                                   @"cobalt.conf"]];
+    NSData *data = [Cobalt dataWithContentsOfFile:[cobaltResourcePath stringByAppendingPathComponent:@"cobalt.conf"]];
     if (data == nil) {
         return nil;
     }
