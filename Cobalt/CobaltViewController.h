@@ -216,7 +216,6 @@ typedef enum {
 @private
     
     id<CobaltDelegate> _delegate;
-    int _alertViewCounter;
     float _lastWebviewContentOffset;
 	BOOL _isLoadingMore;
     BOOL _isRefreshing;
@@ -381,7 +380,7 @@ typedef enum {
 - (void)configureBars;
 - (void)setBarButtonItems;
 - (CobaltBarButtonItem *)barButtonItemForAction:(NSDictionary *)action;
-    
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma mark PULL-TO-REFRESH METHODS

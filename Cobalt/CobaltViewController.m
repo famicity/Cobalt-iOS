@@ -150,7 +150,6 @@ NSString * webLayerPage;
     [self customWebView];
     [webView setDelegate:self];
     
-    _alertViewCounter = 0;
     alertCallbacks = [[NSMutableDictionary alloc] init];
     toastsToShow = [[NSMutableArray alloc] init];
     
@@ -1720,7 +1719,7 @@ forBarButtonItemNamed:(NSString *)name {
         }
         else {
             UIAlertView * alertView;
-            id delegate = (callback && [callback isKindOfClass:[NSString class]]) ? self : nil;
+            id delegate = (callback != nil && [callback isKindOfClass:[NSString class]]) ? self : nil;
             
             if (! buttons.count) {
                 alertView = [[UIAlertView alloc] initWithTitle:title
@@ -1745,10 +1744,10 @@ forBarButtonItemNamed:(NSString *)name {
                 }
             }
             
-            if (delegate) {
-                alertView.tag = ++_alertViewCounter;
+            if (delegate != nil) {
+                alertView.tag = [self alertViewTag];
                 [alertCallbacks setObject:callback
-                                   forKey:[NSString stringWithFormat:@"%ld", (long)alertView.tag]];
+                                   forKey:[NSNumber numberWithInteger:alertView.tag]];
             }
             
             [[NSOperationQueue mainQueue] addOperationWithBlock:^ {
@@ -1763,15 +1762,23 @@ forBarButtonItemNamed:(NSString *)name {
 #endif
 }
 
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    NSString * callback = [alertCallbacks objectForKey:[NSString stringWithFormat:@"%ld", (long)alertView.tag]];
+- (NSInteger)alertViewTag {
+    CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);
+    CFStringRef uuidStringRef = CFUUIDCreateString(kCFAllocatorDefault, uuidRef);
+    CFRelease(uuidRef);
+    return ((__bridge_transfer NSString *) uuidStringRef).integerValue;
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    NSNumber *key = [NSNumber numberWithInteger:alertView.tag];
     
-    if (callback
+    NSString *callback = [alertCallbacks objectForKey:key];
+    if (callback != nil
         && [callback isKindOfClass:[NSString class]]) {
-        NSDictionary * data = [NSDictionary dictionaryWithObjectsAndKeys:   [NSNumber numberWithInteger:buttonIndex], kJSAlertButtonIndex,
-                                                                            nil];
-        [self sendCallback:callback withData:data];
+        [self sendCallback:callback
+                  withData:@{kJSAlertButtonIndex: [NSNumber numberWithInteger:buttonIndex]}];
+        
+        [alertCallbacks removeObjectForKey:key];
     }
 }
 
