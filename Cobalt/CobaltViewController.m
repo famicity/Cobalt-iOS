@@ -106,6 +106,9 @@ NSString * webLayerPage;
     toJavaScriptOperationQueue = [[NSOperationQueue alloc] init] ;
     [toJavaScriptOperationQueue setSuspended:YES];
     
+    fromJavaScriptOperationQueue = [[NSOperationQueue alloc] init] ;
+    [fromJavaScriptOperationQueue setSuspended:YES];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(onAppStarted:)
                                                  name:kOnAppStarted object:nil];
@@ -146,8 +149,6 @@ NSString * webLayerPage;
     // Do any additional setup after loading the view from its nib.
     [self customWebView];
     [webView setDelegate:self];
-    
-    fromJavaScriptOperationQueue = [[NSOperationQueue alloc] init] ;
     
     _alertViewCounter = 0;
     alertCallbacks = [[NSMutableDictionary alloc] init];
@@ -225,10 +226,14 @@ NSString * webLayerPage;
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    
+    [fromJavaScriptOperationQueue setSuspended:NO];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
+    
+    [fromJavaScriptOperationQueue setSuspended:YES];
     
     [self resetBars];
     
