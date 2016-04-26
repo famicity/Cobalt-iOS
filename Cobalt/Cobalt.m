@@ -321,7 +321,7 @@ static NSString *sResourcePath;
 
 + (NSDictionary *)cobaltConfiguration {
     if (sCobaltConfiguration != nil) {
-        return sCobaltConfiguration;
+        return (NSMutableDictionary *) CFBridgingRelease(CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (CFDictionaryRef) sCobaltConfiguration, kCFPropertyListMutableContainersAndLeaves));
     }
     
     NSString *cobaltResourcePath = [Cobalt resourcePath];
@@ -337,7 +337,7 @@ static NSString *sResourcePath;
     }
     
     sCobaltConfiguration = [Cobalt dictionaryWithData:data];
-    return sCobaltConfiguration;
+    return (NSMutableDictionary *) CFBridgingRelease(CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (CFDictionaryRef) sCobaltConfiguration, kCFPropertyListMutableContainersAndLeaves));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
