@@ -64,7 +64,7 @@
         if (badge != nil && [badge isKindOfClass:[NSString class]]) {
             if (iosIcon != nil
                 && [iosIcon isKindOfClass:[NSString class]]) {
-                UIImage *image = [UIImage imageNamed:iosIcon];
+                UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
                 if (image != nil) {
                     _button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 22, 22)];
                     [_button setImage:image
@@ -113,7 +113,7 @@
         else {
             if (iosIcon != nil
                 && [iosIcon isKindOfClass:[NSString class]]) {
-                UIImage *image = [UIImage imageNamed:iosIcon];
+                UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
                 if (image != nil) {
                     self = [super initWithImage:image
                                           style:UIBarButtonItemStylePlain
@@ -230,7 +230,7 @@
     if (_button != nil) {
         if (iosIcon != nil
             && [iosIcon isKindOfClass:[NSString class]]) {
-            UIImage *image = [UIImage imageNamed:iosIcon];
+            UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
             if (image != nil) {
                 [_button setImage:image
                          forState:UIControlStateNormal];
@@ -262,7 +262,7 @@
     else {
         if (iosIcon != nil
             && [iosIcon isKindOfClass:[NSString class]]) {
-            UIImage *image = [UIImage imageNamed:iosIcon];
+            UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
             if (image != nil) {
                 [self setImage:image];
             }
