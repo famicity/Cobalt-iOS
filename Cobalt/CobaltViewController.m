@@ -84,20 +84,62 @@ NSString * webLayerPage;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    if (self = [super initWithNibName:nibNameOrNil
-                               bundle:nibBundleOrNil]) {
-        _firstAppearance = YES;
-        
-        toJavaScriptOperationQueue = [[NSOperationQueue alloc] init] ;
-        [toJavaScriptOperationQueue setSuspended:YES];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(onAppStarted:)
-                                                     name:kOnAppStarted object:nil];
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    if (self = [super initWithCoder:aDecoder]) {
+        [self initCobalt];
     }
     
     return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil
+               bundle:(NSBundle *)nibBundleOrNil {
+    if (self = [super initWithNibName:nibNameOrNil
+                               bundle:nibBundleOrNil]) {
+        [self initCobalt];
+    }
+    
+    return self;
+}
+
+- (void)initCobalt {
+    toJavaScriptOperationQueue = [[NSOperationQueue alloc] init] ;
+    [toJavaScriptOperationQueue setSuspended:YES];
+    
+    fromJavaScriptOperationQueue = [[NSOperationQueue alloc] init] ;
+    [fromJavaScriptOperationQueue setSuspended:YES];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(onAppStarted:)
+                                                 name:kOnAppStarted object:nil];
+}
+
+- (void)initWithPage:(nonnull NSString *)page
+       andController:(nullable NSString *)controller {
+    self.pageName = page;
+    
+    NSDictionary *configuration = [Cobalt configurationForController:controller];
+    if (configuration == nil) {
+        configuration = [Cobalt defaultConfiguration];
+    }
+    
+    if (configuration == nil) {
+        self.isPullToRefreshEnabled = false;
+        self.isInfiniteScrollEnabled = false;
+        self.infiniteScrollOffset = 0;
+        self.barsConfiguration = nil;
+    }
+    else {
+        BOOL pullToRefreshEnabled = [[configuration objectForKey:kConfigurationControllerPullToRefresh] boolValue];
+        BOOL infiniteScrollEnabled = [[configuration objectForKey:kConfigurationControllerInfiniteScroll] boolValue];
+        int infiniteScrollOffset = [configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] != nil ? [[configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] intValue] : 0;
+        NSDictionary *barsDictionary = [configuration objectForKey:kConfigurationBars];
+
+        self.isPullToRefreshEnabled = pullToRefreshEnabled;
+        self.isInfiniteScrollEnabled = infiniteScrollEnabled;
+        self.infiniteScrollOffset = infiniteScrollOffset;
+        self.barsConfiguration = [barsDictionary mutableCopy];
+    }
 }
 
 - (void)viewDidLoad
@@ -108,9 +150,6 @@ NSString * webLayerPage;
     [self customWebView];
     [webView setDelegate:self];
     
-    fromJavaScriptOperationQueue = [[NSOperationQueue alloc] init] ;
-    
-    _alertViewCounter = 0;
     alertCallbacks = [[NSMutableDictionary alloc] init];
     toastsToShow = [[NSMutableArray alloc] init];
     
@@ -177,28 +216,23 @@ NSString * webLayerPage;
                                              selector:@selector(onAppForeground:)
                                                  name:kOnAppForegroundNotification object:nil];
     
-    if (_firstAppearance) {
-        _firstAppearance = NO;
-        
-        [self sendEvent:JSEventOnPageShown
-               withData:_pushedData
-            andCallback:nil];
-    }
-    else {
-        [self sendEvent:JSEventOnPageShown
-               withData:_poppedData
-            andCallback:nil];
-        
-        _poppedData = nil;
-    }
+    [self sendEvent:JSEventOnPageShown
+           withData:_navigationData
+        andCallback:nil];
+    
+    _navigationData = nil;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    
+    [fromJavaScriptOperationQueue setSuspended:NO];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
+    
+    [fromJavaScriptOperationQueue setSuspended:YES];
     
     [self resetBars];
     
@@ -1370,7 +1404,7 @@ forBarButtonItemNamed:(NSString *)name {
             
             if (innerData != nil
                 && [innerData isKindOfClass:[NSDictionary class]]) {
-                viewController.pushedData = innerData;
+                viewController.navigationData = innerData;
             }
             
             // Push corresponding viewController
@@ -1418,7 +1452,7 @@ forBarButtonItemNamed:(NSString *)name {
             if (viewControllers.count > 1) {
                 UIViewController *popToViewController = [viewControllers objectAtIndex:viewControllers.count - 2];
                 if ([popToViewController isKindOfClass:[CobaltViewController class]]) {
-                    ((CobaltViewController *)popToViewController).poppedData = innerData;
+                    ((CobaltViewController *)popToViewController).navigationData = innerData;
                 }
             }
         }
@@ -1442,7 +1476,7 @@ forBarButtonItemNamed:(NSString *)name {
                 && (page == nil || ([viewController isKindOfClass:[CobaltViewController class]] && [((CobaltViewController *)viewController).pageName isEqualToString:page]))) {
                 if ([viewController isKindOfClass:[CobaltViewController class]]
                     && innerData != nil && [innerData isKindOfClass:[NSDictionary class]]) {
-                    ((CobaltViewController *)viewController).poppedData = innerData;
+                    ((CobaltViewController *)viewController).navigationData = innerData;
                 }
                 
                 dispatch_async(dispatch_get_main_queue(), ^{
@@ -1473,7 +1507,7 @@ forBarButtonItemNamed:(NSString *)name {
             
             if (innerData != nil
                 && [innerData isKindOfClass:[NSDictionary class]]) {
-                viewController.pushedData = innerData;
+                viewController.navigationData = innerData;
             }
             
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -1531,7 +1565,7 @@ forBarButtonItemNamed:(NSString *)name {
             
             if (popToViewController
                 && [popToViewController isKindOfClass:[CobaltViewController class]]) {
-                ((CobaltViewController *)popToViewController).poppedData = innerData;
+                ((CobaltViewController *)popToViewController).navigationData = innerData;
             }
         }
         
@@ -1567,7 +1601,7 @@ forBarButtonItemNamed:(NSString *)name {
             
             if (innerData != nil
                 && [innerData isKindOfClass:[NSDictionary class]]) {
-                viewController.pushedData = innerData;
+                viewController.navigationData = innerData;
             }
             
             // replace current view with corresponding viewController
@@ -1685,7 +1719,7 @@ forBarButtonItemNamed:(NSString *)name {
         }
         else {
             UIAlertView * alertView;
-            id delegate = (callback && [callback isKindOfClass:[NSString class]]) ? self : nil;
+            id delegate = (callback != nil && [callback isKindOfClass:[NSString class]]) ? self : nil;
             
             if (! buttons.count) {
                 alertView = [[UIAlertView alloc] initWithTitle:title
@@ -1710,10 +1744,10 @@ forBarButtonItemNamed:(NSString *)name {
                 }
             }
             
-            if (delegate) {
-                alertView.tag = ++_alertViewCounter;
+            if (delegate != nil) {
+                alertView.tag = [self alertViewTag];
                 [alertCallbacks setObject:callback
-                                   forKey:[NSString stringWithFormat:@"%ld", (long)alertView.tag]];
+                                   forKey:[NSNumber numberWithInteger:alertView.tag]];
             }
             
             [[NSOperationQueue mainQueue] addOperationWithBlock:^ {
@@ -1728,15 +1762,23 @@ forBarButtonItemNamed:(NSString *)name {
 #endif
 }
 
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    NSString * callback = [alertCallbacks objectForKey:[NSString stringWithFormat:@"%ld", (long)alertView.tag]];
+- (NSInteger)alertViewTag {
+    CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);
+    CFStringRef uuidStringRef = CFUUIDCreateString(kCFAllocatorDefault, uuidRef);
+    CFRelease(uuidRef);
+    return ((__bridge_transfer NSString *) uuidStringRef).integerValue;
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    NSNumber *key = [NSNumber numberWithInteger:alertView.tag];
     
-    if (callback
+    NSString *callback = [alertCallbacks objectForKey:key];
+    if (callback != nil
         && [callback isKindOfClass:[NSString class]]) {
-        NSDictionary * data = [NSDictionary dictionaryWithObjectsAndKeys:   [NSNumber numberWithInteger:buttonIndex], kJSAlertButtonIndex,
-                                                                            nil];
-        [self sendCallback:callback withData:data];
+        [self sendCallback:callback
+                  withData:@{kJSAlertButtonIndex: [NSNumber numberWithInteger:buttonIndex]}];
+        
+        [alertCallbacks removeObjectForKey:key];
     }
 }
 

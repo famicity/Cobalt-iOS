@@ -41,7 +41,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 //COBALT VERSION
-#define IOSCurrentVersion                   @"0.5.0"
+#define IOSCurrentVersion                   @"0.5.1"
 
 // GENERAL
 #define kJSAction                           @"action"
@@ -216,8 +216,6 @@ typedef enum {
 @private
     
     id<CobaltDelegate> _delegate;
-    BOOL _firstAppearance;
-    int _alertViewCounter;
     float _lastWebviewContentOffset;
 	BOOL _isLoadingMore;
     BOOL _isRefreshing;
@@ -252,16 +250,10 @@ typedef enum {
 @property (strong, nonatomic) NSString * pageName;
 
 /*!
- @property		pushedData
- @abstract		the data to pass to the webview in onPageShown event when pushed or modaled
+ @property             navigationData
+ @abstract             the data to pass to the webview in onPageShown event on navigation
  */
-@property (strong, nonatomic) NSDictionary *pushedData;
-
-/*!
- @property		poppedData
- @abstract		the data to pass to the webview in onPageShown event when popped or dismissed
- */
-@property (strong, nonatomic) NSDictionary *poppedData;
+@property (strong, nonatomic) NSDictionary *navigationData;
 
 @property (strong, nonatomic) UIWebView * webLayer;
 
@@ -301,6 +293,13 @@ typedef enum {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*!
+ @method		- (void)initWithPage:(nonnull NSString *)page andController:(nullable NSString *)controller
+ @abstract		this method sets the configuration of the native controller. If the controller is instantiated from a storyboard, override the initWithCoder: method and call it in instead of instantiate it programmatically
+ */
+- (void)initWithPage:(nonnull NSString *)page
+       andController:(nullable NSString *)controller;
+    
 /*!
  @method		- (void)setDelegate:(id)delegate
  @abstract		this method sets the delegate which responds to CobaltDelegate protocol
@@ -379,8 +378,9 @@ typedef enum {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)configureBars;
+- (void)setBarButtonItems;
 - (CobaltBarButtonItem *)barButtonItemForAction:(NSDictionary *)action;
-    
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma mark PULL-TO-REFRESH METHODS
