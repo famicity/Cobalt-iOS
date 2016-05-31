@@ -41,7 +41,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 //COBALT VERSION
-#define IOSCurrentVersion                   @"0.5.0"
+#define IOSCurrentVersion                   @"0.5.1"
 
 // GENERAL
 #define kJSAction                           @"action"
