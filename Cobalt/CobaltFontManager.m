@@ -38,7 +38,7 @@ static NSDictionary *sFontsConfiguration;
 
 + (UIImage *)imageWithIcon:(NSString *)identifier
                      color:(UIColor *)color
-                   andSize:(CGSize)size {
+                   andSize:(CGFloat)size {
     UIImage *image = nil;
     
     if (identifier != nil) {
@@ -69,7 +69,6 @@ static NSDictionary *sFontsConfiguration;
                     }
                 }
             }
-            
         }
     }
     

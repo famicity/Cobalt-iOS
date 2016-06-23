@@ -77,7 +77,7 @@
                 && [icon isKindOfClass:[NSString class]]) {
                 UIImage *image = [CobaltFontManager imageWithIcon:icon
                                                             color:self.tintColor
-                                                          andSize:CGSizeMake(22, 22)];
+                                                          andSize:22];
                 if (image != nil) {
                     _button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 22, 22)];
                     [_button setImage:image
@@ -125,7 +125,7 @@
                     && [icon isKindOfClass:[NSString class]]) {
                 UIImage *image = [CobaltFontManager imageWithIcon:icon
                                                             color:self.tintColor
-                                                          andSize:CGSizeMake(22, 22)];
+                                                          andSize:22];
                 if (image != nil) {
                     self = [super initWithImage:image
                                           style:UIBarButtonItemStylePlain
@@ -240,7 +240,7 @@
                  && [icon isKindOfClass:[NSString class]]) {
             UIImage *image = [CobaltFontManager imageWithIcon:icon
                                                         color:self.tintColor
-                                                      andSize:CGSizeMake(22, 22)];
+                                                      andSize:22];
             if (image != nil) {
                 [_button setImage:image
                          forState:UIControlStateNormal];
@@ -271,7 +271,7 @@
                  && [icon isKindOfClass:[NSString class]]) {
             UIImage *image = [CobaltFontManager imageWithIcon:icon
                                                         color:self.tintColor
-                                                      andSize:CGSizeMake(22, 22)];
+                                                      andSize:22];
             if (image != nil) {
                 [self setImage:image];
             }
