@@ -124,17 +124,27 @@ NSString * webLayerPage;
     }
     
     if (configuration == nil) {
+        _background = [UIColor whiteColor];
         self.isPullToRefreshEnabled = false;
         self.isInfiniteScrollEnabled = false;
         self.infiniteScrollOffset = 0;
         self.barsConfiguration = nil;
     }
     else {
+        id background = [configuration objectForKey:kConfigurationControllerBackground];
         BOOL pullToRefreshEnabled = [[configuration objectForKey:kConfigurationControllerPullToRefresh] boolValue];
         BOOL infiniteScrollEnabled = [[configuration objectForKey:kConfigurationControllerInfiniteScroll] boolValue];
         int infiniteScrollOffset = [configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] != nil ? [[configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] intValue] : 0;
         NSDictionary *barsDictionary = [configuration objectForKey:kConfigurationBars];
 
+        _background = [UIColor whiteColor];
+        if (background != nil
+            && [background isKindOfClass:[NSString class]]) {
+            UIColor *parsedBackground = [Cobalt colorFromHexString:background];
+            if (parsedBackground != nil) {
+                _background = parsedBackground;
+            }
+        }
         self.isPullToRefreshEnabled = pullToRefreshEnabled;
         self.isInfiniteScrollEnabled = infiniteScrollEnabled;
         self.infiniteScrollOffset = infiniteScrollOffset;
@@ -147,6 +157,7 @@ NSString * webLayerPage;
     [super viewDidLoad];
     
     // Do any additional setup after loading the view from its nib.
+    webView.backgroundColor = _background;
     [self customWebView];
     [webView setDelegate:self];
     

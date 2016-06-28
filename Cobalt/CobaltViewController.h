@@ -264,6 +264,12 @@ typedef enum {
 @property (strong, nonatomic) UIRefreshControl *refreshControl;
 
 /*!
+ @property		background
+ @abstract		background color of the WebView
+ */
+@property (strong, nonatomic) UIColor *background;
+
+/*!
  @property		isPullToRefreshEnabled
  @abstract		allows or not the pullToRefresh functionality
  */

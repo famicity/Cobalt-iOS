@@ -103,6 +103,17 @@ static NSString *sResourcePath;
     
     NSString *class = [configuration objectForKey:kConfigurationIOS];
     nib = [configuration objectForKey:kConfigurationControllerIOSNibName];
+    
+    id background = [configuration objectForKey:kConfigurationControllerBackground];
+    UIColor *backgroundColor = [UIColor whiteColor];
+    if (background != nil
+        && [background isKindOfClass:[NSString class]]) {
+        UIColor *parsedBackground = [Cobalt colorFromHexString:background];
+        if (parsedBackground != nil) {
+            backgroundColor = parsedBackground;
+        }
+    }
+    
     BOOL pullToRefreshEnabled = [[configuration objectForKey:kConfigurationControllerPullToRefresh] boolValue];
     BOOL infiniteScrollEnabled = [[configuration objectForKey:kConfigurationControllerInfiniteScroll] boolValue];
     int infiniteScrollOffset = [configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] != nil ? [[configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] intValue] : 0;
@@ -133,6 +144,7 @@ static NSString *sResourcePath;
             }
             
             viewController.pageName = page;
+            viewController.background = backgroundColor;
             viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
             viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
             viewController.infiniteScrollOffset = infiniteScrollOffset;
@@ -145,6 +157,7 @@ static NSString *sResourcePath;
             CobaltViewController *viewController = [[NSClassFromString(class) alloc] initWithNibName:nib
                                                                                               bundle:mainBundle];
             viewController.pageName = page;
+            viewController.background = backgroundColor;
             viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
             viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
             viewController.infiniteScrollOffset = infiniteScrollOffset;
