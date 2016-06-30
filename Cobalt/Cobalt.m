@@ -93,6 +93,7 @@ static NSString *sResourcePath;
         CobaltViewController *viewController = [[CobaltViewController alloc] initWithNibName:nib
                                                                                       bundle:cobaltBundle];
         viewController.pageName = page;
+        viewController.background = [UIColor whiteColor];
         viewController.isPullToRefreshEnabled = false;
         viewController.isInfiniteScrollEnabled = false;
         viewController.infiniteScrollOffset = 0;
