@@ -67,6 +67,7 @@ FOUNDATION_EXPORT const unsigned char CobaltVersionString[];
 #define kConfigurationControllerDefault                 @"default"
 #define kConfigurationControllerIOSNibName              @"iosNibName"
 #define kConfigurationControllerBackground              @"background"
+#define kConfigurationControllerScrollsToTop            @"iosScrollToTop"
 #define kConfigurationControllerPullToRefresh           @"pullToRefresh"
 #define kConfigurationControllerInfiniteScroll          @"infiniteScroll"
 #define kConfigurationControllerInfiniteScrollOffset    @"infiniteScrollOffset"

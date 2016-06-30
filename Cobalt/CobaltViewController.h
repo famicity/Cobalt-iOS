@@ -270,6 +270,12 @@ typedef enum {
 @property (strong, nonatomic) UIColor *background;
 
 /*!
+ @property		scrollsToTop
+ @abstract		allows or not the scrollsToTop functionality
+ */
+@property BOOL scrollsToTop;
+
+/*!
  @property		isPullToRefreshEnabled
  @abstract		allows or not the pullToRefresh functionality
  */
