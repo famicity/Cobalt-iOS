@@ -106,13 +106,13 @@ static NSString *sResourcePath;
     NSString *class = [configuration objectForKey:kConfigurationIOS];
     nib = [configuration objectForKey:kConfigurationControllerIOSNibName];
     
-    id background = [configuration objectForKey:kConfigurationControllerBackground];
-    UIColor *backgroundColor = [UIColor whiteColor];
-    if (background != nil
-        && [background isKindOfClass:[NSString class]]) {
-        UIColor *parsedBackground = [Cobalt colorFromHexString:background];
-        if (parsedBackground != nil) {
-            backgroundColor = parsedBackground;
+    id backgroundColor = [configuration objectForKey:kConfigurationControllerBackgroundColor];
+    UIColor *background = [UIColor whiteColor];
+    if (backgroundColor != nil
+        && [backgroundColor isKindOfClass:[NSString class]]) {
+        UIColor *parsedBackgroundColor = [Cobalt colorFromHexString:backgroundColor];
+        if (parsedBackgroundColor != nil) {
+            background = parsedBackgroundColor;
         }
     }
     
@@ -147,7 +147,7 @@ static NSString *sResourcePath;
             }
             
             viewController.pageName = page;
-            viewController.background = backgroundColor;
+            viewController.background = background;
             viewController.scrollsToTop = scrollsToTop;
             viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
             viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
@@ -161,7 +161,7 @@ static NSString *sResourcePath;
             CobaltViewController *viewController = [[NSClassFromString(class) alloc] initWithNibName:nib
                                                                                               bundle:mainBundle];
             viewController.pageName = page;
-            viewController.background = backgroundColor;
+            viewController.background = background;
             viewController.scrollsToTop = scrollsToTop;
             viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
             viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;

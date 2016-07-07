@@ -132,7 +132,7 @@ NSString * webLayerPage;
         self.barsConfiguration = nil;
     }
     else {
-        id background = [configuration objectForKey:kConfigurationControllerBackground];
+        id backgroundColor = [configuration objectForKey:kConfigurationControllerBackgroundColor];
         BOOL scrollsToTop = [[configuration objectForKey:kConfigurationControllerScrollsToTop] boolValue];
         BOOL pullToRefreshEnabled = [[configuration objectForKey:kConfigurationControllerPullToRefresh] boolValue];
         BOOL infiniteScrollEnabled = [[configuration objectForKey:kConfigurationControllerInfiniteScroll] boolValue];
@@ -140,11 +140,11 @@ NSString * webLayerPage;
         NSDictionary *barsDictionary = [configuration objectForKey:kConfigurationBars];
 
         _background = [UIColor whiteColor];
-        if (background != nil
-            && [background isKindOfClass:[NSString class]]) {
-            UIColor *parsedBackground = [Cobalt colorFromHexString:background];
-            if (parsedBackground != nil) {
-                _background = parsedBackground;
+        if (backgroundColor != nil
+            && [backgroundColor isKindOfClass:[NSString class]]) {
+            UIColor *parsedBackgroundColor = [Cobalt colorFromHexString:backgroundColor];
+            if (parsedBackgroundColor != nil) {
+                _background = parsedBackgroundColor;
             }
         }
         _scrollsToTop = scrollsToTop;
@@ -160,7 +160,7 @@ NSString * webLayerPage;
     [super viewDidLoad];
     
     // Do any additional setup after loading the view from its nib.
-    webView.backgroundColor = _background;
+    self.view.backgroundColor = _background;
     webView.scrollView.scrollsToTop = _scrollsToTop;
     
     [self customWebView];
