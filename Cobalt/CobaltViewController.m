@@ -129,6 +129,7 @@ NSString * webLayerPage;
         self.isPullToRefreshEnabled = false;
         self.isInfiniteScrollEnabled = false;
         self.infiniteScrollOffset = 0;
+        self.statusBarConfiguration = nil;
         self.barsConfiguration = nil;
     }
     else {
@@ -137,6 +138,7 @@ NSString * webLayerPage;
         BOOL pullToRefreshEnabled = [[configuration objectForKey:kConfigurationControllerPullToRefresh] boolValue];
         BOOL infiniteScrollEnabled = [[configuration objectForKey:kConfigurationControllerInfiniteScroll] boolValue];
         int infiniteScrollOffset = [configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] != nil ? [[configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] intValue] : 0;
+        NSDictionary *statusBarDictionary = [configuration objectForKey:kConfigurationStatusBar];
         NSDictionary *barsDictionary = [configuration objectForKey:kConfigurationBars];
 
         _background = [UIColor whiteColor];
@@ -151,6 +153,7 @@ NSString * webLayerPage;
         self.isPullToRefreshEnabled = pullToRefreshEnabled;
         self.isInfiniteScrollEnabled = infiniteScrollEnabled;
         self.infiniteScrollOffset = infiniteScrollOffset;
+        self.statusBarConfiguration = statusBarDictionary;
         self.barsConfiguration = [barsDictionary mutableCopy];
     }
 }
@@ -306,6 +309,43 @@ NSString * webLayerPage;
         andCallback:nil];
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark STATUS BAR
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (BOOL)prefersStatusBarHidden {
+    if (_statusBarConfiguration != nil
+        && [_statusBarConfiguration isKindOfClass:[NSDictionary class]]) {
+        id visible = [_statusBarConfiguration objectForKey:kConfigurationStatusBarVisible];
+        if (visible != nil
+            && [visible isKindOfClass:[NSNumber class]]) {
+            return ! [visible boolValue];
+        }
+    }
+    
+    return NO;
+}
+
+- (void)setWebViewMarginTop {
+    for (NSLayoutConstraint *constraint in [self.view constraints]) {
+        if ([@"webViewMarginTop" isEqualToString:[constraint identifier]]) {
+            _webViewMarginTopConstraint = constraint;
+        }
+    }
+    
+    NSLog(@"navigationController visible? %d", ! self.navigationController.navigationBarHidden);
+    if (! [self prefersStatusBarHidden]
+        && self.navigationController.navigationBarHidden) {
+        [_webViewMarginTopConstraint setConstant:20];
+    }
+    else {
+        [_webViewMarginTopConstraint setConstant:0];
+    }
+    
+    [self.view layoutIfNeeded];
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -370,6 +410,8 @@ NSString * webLayerPage;
                 [self.navigationController setNavigationBarHidden:YES
                                                          animated:YES];
             }
+            
+            [self setWebViewMarginTop];
             
             if (bottom != nil
                 && [bottom isKindOfClass:[NSNumber class]]) {
@@ -473,6 +515,8 @@ NSString * webLayerPage;
                                                  animated:YES];
         [barsVisible setObject:top
                         forKey:kConfigurationBarsVisibleTop];
+        
+        [self setWebViewMarginTop];
     }
     if (bottom != nil
         && [bottom isKindOfClass:[NSNumber class]]) {

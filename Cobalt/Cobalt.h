@@ -72,6 +72,11 @@ FOUNDATION_EXPORT const unsigned char CobaltVersionString[];
 #define kConfigurationControllerInfiniteScroll          @"infiniteScroll"
 #define kConfigurationControllerInfiniteScrollOffset    @"infiniteScrollOffset"
 
+// STATUS BAR
+#define kConfigurationStatusBar             @"statusBar"
+#define kConfigurationStatusBarVisible      @"visible"
+#define kConfigurationStatusBarLightText    @"lightText"
+
 // BARS
 #define kConfigurationBars                          @"bars"
 #define kConfigurationBarsBackgroundColor           @"backgroundColor"

@@ -216,6 +216,7 @@ typedef enum {
 @private
     
     id<CobaltDelegate> _delegate;
+    NSLayoutConstraint *_webViewMarginTopConstraint;
     float _lastWebviewContentOffset;
 	BOOL _isLoadingMore;
     BOOL _isRefreshing;
@@ -292,6 +293,12 @@ typedef enum {
  @abstract		offset to trigger infinite scroll
  */
 @property int infiniteScrollOffset;
+
+/*!
+ @property		statusBarConfiguration
+ @abstract		status bar configuration as defined in cobalt.conf or sent by Web on navigation
+ */
+@property NSDictionary *statusBarConfiguration;
 
 /*!
  @property		barsConfiguration

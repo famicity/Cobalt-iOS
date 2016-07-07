@@ -98,6 +98,7 @@ static NSString *sResourcePath;
         viewController.isPullToRefreshEnabled = false;
         viewController.isInfiniteScrollEnabled = false;
         viewController.infiniteScrollOffset = 0;
+        viewController.statusBarConfiguration = nil;
         viewController.barsConfiguration = nil;
         
         return viewController;
@@ -120,6 +121,7 @@ static NSString *sResourcePath;
     BOOL pullToRefreshEnabled = [[configuration objectForKey:kConfigurationControllerPullToRefresh] boolValue];
     BOOL infiniteScrollEnabled = [[configuration objectForKey:kConfigurationControllerInfiniteScroll] boolValue];
     int infiniteScrollOffset = [configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] != nil ? [[configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] intValue] : 0;
+    NSDictionary *statusBarDictionary = [configuration objectForKey:kConfigurationStatusBar];
     NSDictionary *barsDictionary = [configuration objectForKey:kConfigurationBars];
     
     if (class == nil) {
@@ -152,6 +154,7 @@ static NSString *sResourcePath;
             viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
             viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
             viewController.infiniteScrollOffset = infiniteScrollOffset;
+            viewController.statusBarConfiguration = statusBarDictionary;
             viewController.barsConfiguration = barsDictionary;
             
             return viewController;
@@ -166,6 +169,7 @@ static NSString *sResourcePath;
             viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
             viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
             viewController.infiniteScrollOffset = infiniteScrollOffset;
+            viewController.statusBarConfiguration = statusBarDictionary;
             viewController.barsConfiguration = barsDictionary;
             
             return viewController;
