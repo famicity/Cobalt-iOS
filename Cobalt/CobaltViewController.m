@@ -133,7 +133,7 @@ NSString * webLayerPage;
     }
     else {
         id backgroundColor = [configuration objectForKey:kConfigurationControllerBackgroundColor];
-        BOOL scrollsToTop = [[configuration objectForKey:kConfigurationControllerScrollsToTop] boolValue];
+        BOOL scrollsToTop = [configuration objectForKey:kConfigurationControllerScrollsToTop] != nil ? [[configuration objectForKey:kConfigurationControllerScrollsToTop] boolValue] : YES;
         BOOL pullToRefreshEnabled = [[configuration objectForKey:kConfigurationControllerPullToRefresh] boolValue];
         BOOL infiniteScrollEnabled = [[configuration objectForKey:kConfigurationControllerInfiniteScroll] boolValue];
         int infiniteScrollOffset = [configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] != nil ? [[configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] intValue] : 0;
