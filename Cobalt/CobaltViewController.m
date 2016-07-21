@@ -125,7 +125,7 @@ NSString * webLayerPage;
     
     if (configuration == nil) {
         _background = [UIColor whiteColor];
-        _scrollsToTop = NO;
+        _scrollsToTop = YES;
         self.isPullToRefreshEnabled = false;
         self.isInfiniteScrollEnabled = false;
         self.infiniteScrollOffset = 0;

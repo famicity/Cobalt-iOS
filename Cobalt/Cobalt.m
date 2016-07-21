@@ -94,7 +94,7 @@ static NSString *sResourcePath;
                                                                                       bundle:cobaltBundle];
         viewController.pageName = page;
         viewController.background = [UIColor whiteColor];
-        viewController.scrollsToTop = NO;
+        viewController.scrollsToTop = YES;
         viewController.isPullToRefreshEnabled = false;
         viewController.isInfiniteScrollEnabled = false;
         viewController.infiniteScrollOffset = 0;
