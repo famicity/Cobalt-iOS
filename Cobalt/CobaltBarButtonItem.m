@@ -36,11 +36,13 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+#pragma mark -
 #pragma mark INIT
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (instancetype)initWithAction:(NSDictionary *)action
+                     barHeight:(CGFloat)barHeight
                       barColor:(UIColor *)barColor
                    andDelegate:(id<CobaltBarButtonItemDelegate>)delegate {
     id name = [action objectForKey:kConfigurationBarsActionName];                 //NSString  (mandatory)
@@ -51,6 +53,8 @@
     id badge = [action objectForKey:kConfigurationBarsActionBadge];               //NSString  (default: nil)
     id enabled = [action objectForKey:kConfigurationBarsActionEnabled];           //BOOL      (default: true)
     id visible = [action objectForKey:kConfigurationBarsActionVisible];           //BOOL      (default: true)
+    
+    _barHeight = barHeight;
     
     if (color != nil
         && [color isKindOfClass:[NSString class]]) {
@@ -66,7 +70,7 @@
                 && [iosIcon isKindOfClass:[NSString class]]) {
                 UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
                 if (image != nil) {
-                    _button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 22, 22)];
+                    _button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, _barHeight / 2.0, _barHeight / 2.0)];
                     [_button setImage:image
                             forState:UIControlStateNormal];
                 }
@@ -75,18 +79,20 @@
             if (_button == nil
                 && icon != nil
                 && [icon isKindOfClass:[NSString class]]) {
-                UIImage *image = [CobaltFontManager imageWithIcon:icon
+                _icon = icon;
+                
+                UIImage *image = [CobaltFontManager imageWithIcon:_icon
                                                             color:self.tintColor
-                                                          andSize:22];
+                                                          andSize:_barHeight / 2.0];
                 if (image != nil) {
-                    _button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 22, 22)];
+                    _button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, _barHeight / 2.0, _barHeight / 2.0)];
                     [_button setImage:image
                             forState:UIControlStateNormal];
                 }
             }
             
             if (_button == nil) {
-                _button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 22, 22)];
+                _button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, _barHeight / 2.0, _barHeight / 2.0)];
                 [_button setTitle:title
                         forState:UIControlStateNormal];
             }
@@ -123,9 +129,11 @@
             }
             else if(icon != nil
                     && [icon isKindOfClass:[NSString class]]) {
-                UIImage *image = [CobaltFontManager imageWithIcon:icon
+                _icon = icon;
+                
+                UIImage *image = [CobaltFontManager imageWithIcon:_icon
                                                             color:self.tintColor
-                                                          andSize:22];
+                                                          andSize:_barHeight / 2.0];
                 if (image != nil) {
                     self = [super initWithImage:image
                                           style:UIBarButtonItemStylePlain
@@ -167,19 +175,112 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma mark BUTTON / BARBUTTONITEM DELEGATE
+#pragma mark -
+#pragma mark METHODS
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)onBarButtonItemPressed:(id)sender {
-    if (_delegate != nil) {
-        [_delegate onBarButtonItemPressed:_name];
+- (void)resizeWithBarHeight:(CGFloat)barHeight {
+    _barHeight = barHeight;
+    
+    if (_icon != nil
+        && [_icon isKindOfClass:[NSString class]]) {
+        UIImage *image = [CobaltFontManager imageWithIcon:_icon
+                                                    color:self.tintColor
+                                                  andSize:_barHeight / 2.0];
+        if (image != nil) {
+            if (_button != nil) {
+                [_button setImage:image
+                         forState:UIControlStateNormal];
+            }
+            else {
+                [self setImage:image];
+            }
+        }
+    }
+}
+
+- (void)setContent:(NSDictionary *)content {
+    id iosIcon = [content objectForKey:kConfigurationBarsActionIconIOS];
+    id icon = [content objectForKey:kConfigurationBarsActionIcon];
+    id title = [content objectForKey:kConfigurationBarsActionTitle];
+    id color = [content objectForKey:kConfigurationBarsActionColor];
+    
+    if (color != nil
+        && [color isKindOfClass:[NSString class]]) {
+        _color = [Cobalt colorFromHexString:color];
+        self.tintColor = _color;
+    }
+    
+    if (_button != nil) {
+        if (iosIcon != nil
+            && [iosIcon isKindOfClass:[NSString class]]) {
+            UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+            if (image != nil) {
+                [_button setImage:image
+                         forState:UIControlStateNormal];
+            }
+        }
+        else if (icon != nil
+                 && [icon isKindOfClass:[NSString class]]) {
+            _icon = icon;
+            
+            UIImage *image = [CobaltFontManager imageWithIcon:_icon
+                                                        color:self.tintColor
+                                                      andSize:_barHeight / 2.0];
+            if (image != nil) {
+                [_button setImage:image
+                         forState:UIControlStateNormal];
+            }
+        }
+        else if (title != nil
+                 && [title isKindOfClass:[NSString class]]) {
+            [_button setImage:nil
+                     forState:UIControlStateNormal];
+            [_button setTitle:title
+                     forState:UIControlStateNormal];
+        }
+        
+        if (title != nil
+            && [title isKindOfClass:[NSString class]]) {
+            _button.accessibilityLabel = [NSString stringWithFormat:@"%@ %@", _badgeLabel.text, title];
+        }
+    }
+    else {
+        if (iosIcon != nil
+            && [iosIcon isKindOfClass:[NSString class]]) {
+            UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+            if (image != nil) {
+                [self setImage:image];
+            }
+        }
+        else if (icon != nil
+                 && [icon isKindOfClass:[NSString class]]) {
+            _icon = icon;
+            
+            UIImage *image = [CobaltFontManager imageWithIcon:_icon
+                                                        color:self.tintColor
+                                                      andSize:_barHeight / 2.0];
+            if (image != nil) {
+                [self setImage:image];
+            }
+        }
+        else if (title != nil
+                 && [title isKindOfClass:[NSString class]]) {
+            [self setImage:nil];
+            [self setTitle:title];
+        }
+        
+        if (title != nil
+            && [title isKindOfClass:[NSString class]]) {
+            self.accessibilityLabel = title;
+        }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma mark BADGE
+#pragma mark Badge
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -211,81 +312,14 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma mark CONTENT
+#pragma mark -
+#pragma mark BUTTON / BARBUTTONITEM DELEGATE
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)setContent:(NSDictionary *)content {
-    id iosIcon = [content objectForKey:kConfigurationBarsActionIconIOS];
-    id icon = [content objectForKey:kConfigurationBarsActionIcon];
-    id title = [content objectForKey:kConfigurationBarsActionTitle];
-    id color = [content objectForKey:kConfigurationBarsActionColor];
-    
-    if (color != nil
-        && [color isKindOfClass:[NSString class]]) {
-        _color = [Cobalt colorFromHexString:color];
-        self.tintColor = _color;
-    }
-    
-    if (_button != nil) {
-        if (iosIcon != nil
-            && [iosIcon isKindOfClass:[NSString class]]) {
-            UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-            if (image != nil) {
-                [_button setImage:image
-                         forState:UIControlStateNormal];
-            }
-        }
-        else if (icon != nil
-                 && [icon isKindOfClass:[NSString class]]) {
-            UIImage *image = [CobaltFontManager imageWithIcon:icon
-                                                        color:self.tintColor
-                                                      andSize:22];
-            if (image != nil) {
-                [_button setImage:image
-                         forState:UIControlStateNormal];
-            }
-        }
-        else if (title != nil
-                 && [title isKindOfClass:[NSString class]]) {
-            [_button setImage:nil
-                     forState:UIControlStateNormal];
-            [_button setTitle:title
-                     forState:UIControlStateNormal];
-        }
-        
-        if (title != nil
-            && [title isKindOfClass:[NSString class]]) {
-            _button.accessibilityLabel = [NSString stringWithFormat:@"%@ %@", _badgeLabel.text, title];
-        }
-    }
-    else {
-        if (iosIcon != nil
-            && [iosIcon isKindOfClass:[NSString class]]) {
-            UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-            if (image != nil) {
-                [self setImage:image];
-            }
-        }
-        else if (icon != nil
-                 && [icon isKindOfClass:[NSString class]]) {
-            UIImage *image = [CobaltFontManager imageWithIcon:icon
-                                                        color:self.tintColor
-                                                      andSize:22];
-            if (image != nil) {
-                [self setImage:image];
-            }
-        }
-        else if (title != nil
-                 && [title isKindOfClass:[NSString class]]) {
-            [self setImage:nil];
-            [self setTitle:title];
-        }
-        
-        if (title != nil
-            && [title isKindOfClass:[NSString class]]) {
-            self.accessibilityLabel = title;
-        }
+- (void)onBarButtonItemPressed:(id)sender {
+    if (_delegate != nil) {
+        [_delegate onBarButtonItemPressed:_name];
     }
 }
 
