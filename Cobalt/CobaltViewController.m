@@ -232,6 +232,13 @@ NSString * webLayerPage;
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(onAppForeground:)
                                                  name:kOnAppForegroundNotification object:nil];
+    if ([[UIDevice currentDevice].systemVersion compare:@"8.0"
+                                                options:NSNumericSearch] == NSOrderedAscending) {
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(orientationDidChange:)
+                                                     name:UIDeviceOrientationDidChangeNotification
+                                                   object:nil];
+    }
     
     [self sendEvent:JSEventOnPageShown
            withData:_navigationData
@@ -259,6 +266,17 @@ NSString * webLayerPage;
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:kOnAppForegroundNotification
                                                   object:nil];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    
+    if ([[UIDevice currentDevice].systemVersion compare:@"8.0"
+                                                options:NSNumericSearch] == NSOrderedAscending) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                        name:UIDeviceOrientationDidChangeNotification
+                                                      object:nil];
+    }
 }
 
 - (void)dealloc
@@ -309,9 +327,16 @@ NSString * webLayerPage;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#pragma mark -
 #pragma mark BARS
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark Methods
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)saveBars {
     oldNavigationBarBarTintColor = self.navigationController.navigationBar.barTintColor;
@@ -558,7 +583,10 @@ NSString * webLayerPage;
 }
 
 - (CobaltBarButtonItem *)barButtonItemForAction:(NSDictionary *)action {
+    NSString *iosPosition = (NSString *)[action objectForKey:kConfigurationBarsActionPosition];
+    
     return [[CobaltBarButtonItem alloc] initWithAction:action
+                                             barHeight:[iosPosition isEqualToString:kConfigurationBarsActionPositionBottom] ? self.navigationController.toolbar.bounds.size.height : self.navigationController.navigationBar.bounds.size.height
                                               barColor:self.navigationController.navigationBar.tintColor
                                            andDelegate:self];
 }
@@ -760,11 +788,35 @@ forBarButtonItemNamed:(NSString *)name {
     }
 }
 
+- (void)resizeBarButtonitems {
+    for (UIBarButtonItem *barButtonItem in topLeftBarButtonItems) {
+        if ([barButtonItem isKindOfClass:[CobaltBarButtonItem class]]) {
+            [(CobaltBarButtonItem *)barButtonItem resizeWithBarHeight:self.navigationController.navigationBar.bounds.size.height];
+        }
+    }
+    for (UIBarButtonItem *barButtonItem in topRightBarButtonItems) {
+        if ([barButtonItem isKindOfClass:[CobaltBarButtonItem class]]) {
+            [(CobaltBarButtonItem *)barButtonItem resizeWithBarHeight:self.navigationController.navigationBar.bounds.size.height];
+        }
+    }
+    for (UIBarButtonItem *barButtonItem in bottomBarButtonItems) {
+        if ([barButtonItem isKindOfClass:[CobaltBarButtonItem class]]) {
+            [(CobaltBarButtonItem *)barButtonItem resizeWithBarHeight:self.navigationController.toolbar.bounds.size.height];
+        }
+    }
+}
+
 - (void)resetBarButtonItems {
     self.navigationItem.leftBarButtonItems = @[];
     self.navigationItem.rightBarButtonItems = @[];
     self.toolbarItems = @[];
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark CobaltBarButtonItemDelegate
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)onBarButtonItemPressed:(NSString *)name {
     [self sendMessage:@{
@@ -779,6 +831,29 @@ forBarButtonItemNamed:(NSString *)name {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+#pragma mark Orientation delegate
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)orientationDidChange:(NSNotification *)notification {
+    [self resizeBarButtonitems];
+}
+
+- (void)viewWillTransitionToSize:(CGSize)size
+       withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [super viewWillTransitionToSize:size
+          withTransitionCoordinator:coordinator];
+    
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> _Nonnull context) {
+        [self resizeBarButtonitems];
+    }
+                                 completion:nil];
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark -
 #pragma mark METHODS
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -38,8 +38,10 @@
 @end
 
 @interface CobaltBarButtonItem : UIBarButtonItem {
+    CGFloat _barHeight;
     UIColor *_color;
     UIColor *_barColor;
+    NSString *_icon;
 }
 
 @property (strong, nonatomic) NSString *name;
@@ -49,11 +51,15 @@
 @property (strong, nonatomic) UILabel *badgeLabel;
 
 - (instancetype)initWithAction:(NSDictionary *)action
+                     barHeight:(CGFloat)barHeight
                       barColor:(UIColor *)barColor
                    andDelegate:(id<CobaltBarButtonItemDelegate>)delegate;
 
+- (void)resizeWithBarHeight:(CGFloat)barHeight;
+- (void)setContent:(NSDictionary *)content;
+
 - (void)setBadge:(NSString *)text;
 - (void)resizeBadge;
-- (void)setContent:(NSDictionary *)content;
+
 
 @end
