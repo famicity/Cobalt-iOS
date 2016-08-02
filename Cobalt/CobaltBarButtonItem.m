@@ -93,11 +93,21 @@
             }
             
             if (_button == nil) {
-                _button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, _barHeight / 2.0, _barHeight / 2.0)];
-                [_button setTitle:title
-                         forState:UIControlStateNormal];
-                [_button setTitleColor:self.tintColor
-                              forState:UIControlStateNormal];
+                NSRange titleRange = NSMakeRange(0, ((NSString *)title).length);
+                
+                NSMutableAttributedString *attributedTitle = [[NSMutableAttributedString alloc] initWithString:title];
+                [attributedTitle addAttribute:NSFontAttributeName
+                                        value:[UIFont systemFontOfSize:17.0]
+                                        range:titleRange];
+                [attributedTitle addAttribute:NSForegroundColorAttributeName
+                                        value:self.tintColor
+                                        range:titleRange];
+                
+                CGSize titleSize = attributedTitle.size;
+                
+                _button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, titleSize.width, titleSize.height)];
+                [_button setAttributedTitle:attributedTitle
+                                   forState:UIControlStateNormal];
             }
             
             [_button addTarget:self
@@ -239,12 +249,23 @@
         }
         else if (title != nil
                  && [title isKindOfClass:[NSString class]]) {
+            NSRange titleRange = NSMakeRange(0, ((NSString *)title).length);
+            
+            NSMutableAttributedString *attributedTitle = [[NSMutableAttributedString alloc] initWithString:title];
+            [attributedTitle addAttribute:NSFontAttributeName
+                                    value:[UIFont systemFontOfSize:17.0]
+                                    range:titleRange];
+            [attributedTitle addAttribute:NSForegroundColorAttributeName
+                                    value:self.tintColor
+                                    range:titleRange];
+            
+            CGSize titleSize = attributedTitle.size;
+            
+            _button.frame = CGRectMake(0, 0, titleSize.width, titleSize.height);
+            [_button setAttributedTitle:attributedTitle
+                               forState:UIControlStateNormal];
             [_button setImage:nil
                      forState:UIControlStateNormal];
-            [_button setTitle:title
-                     forState:UIControlStateNormal];
-            [_button setTitleColor:self.tintColor
-                          forState:UIControlStateNormal];
         }
         
         if (title != nil
