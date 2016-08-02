@@ -73,6 +73,7 @@
                     _button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, _barHeight / 2.0, _barHeight / 2.0)];
                     [_button setImage:image
                             forState:UIControlStateNormal];
+                    _button.tintColor = self.tintColor;
                 }
             }
             
@@ -94,7 +95,9 @@
             if (_button == nil) {
                 _button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, _barHeight / 2.0, _barHeight / 2.0)];
                 [_button setTitle:title
-                        forState:UIControlStateNormal];
+                         forState:UIControlStateNormal];
+                [_button setTitleColor:self.tintColor
+                              forState:UIControlStateNormal];
             }
             
             [_button addTarget:self
@@ -219,6 +222,7 @@
             if (image != nil) {
                 [_button setImage:image
                          forState:UIControlStateNormal];
+                _button.tintColor = self.tintColor;
             }
         }
         else if (icon != nil
@@ -239,6 +243,8 @@
                      forState:UIControlStateNormal];
             [_button setTitle:title
                      forState:UIControlStateNormal];
+            [_button setTitleColor:self.tintColor
+                          forState:UIControlStateNormal];
         }
         
         if (title != nil
