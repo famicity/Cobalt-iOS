@@ -53,6 +53,7 @@
     id badge = [action objectForKey:kConfigurationBarsActionBadge];               //NSString  (default: nil)
     id enabled = [action objectForKey:kConfigurationBarsActionEnabled];           //BOOL      (default: true)
     id visible = [action objectForKey:kConfigurationBarsActionVisible];           //BOOL      (default: true)
+    _position = [action objectForKey:kConfigurationBarsActionPosition];
     
     _barHeight = barHeight;
     
@@ -72,7 +73,7 @@
                 if (image != nil) {
                     _button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, _barHeight / 2.0, _barHeight / 2.0)];
                     [_button setImage:image
-                            forState:UIControlStateNormal];
+                             forState:UIControlStateNormal];
                     _button.tintColor = self.tintColor;
                 }
             }
@@ -88,7 +89,7 @@
                 if (image != nil) {
                     _button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, _barHeight / 2.0, _barHeight / 2.0)];
                     [_button setImage:image
-                            forState:UIControlStateNormal];
+                             forState:UIControlStateNormal];
                 }
             }
             
@@ -111,10 +112,31 @@
             }
             
             [_button addTarget:self
-                       action:@selector(onBarButtonItemPressed:)
-             forControlEvents:UIControlEventTouchUpInside];
+                        action:@selector(onBarButtonItemPressed:)
+              forControlEvents:UIControlEventTouchUpInside];
             _button.accessibilityLabel = [NSString stringWithFormat:@"%@ %@", badge, title];
             [_button setBadgeLabelWithText:badge];
+            
+            if ([_position isEqualToString:kConfigurationBarsActionPositionBottom]) {
+                _button.imageEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+                
+                if (_barHeight < 44.0) {
+                    _button.titleEdgeInsets = UIEdgeInsetsMake(-1.0, 0, 1.0, 0);
+                }
+                else {
+                    _button.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+                }
+            }
+            else {
+                _button.imageEdgeInsets = UIEdgeInsetsMake(-1.0, 0, 1.0, 0);
+                
+                if (_barHeight < 44.0) {
+                    _button.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+                }
+                else {
+                    _button.titleEdgeInsets = UIEdgeInsetsMake(1.0, 0, -1.0, 0);
+                }
+            }
             
             self = [super initWithCustomView:_button];
         }
@@ -197,6 +219,29 @@
             }
             else {
                 [self setImage:image];
+            }
+        }
+    }
+    
+    if (_button != nil) {
+        if ([_position isEqualToString:kConfigurationBarsActionPositionBottom]) {
+            _button.imageEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+            
+            if (_barHeight < 44.0) {
+                _button.titleEdgeInsets = UIEdgeInsetsMake(-1.0, 0, 1.0, 0);
+            }
+            else {
+                _button.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+            }
+        }
+        else {
+            _button.imageEdgeInsets = UIEdgeInsetsMake(-1.0, 0, 1.0, 0);
+            
+            if (_barHeight < 44.0) {
+                _button.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+            }
+            else {
+                _button.titleEdgeInsets = UIEdgeInsetsMake(1.0, 0, -1.0, 0);
             }
         }
     }

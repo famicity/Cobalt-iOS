@@ -44,6 +44,7 @@
     UIColor *_color;
     UIColor *_barColor;
     NSString *_icon;
+    NSString *_position;
 }
 
 @property (strong, nonatomic) NSString *name;

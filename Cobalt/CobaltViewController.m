@@ -568,9 +568,12 @@ NSString * webLayerPage;
     
     if (actions != nil
         && [actions isKindOfClass:[NSArray class]]) {
-        for (id action in actions) {
+        for (__strong id action in actions) {
             if (action != nil
                 && [action isKindOfClass:[NSDictionary class]]) {
+                action = [action mutableCopy];
+                [action setObject:[group objectForKey:kConfigurationBarsActionPosition]
+                           forKey:kConfigurationBarsActionPosition];
                 CobaltBarButtonItem *barButtonItem = [self barButtonItemForAction:action];
                 if (barButtonItem != nil) {
                     [barButtonItems addObject:barButtonItem];
