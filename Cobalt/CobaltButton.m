@@ -31,12 +31,40 @@
 
 @implementation CobaltButton
 
-/*
+- (void)setBadgeLabelWithText:(NSString *)text {
+    if (_badgeLabel == nil) {
+        _badgeLabel = [[UILabel alloc] init];
+        _badgeLabel.backgroundColor = [UIColor redColor];
+        _badgeLabel.textColor = [UIColor whiteColor];
+        _badgeLabel.font = [UIFont systemFontOfSize:12.0];
+        _badgeLabel.textAlignment = NSTextAlignmentCenter;
+        _badgeLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
+    }
+    _badgeLabel.text = text;
+    
+    [self resizeBadge];
+    [self addSubview:_badgeLabel];
+}
+
+- (void)resizeBadge {
+    [_badgeLabel sizeToFit];
+    
+    CGSize badgeSize = _badgeLabel.frame.size;
+    CGFloat width = badgeSize.width + 6.0 < badgeSize.height ? badgeSize.height : badgeSize.width + 6.0;
+    width = width > (self.frame.size.width + badgeSize.height / 2.0) ? self.frame.size.width + badgeSize.height / 2.0 : width;
+    
+    _badgeLabel.frame = CGRectMake(self.frame.size.width - (width - badgeSize.height / 2.0), - badgeSize.height / 2.0,
+                                   width, badgeSize.height);
+    _badgeLabel.layer.cornerRadius = _badgeLabel.frame.size.height / 2.0;
+    _badgeLabel.layer.masksToBounds = YES;
+}
+
 // Only override drawRect: if you perform custom drawing.
 // An empty implementation adversely affects performance during animation.
 - (void)drawRect:(CGRect)rect {
-    // Drawing code
+    [super drawRect:rect];
+    
+    [self bringSubviewToFront:_badgeLabel];
 }
-*/
 
 @end

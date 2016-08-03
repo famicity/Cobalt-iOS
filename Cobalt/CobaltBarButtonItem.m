@@ -70,7 +70,7 @@
                 && [iosIcon isKindOfClass:[NSString class]]) {
                 UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
                 if (image != nil) {
-                    _button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, _barHeight / 2.0, _barHeight / 2.0)];
+                    _button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, _barHeight / 2.0, _barHeight / 2.0)];
                     [_button setImage:image
                             forState:UIControlStateNormal];
                     _button.tintColor = self.tintColor;
@@ -86,7 +86,7 @@
                                                             color:self.tintColor
                                                           andSize:_barHeight / 2.0];
                 if (image != nil) {
-                    _button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, _barHeight / 2.0, _barHeight / 2.0)];
+                    _button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, _barHeight / 2.0, _barHeight / 2.0)];
                     [_button setImage:image
                             forState:UIControlStateNormal];
                 }
@@ -105,7 +105,7 @@
                 
                 CGSize titleSize = attributedTitle.size;
                 
-                _button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, titleSize.width, titleSize.height)];
+                _button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, titleSize.width, titleSize.height)];
                 [_button setAttributedTitle:attributedTitle
                                    forState:UIControlStateNormal];
             }
@@ -114,18 +114,7 @@
                        action:@selector(onBarButtonItemPressed:)
              forControlEvents:UIControlEventTouchUpInside];
             _button.accessibilityLabel = [NSString stringWithFormat:@"%@ %@", badge, title];
-            
-            _badgeLabel = [[UILabel alloc] init];
-            _badgeLabel.backgroundColor = [UIColor redColor];
-            _badgeLabel.textColor = [UIColor whiteColor];
-            _badgeLabel.font = [UIFont systemFontOfSize:12.0];
-            _badgeLabel.textAlignment = NSTextAlignmentCenter;
-            _badgeLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
-            _badgeLabel.text = badge;
-            
-            [self resizeBadge];
-            
-            [_button addSubview:_badgeLabel];
+            [_button setBadgeLabelWithText:badge];
             
             self = [super initWithCustomView:_button];
         }
@@ -270,7 +259,7 @@
         
         if (title != nil
             && [title isKindOfClass:[NSString class]]) {
-            _button.accessibilityLabel = [NSString stringWithFormat:@"%@ %@", _badgeLabel.text, title];
+            _button.accessibilityLabel = [NSString stringWithFormat:@"%@ %@", _button.badgeLabel.text, title];
         }
     }
     else {
@@ -311,24 +300,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)resizeBadge {
-    [_badgeLabel sizeToFit];
-    
-    CGSize badgeSize = _badgeLabel.frame.size;
-    CGFloat width = badgeSize.width + 6.0 < badgeSize.height ? badgeSize.height : badgeSize.width + 6.0;
-    width = width > (_button.frame.size.width + badgeSize.height / 2.0) ? _button.frame.size.width + badgeSize.height / 2.0 : width;
-    
-    _badgeLabel.frame = CGRectMake(_button.frame.size.width - (width - badgeSize.height / 2.0), - badgeSize.height / 2.0,
-                                   width, badgeSize.height);
-    _badgeLabel.layer.cornerRadius = _badgeLabel.frame.size.height / 2.0;
-    _badgeLabel.layer.masksToBounds = YES;
-}
-
 - (void)setBadge:(NSString *)text {
-    if (_badgeLabel != nil) {
-        _badgeLabel.text = text;
-        
-        [self resizeBadge];
+    if (_button != nil) {
+        [_button setBadgeLabelWithText:text];
     }
 #if DEBUG_COBALT
     else {
