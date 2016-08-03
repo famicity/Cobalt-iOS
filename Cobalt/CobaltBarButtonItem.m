@@ -71,7 +71,7 @@
                 && [iosIcon isKindOfClass:[NSString class]]) {
                 UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
                 if (image != nil) {
-                    _button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, _barHeight / 2.0, _barHeight / 2.0)];
+                    _button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, 22.0, 22.0)];
                     [_button setImage:image
                              forState:UIControlStateNormal];
                     _button.tintColor = self.tintColor;
@@ -85,9 +85,9 @@
                 
                 UIImage *image = [CobaltFontManager imageWithIcon:_icon
                                                             color:self.tintColor
-                                                          andSize:_barHeight / 2.0];
+                                                          andSize:22.0];
                 if (image != nil) {
-                    _button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, _barHeight / 2.0, _barHeight / 2.0)];
+                    _button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, 22.0, 22.0)];
                     [_button setImage:image
                              forState:UIControlStateNormal];
                 }
@@ -157,7 +157,7 @@
                 
                 UIImage *image = [CobaltFontManager imageWithIcon:_icon
                                                             color:self.tintColor
-                                                          andSize:_barHeight / 2.0];
+                                                          andSize:22.0];
                 if (image != nil) {
                     self = [super initWithImage:image
                                           style:UIBarButtonItemStylePlain
@@ -211,7 +211,7 @@
         && [_icon isKindOfClass:[NSString class]]) {
         UIImage *image = [CobaltFontManager imageWithIcon:_icon
                                                     color:self.tintColor
-                                                  andSize:_barHeight / 2.0];
+                                                  andSize:22.0];
         if (image != nil) {
             if (_button != nil) {
                 [_button setImage:image
@@ -275,7 +275,7 @@
             
             UIImage *image = [CobaltFontManager imageWithIcon:_icon
                                                         color:self.tintColor
-                                                      andSize:_barHeight / 2.0];
+                                                      andSize:22.0];
             if (image != nil) {
                 [_button setImage:image
                          forState:UIControlStateNormal];
@@ -321,7 +321,7 @@
             
             UIImage *image = [CobaltFontManager imageWithIcon:_icon
                                                         color:self.tintColor
-                                                      andSize:_barHeight / 2.0];
+                                                      andSize:22.0];
             if (image != nil) {
                 [self setImage:image];
             }
