@@ -59,6 +59,10 @@
     _badgeLabel.layer.masksToBounds = YES;
 }
 
+- (UIEdgeInsets)alignmentRectInsets {
+    return UIEdgeInsetsMake(0, -5.5, 0, -5.5);
+}
+
 // Only override drawRect: if you perform custom drawing.
 // An empty implementation adversely affects performance during animation.
 - (void)drawRect:(CGRect)rect {
