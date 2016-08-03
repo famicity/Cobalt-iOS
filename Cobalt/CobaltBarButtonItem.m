@@ -81,9 +81,7 @@
             if (_button == nil
                 && icon != nil
                 && [icon isKindOfClass:[NSString class]]) {
-                _icon = icon;
-                
-                UIImage *image = [CobaltFontManager imageWithIcon:_icon
+                UIImage *image = [CobaltFontManager imageWithIcon:icon
                                                             color:self.tintColor
                                                           andSize:22.0];
                 if (image != nil) {
@@ -153,9 +151,7 @@
             }
             else if(icon != nil
                     && [icon isKindOfClass:[NSString class]]) {
-                _icon = icon;
-                
-                UIImage *image = [CobaltFontManager imageWithIcon:_icon
+                UIImage *image = [CobaltFontManager imageWithIcon:icon
                                                             color:self.tintColor
                                                           andSize:22.0];
                 if (image != nil) {
@@ -207,22 +203,6 @@
 - (void)resizeWithBarHeight:(CGFloat)barHeight {
     _barHeight = barHeight;
     
-    if (_icon != nil
-        && [_icon isKindOfClass:[NSString class]]) {
-        UIImage *image = [CobaltFontManager imageWithIcon:_icon
-                                                    color:self.tintColor
-                                                  andSize:22.0];
-        if (image != nil) {
-            if (_button != nil) {
-                [_button setImage:image
-                         forState:UIControlStateNormal];
-            }
-            else {
-                [self setImage:image];
-            }
-        }
-    }
-    
     if (_button != nil) {
         if ([_position isEqualToString:kConfigurationBarsActionPositionBottom]) {
             _button.imageEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
@@ -271,9 +251,7 @@
         }
         else if (icon != nil
                  && [icon isKindOfClass:[NSString class]]) {
-            _icon = icon;
-            
-            UIImage *image = [CobaltFontManager imageWithIcon:_icon
+            UIImage *image = [CobaltFontManager imageWithIcon:icon
                                                         color:self.tintColor
                                                       andSize:22.0];
             if (image != nil) {
@@ -317,9 +295,7 @@
         }
         else if (icon != nil
                  && [icon isKindOfClass:[NSString class]]) {
-            _icon = icon;
-            
-            UIImage *image = [CobaltFontManager imageWithIcon:_icon
+            UIImage *image = [CobaltFontManager imageWithIcon:icon
                                                         color:self.tintColor
                                                       andSize:22.0];
             if (image != nil) {
