@@ -34,6 +34,8 @@
 		BE31EB441C3EC62900141B6E /* CobaltViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BE31EB381C3EC62900141B6E /* CobaltViewController.m */; };
 		BE31EB451C3EC62900141B6E /* ImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BE31EB3A1C3EC62900141B6E /* ImageManager.m */; };
 		BE31EB461C3EC62900141B6E /* iToast.m in Sources */ = {isa = PBXBuildFile; fileRef = BE31EB3C1C3EC62900141B6E /* iToast.m */; };
+		BECF92211D53401400D8081D /* CobaltAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = BECF92201D53401400D8081D /* CobaltAlert.m */; };
+		BECF92221D536DFE00D8081D /* CobaltAlert.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BECF921F1D53401400D8081D /* CobaltAlert.h */; };
 		BED87CBD1C5A660000C4C0C1 /* Cobalt.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BE31EB1E1C3EC52100141B6E /* Cobalt.h */; };
 		BED87CBE1C5A660400C4C0C1 /* CobaltViewController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BE31EB371C3EC62900141B6E /* CobaltViewController.h */; };
 		BED87CBF1C5A660800C4C0C1 /* CobaltFont.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BE31EB301C3EC62900141B6E /* CobaltFont.h */; };
@@ -81,6 +83,7 @@
 			dstSubfolderSpec = 16;
 			files = (
 				BED87CC41C5A661F00C4C0C1 /* BackBarButtonItem.h in CopyFiles */,
+				BECF92221D536DFE00D8081D /* CobaltAlert.h in CopyFiles */,
 				BED87CBD1C5A660000C4C0C1 /* Cobalt.h in CopyFiles */,
 				BED87CC21C5A661500C4C0C1 /* CobaltAbstractPlugin.h in CopyFiles */,
 				BED87CC51C5A662600C4C0C1 /* CobaltBarButtonItem.h in CopyFiles */,
@@ -125,6 +128,8 @@
 		BE31EB3B1C3EC62900141B6E /* iToast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iToast.h; sourceTree = "<group>"; };
 		BE31EB3C1C3EC62900141B6E /* iToast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iToast.m; sourceTree = "<group>"; };
 		BE31EB511C3EC7E800141B6E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		BECF921F1D53401400D8081D /* CobaltAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CobaltAlert.h; sourceTree = "<group>"; };
+		BECF92201D53401400D8081D /* CobaltAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CobaltAlert.m; sourceTree = "<group>"; };
 		BEFF87FE1C3EC8340063AA18 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		BEFF87FF1C3EC8590063AA18 /* CobaltViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CobaltViewController.xib; sourceTree = "<group>"; };
 		BEFF88011C3EC87B0063AA18 /* backButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = backButton.png; sourceTree = "<group>"; };
@@ -238,6 +243,8 @@
 				BE31EB2D1C3EC62900141B6E /* CobaltBarButtonItem.m */,
 				BE31EB2E1C3EC62900141B6E /* CobaltButton.h */,
 				BE31EB2F1C3EC62900141B6E /* CobaltButton.m */,
+				BECF921F1D53401400D8081D /* CobaltAlert.h */,
+				BECF92201D53401400D8081D /* CobaltAlert.m */,
 				BE31EB351C3EC62900141B6E /* CobaltToast.h */,
 				BE31EB361C3EC62900141B6E /* CobaltToast.m */,
 			);
@@ -423,6 +430,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BE31EB431C3EC62900141B6E /* CobaltToast.m in Sources */,
+				BECF92211D53401400D8081D /* CobaltAlert.m in Sources */,
 				BE31EB3E1C3EC62900141B6E /* CobaltAbstractPlugin.m in Sources */,
 				BE31EB441C3EC62900141B6E /* CobaltViewController.m in Sources */,
 				BE31EB421C3EC62900141B6E /* CobaltPluginManager.m in Sources */,

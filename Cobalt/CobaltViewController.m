@@ -71,8 +71,7 @@
             webLayer,
             webView;
 
-NSMutableDictionary * alertCallbacks;
-
+NSMutableArray * _currentAlerts;
 NSMutableArray * toastsToShow;
 BOOL toastIsShown;
 
@@ -167,7 +166,7 @@ NSString * webLayerPage;
     
     [webView setDelegate:self];
     
-    alertCallbacks = [[NSMutableDictionary alloc] init];
+    _currentAlerts = [[NSMutableArray alloc] init];
     toastsToShow = [[NSMutableArray alloc] init];
     
     [activityIndicator startAnimating];
@@ -1761,120 +1760,25 @@ forBarButtonItemNamed:(NSString *)name {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)showAlert:(NSDictionary *)dict
-{
-    NSDictionary * data = [dict objectForKey:kJSData];
-    NSString * callback = [dict objectForKey:kJSCallback];
+- (void)showAlert:(NSDictionary *)dict {
+    NSDictionary *data = [dict objectForKey:kJSData];
+    NSString *callback = [dict objectForKey:kJSCallback];
     
-    if (data && [data isKindOfClass:[NSDictionary class]]) {
-        NSString * title = ([data objectForKey:kJSAlertTitle] && [[data objectForKey:kJSAlertTitle] isKindOfClass:[NSString class]]) ? [data objectForKey:kJSAlertTitle] : @"";
-        NSString * message = ([data objectForKey:kJSAlertMessage] && [[data objectForKey:kJSAlertMessage] isKindOfClass:[NSString class]]) ? [data objectForKey:kJSAlertMessage] : @"";
-        NSArray * buttons = ([data objectForKey:kJSAlertButtons] && [[data objectForKey:kJSAlertButtons] isKindOfClass:[NSArray class]]) ? [data objectForKey:kJSAlertButtons] : [NSArray array];
-        
-        NSString * systemVersion = [[UIDevice currentDevice] systemVersion];
-        if ([systemVersion compare: @"8.0" options:NSNumericSearch] != NSOrderedAscending) {
-            UIAlertController * alertController = [UIAlertController alertControllerWithTitle:title
-                                                                                      message:message
-                                                                               preferredStyle:UIAlertControllerStyleAlert];
-            if (! buttons.count) {
-                UIAlertAction * cancelAction = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"OK",
-                                                                                                                 @"Localizable",
-                                                                                                                 [Cobalt bundleResources],
-                                                                                                                 @"OK")
-                                                                        style:UIAlertActionStyleCancel
-                                                                      handler:^(UIAlertAction * action) {
-                        if (callback && [callback isKindOfClass:[NSString class]]) {
-                            NSDictionary * data = [NSDictionary dictionaryWithObjectsAndKeys:@0, kJSAlertButtonIndex, nil];
-                            [self sendCallback:callback withData:data];
-                        }
-                    }
-                ];
-                
-                [alertController addAction:cancelAction];
-            }
-            else {
-                for (int i = 0 ; i < buttons.count ; i++) {
-                    UIAlertAction * action = [UIAlertAction actionWithTitle:[buttons objectAtIndex:i]
-                                                                      style:UIAlertActionStyleDefault
-                                                                    handler:^(UIAlertAction * action) {
-                           if (callback && [callback isKindOfClass:[NSString class]]) {
-                               NSDictionary * data = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:i], kJSAlertButtonIndex, nil];
-                               [self sendCallback:callback withData:data];
-                           }
-                       }
-                    ];
-                    
-                    [alertController addAction:action];
-                }
-            }
-            
-            [[NSOperationQueue mainQueue] addOperationWithBlock:^ {
-                [self presentViewController:alertController animated:YES completion:nil];
-            }];
-        }
-        else {
-            UIAlertView * alertView;
-            id delegate = (callback != nil && [callback isKindOfClass:[NSString class]]) ? self : nil;
-            
-            if (! buttons.count) {
-                alertView = [[UIAlertView alloc] initWithTitle:title
-                                                       message:message
-                                                      delegate:delegate
-                                             cancelButtonTitle:NSLocalizedStringFromTableInBundle(@"OK",
-                                                                                                  @"Localizable",
-                                                                                                  [Cobalt bundleResources],
-                                                                                                  @"OK")
-                                             otherButtonTitles:nil];
-            }
-            else {
-                alertView = [[UIAlertView alloc] initWithTitle:title
-                                                       message:message
-                                                      delegate:delegate
-                                             cancelButtonTitle:nil
-                                             otherButtonTitles:nil];
-                
-                // Add buttons
-                for (int i = 0 ; i < buttons.count ; i++) {
-                    [alertView addButtonWithTitle:[buttons objectAtIndex:i]];
-                }
-            }
-            
-            if (delegate != nil) {
-                alertView.tag = [self alertViewTag];
-                [alertCallbacks setObject:callback
-                                   forKey:[NSNumber numberWithInteger:alertView.tag]];
-            }
-            
-            [[NSOperationQueue mainQueue] addOperationWithBlock:^ {
-                [alertView show];
-            }];
-        }
-    }
-#if DEBUG_COBALT
-    else {
-        NSLog(@"showAlert: data field missing or not an object (message: %@)", [dict description]);
-    }
-#endif
+    CobaltAlert *alert = [[CobaltAlert alloc] initWithData:data
+                                                  callback:callback
+                                               andDelegate:self
+                                        fromViewController:self];
+    [_currentAlerts addObject:alert];
+    [alert show];
 }
 
-- (NSInteger)alertViewTag {
-    CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);
-    CFStringRef uuidStringRef = CFUUIDCreateString(kCFAllocatorDefault, uuidRef);
-    CFRelease(uuidRef);
-    return ((__bridge_transfer NSString *) uuidStringRef).integerValue;
-}
-
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-    NSNumber *key = [NSNumber numberWithInteger:alertView.tag];
+- (void)alert:(CobaltAlert *)alert
+ withCallback:(NSString *)callback
+clickedButtonAtIndex:(NSInteger)index {
+    [self sendCallback:callback
+              withData:@{kJSAlertButtonIndex: [NSNumber numberWithInteger:index]}];
     
-    NSString *callback = [alertCallbacks objectForKey:key];
-    if (callback != nil
-        && [callback isKindOfClass:[NSString class]]) {
-        [self sendCallback:callback
-                  withData:@{kJSAlertButtonIndex: [NSNumber numberWithInteger:buttonIndex]}];
-        
-        [alertCallbacks removeObjectForKey:key];
-    }
+    [_currentAlerts removeObject:alert];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
