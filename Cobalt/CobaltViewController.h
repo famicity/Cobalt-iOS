@@ -203,7 +203,7 @@ typedef enum {
  @class			CobaltViewController
  @abstract		Base class for a webView controller that allows javascript/native dialogs
  */
-@interface CobaltViewController : UIViewController <UIScrollViewDelegate, UIWebViewDelegate, CobaltAlertDelegate, CobaltToastDelegate, CobaltViewControllerJS, CobaltBarButtonItemDelegate, BackBarButtonItemDelegate>
+@interface CobaltViewController : UIViewController <UINavigationBarDelegate, UIScrollViewDelegate, UIWebViewDelegate, CobaltAlertDelegate, CobaltToastDelegate, CobaltViewControllerJS, CobaltBarButtonItemDelegate, BackBarButtonItemDelegate>
 {
     // Javascript queues
     NSOperationQueue * toJavaScriptOperationQueue;
@@ -236,6 +236,9 @@ typedef enum {
  @abstract		the webView displaying content
  */
 @property (strong, nonatomic) IBOutlet UIWebView * webView;
+
+@property (strong, nonatomic) IBOutlet UINavigationBar *navigationBar;
+@property (strong, nonatomic) IBOutlet UIToolbar *toolbar;
 
 /*!
  @property		activityIndicator

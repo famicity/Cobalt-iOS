@@ -40,14 +40,6 @@
     NSMutableArray *topRightBarButtonItems;
     NSMutableArray *bottomBarButtonItems;
     */
-    
-    UIColor *oldNavigationBarBarTintColor;
-    UIColor *oldToolbarBarTintColor;
-    UIColor *oldNavigationBarTintColor;
-    NSDictionary *oldNavigationBarTitleTextAttributes;
-    UIColor *oldToolbarTintColor;
-    BOOL oldNavigationBarHidden;
-    BOOL oldToolbarHidden;
 }
 
 /*!
@@ -71,6 +63,7 @@
             webLayer,
             webView;
 
+NSArray *_constraints;
 NSMutableArray * _currentAlerts;
 NSMutableArray * toastsToShow;
 BOOL toastIsShown;
@@ -158,6 +151,8 @@ NSString * webLayerPage;
 {
     [super viewDidLoad];
     
+    _constraints = [self.view constraints];
+    
     // Do any additional setup after loading the view from its nib.
     self.view.backgroundColor = _background;
     webView.scrollView.scrollsToTop = _scrollsToTop;
@@ -221,7 +216,6 @@ NSString * webLayerPage;
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    [self saveBars];
     [self configureBars];
     [self setBarButtonItems];
     
@@ -256,8 +250,6 @@ NSString * webLayerPage;
     [super viewWillDisappear:animated];
     
     [fromJavaScriptOperationQueue setSuspended:YES];
-    
-    [self resetBars];
     
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:kOnAppBackgroundNotification
@@ -337,16 +329,6 @@ NSString * webLayerPage;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)saveBars {
-    oldNavigationBarBarTintColor = self.navigationController.navigationBar.barTintColor;
-    oldToolbarBarTintColor = self.navigationController.toolbar.barTintColor;
-    oldNavigationBarTintColor = self.navigationController.navigationBar.tintColor;
-    oldNavigationBarTitleTextAttributes = self.navigationController.navigationBar.titleTextAttributes;
-    oldToolbarTintColor = self.navigationController.toolbar.tintColor;
-    oldNavigationBarHidden = self.navigationController.navigationBarHidden;
-    oldToolbarHidden = self.navigationController.toolbarHidden;
-}
-
 - (void)configureBars {
     if (_barsConfiguration != nil) {
         id title = [_barsConfiguration objectForKey:kConfigurationBarsTitle];
@@ -357,15 +339,15 @@ NSString * webLayerPage;
         
         if (title != nil
             && [title isKindOfClass:[NSString class]]) {
-            self.navigationItem.title = title;
+            _navigationBar.topItem.title = title;
         }
         
         if (backgroundColor != nil
             && [backgroundColor isKindOfClass:[NSString class]]) {
             UIColor *barTintColor = [Cobalt colorFromHexString:backgroundColor];
             if (barTintColor != nil) {
-                self.navigationController.navigationBar.barTintColor = barTintColor;
-                self.navigationController.toolbar.barTintColor = barTintColor;
+                _navigationBar.barTintColor = barTintColor;
+                _toolbar.barTintColor = barTintColor;
             }
         }
         
@@ -373,9 +355,9 @@ NSString * webLayerPage;
             && [color isKindOfClass:[NSString class]]) {
             UIColor *tintColor = [Cobalt colorFromHexString:color];
             if (tintColor != nil) {
-                self.navigationController.navigationBar.tintColor = tintColor;
-                self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: tintColor};
-                self.navigationController.toolbar.tintColor = tintColor;
+                _navigationBar.tintColor = tintColor;
+                _navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: tintColor};
+                _toolbar.tintColor = tintColor;
             }
         }
         
@@ -384,26 +366,50 @@ NSString * webLayerPage;
             id top = [visible objectForKey:kConfigurationBarsVisibleTop];
             id bottom = [visible objectForKey:kConfigurationBarsVisibleBottom];
             
-            
             if (top != nil
-                && [top isKindOfClass:[NSNumber class]]) {
-                [self.navigationController setNavigationBarHidden:! [top boolValue]
-                                                         animated:YES];
+                && [top isKindOfClass:[NSNumber class]]
+                && ! [top boolValue]) {
+                [_navigationBar removeFromSuperview];
             }
             else {
-                [self.navigationController setNavigationBarHidden:YES
-                                                         animated:YES];
+                [self.view addSubview:_navigationBar];
+                for (NSLayoutConstraint *constraint in _constraints) {
+                    NSString *constraintIdentifier = constraint.identifier;
+                    if ([constraintIdentifier isEqualToString:@"navigationBarWidth"]
+                        || [constraintIdentifier isEqualToString:@"navigationBarLeft"]
+                        || [constraintIdentifier isEqualToString:@"navigationBarTop"]
+                        || [constraintIdentifier isEqualToString:@"webViewTopBar"]) {
+                        [self.view addConstraint:constraint];
+                    }
+                }
             }
             
             if (bottom != nil
-                && [bottom isKindOfClass:[NSNumber class]]) {
-                [self.navigationController setToolbarHidden:! [bottom boolValue]
-                                                   animated:YES];
+                && [bottom isKindOfClass:[NSNumber class]]
+                && [bottom boolValue]) {
+                [self.view addSubview:_toolbar];
+                for (NSLayoutConstraint *constraint in _constraints) {
+                    NSString *constraintIdentifier = constraint.identifier;
+                    if ([constraintIdentifier isEqualToString:@"toolbarWidth"]
+                        || [constraintIdentifier isEqualToString:@"toolbarLeft"]
+                        || [constraintIdentifier isEqualToString:@"toolbarBottom"]
+                        || [constraintIdentifier isEqualToString:@"webViewBottomBar"]) {
+                        [self.view addConstraint:constraint];
+                    }
+                }
             }
             else {
-                [self.navigationController setToolbarHidden:YES
-                                                   animated:YES];
+                [_toolbar removeFromSuperview];
             }
+            
+            [self.view setNeedsUpdateConstraints];
+            
+            // TODO: find a way to animate changes
+            /*
+            [UIView animateWithDuration:0.3 animations:^{
+                [self.view layoutIfNeeded];
+            }];
+             */
         }
         
         if (actions != nil
@@ -491,20 +497,59 @@ NSString * webLayerPage;
         barsVisible = [NSMutableDictionary dictionary];
     }
     
+
     if (top != nil
         && [top isKindOfClass:[NSNumber class]]) {
-        [self.navigationController setNavigationBarHidden:! [top boolValue]
-                                                 animated:YES];
+        if ([top boolValue]) {
+            [self.view addSubview:_navigationBar];
+            for (NSLayoutConstraint *constraint in _constraints) {
+                NSString *constraintIdentifier = constraint.identifier;
+                if ([constraintIdentifier isEqualToString:@"navigationBarWidth"]
+                    || [constraintIdentifier isEqualToString:@"navigationBarLeft"]
+                    || [constraintIdentifier isEqualToString:@"navigationBarTop"]
+                    || [constraintIdentifier isEqualToString:@"webViewTopBar"]) {
+                    [self.view addConstraint:constraint];
+                }
+            }
+        }
+        else {
+            [_navigationBar removeFromSuperview];
+        }
+        
         [barsVisible setObject:top
                         forKey:kConfigurationBarsVisibleTop];
     }
+    
     if (bottom != nil
         && [bottom isKindOfClass:[NSNumber class]]) {
-        [self.navigationController setToolbarHidden:! [bottom boolValue]
-                                           animated:YES];
+        if ([bottom boolValue]) {
+            [self.view addSubview:_toolbar];
+            for (NSLayoutConstraint *constraint in _constraints) {
+                NSString *constraintIdentifier = constraint.identifier;
+                if ([constraintIdentifier isEqualToString:@"toolbarWidth"]
+                    || [constraintIdentifier isEqualToString:@"toolbarLeft"]
+                    || [constraintIdentifier isEqualToString:@"toolbarBottom"]
+                    || [constraintIdentifier isEqualToString:@"webViewBottomBar"]) {
+                    [self.view addConstraint:constraint];
+                }
+            }
+        }
+        else {
+            [_toolbar removeFromSuperview];
+        }
+        
         [barsVisible setObject:bottom
                         forKey:kConfigurationBarsVisibleBottom];
     }
+    
+    [self.view setNeedsUpdateConstraints];
+    
+    // TODO: find a way to animate changes
+    /*
+    [UIView animateWithDuration:0.3 animations:^{
+        [self.view layoutIfNeeded];
+    }];
+    */
     
     if (barsVisible.count > 0) {
         [barsConfiguration setObject:barsVisible
@@ -524,7 +569,7 @@ NSString * webLayerPage;
     
     if (title != nil
         && [title isKindOfClass:[NSString class]]) {
-        self.navigationItem.title = title;
+        _navigationBar.topItem.title = title;
         [barsConfiguration setObject:title
                               forKey:kConfigurationBarsTitle];
     }
@@ -533,8 +578,8 @@ NSString * webLayerPage;
         && [backgroundColor isKindOfClass:[NSString class]]) {
         UIColor *barTintColor = [Cobalt colorFromHexString:backgroundColor];
         if (barTintColor != nil) {
-            self.navigationController.navigationBar.barTintColor = barTintColor;
-            self.navigationController.toolbar.barTintColor = barTintColor;
+            _navigationBar.barTintColor = barTintColor;
+            _toolbar.barTintColor = barTintColor;
         }
         
         [barsConfiguration setObject:backgroundColor
@@ -545,10 +590,10 @@ NSString * webLayerPage;
         && [color isKindOfClass:[NSString class]]) {
         UIColor *tintColor = [Cobalt colorFromHexString:color];
         if (tintColor != nil) {
-            self.navigationController.navigationBar.tintColor = tintColor;
-            self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: tintColor};
-            self.navigationController.toolbar.tintColor = tintColor;
-            UIBarButtonItem *leftBarButtonItem = self.navigationItem.leftBarButtonItem;
+            _navigationBar.tintColor = tintColor;
+            _navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: tintColor};
+            _toolbar.tintColor = tintColor;
+            UIBarButtonItem *leftBarButtonItem = _navigationBar.topItem.leftBarButtonItem;
             if (leftBarButtonItem != nil
                 && [leftBarButtonItem isKindOfClass:[BackBarButtonItem class]]) {
                 [leftBarButtonItem setTintColor:tintColor];
@@ -588,8 +633,8 @@ NSString * webLayerPage;
     NSString *iosPosition = (NSString *)[action objectForKey:kConfigurationBarsActionPosition];
     
     return [[CobaltBarButtonItem alloc] initWithAction:action
-                                             barHeight:[iosPosition isEqualToString:kConfigurationBarsActionPositionBottom] ? self.navigationController.toolbar.bounds.size.height : self.navigationController.navigationBar.bounds.size.height
-                                              barColor:self.navigationController.navigationBar.tintColor
+                                             barHeight:[iosPosition isEqualToString:kConfigurationBarsActionPositionBottom] ? _toolbar.bounds.size.height : _navigationBar.bounds.size.height
+                                              barColor:_navigationBar.tintColor
                                            andDelegate:self];
 }
 
@@ -733,16 +778,6 @@ forBarButtonItemNamed:(NSString *)name {
     }
 }
 
-- (void)resetBars {
-    self.navigationController.navigationBar.barTintColor = oldNavigationBarBarTintColor;
-    self.navigationController.toolbar.barTintColor = oldToolbarBarTintColor;
-    self.navigationController.navigationBar.tintColor = oldNavigationBarTintColor;
-    self.navigationController.navigationBar.titleTextAttributes = oldNavigationBarTitleTextAttributes;
-    self.navigationController.toolbar.tintColor = oldToolbarTintColor;
-    self.navigationController.navigationBarHidden = oldNavigationBarHidden;
-    self.navigationController.toolbarHidden = oldToolbarHidden;
-}
-
 - (void)setBarButtonItems {
     NSMutableArray *visibleTopLeftBarButtonItems = [[NSMutableArray alloc] initWithCapacity:topLeftBarButtonItems.count];
     NSMutableArray *visibleTopRightBarButtonItems = [[NSMutableArray alloc] initWithCapacity:topRightBarButtonItems.count];
@@ -768,50 +803,61 @@ forBarButtonItemNamed:(NSString *)name {
     }
     
     if (visibleTopLeftBarButtonItems.count > 0) {
-        self.navigationItem.leftBarButtonItems = visibleTopLeftBarButtonItems;
+        _navigationBar.topItem.leftBarButtonItems = visibleTopLeftBarButtonItems;
     }
     else {
         // Override back button
+        // TODO: do not track navigation like this
         NSArray *navigationViewControllers = self.navigationController.viewControllers;
         if (navigationViewControllers.count > 1
             && [navigationViewControllers indexOfObject:self] != 0) {
-            self.navigationItem.leftBarButtonItem = [[BackBarButtonItem alloc] initWithTintColor:self.navigationController.navigationBar.tintColor
-                                                                                     andDelegate:self];
-            self.navigationItem.hidesBackButton = YES;
+            _navigationBar.topItem.leftBarButtonItem = [[BackBarButtonItem alloc] initWithTintColor:_navigationBar.tintColor
+                                                                                        andDelegate:self];
+            _navigationBar.topItem.hidesBackButton = YES;
         }
     }
     
     if (visibleTopRightBarButtonItems.count > 0) {
-        self.navigationItem.rightBarButtonItems = visibleTopRightBarButtonItems;
+        _navigationBar.topItem.rightBarButtonItems = visibleTopRightBarButtonItems;
     }
     
     if (visibleBottomBarButtonItems.count > 0) {
-        self.toolbarItems = visibleBottomBarButtonItems;
+        _toolbar.items = visibleBottomBarButtonItems;
     }
 }
 
 - (void)resizeBarButtonitems {
     for (UIBarButtonItem *barButtonItem in topLeftBarButtonItems) {
         if ([barButtonItem isKindOfClass:[CobaltBarButtonItem class]]) {
-            [(CobaltBarButtonItem *)barButtonItem resizeWithBarHeight:self.navigationController.navigationBar.bounds.size.height];
+            [(CobaltBarButtonItem *)barButtonItem resizeWithBarHeight:_navigationBar.bounds.size.height];
         }
     }
     for (UIBarButtonItem *barButtonItem in topRightBarButtonItems) {
         if ([barButtonItem isKindOfClass:[CobaltBarButtonItem class]]) {
-            [(CobaltBarButtonItem *)barButtonItem resizeWithBarHeight:self.navigationController.navigationBar.bounds.size.height];
+            [(CobaltBarButtonItem *)barButtonItem resizeWithBarHeight:_navigationBar.bounds.size.height];
         }
     }
     for (UIBarButtonItem *barButtonItem in bottomBarButtonItems) {
         if ([barButtonItem isKindOfClass:[CobaltBarButtonItem class]]) {
-            [(CobaltBarButtonItem *)barButtonItem resizeWithBarHeight:self.navigationController.toolbar.bounds.size.height];
+            [(CobaltBarButtonItem *)barButtonItem resizeWithBarHeight:_toolbar.bounds.size.height];
         }
     }
 }
 
 - (void)resetBarButtonItems {
-    self.navigationItem.leftBarButtonItems = @[];
-    self.navigationItem.rightBarButtonItems = @[];
-    self.toolbarItems = @[];
+    _navigationBar.topItem.leftBarButtonItems = @[];
+    _navigationBar.topItem.rightBarButtonItems = @[];
+    _toolbar.items = @[];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark NavigationBarDelegate
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+-(UIBarPosition)positionForBar:(id<UIBarPositioning>)bar {
+    return UIBarPositionTopAttached;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1473,6 +1519,8 @@ forBarButtonItemNamed:(NSString *)name {
     else NSLog(@"sendMessage: message is nil!");
 #endif
 }
+
+// TODO: Find another way to navigate
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

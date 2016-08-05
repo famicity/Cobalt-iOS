@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10117" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10117" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
@@ -7,6 +7,8 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="CobaltViewController">
             <connections>
+                <outlet property="navigationBar" destination="ia2-Nc-l84" id="w9j-co-WQa"/>
+                <outlet property="toolbar" destination="Pam-uQ-wXS" id="e7v-12-3Gk"/>
                 <outlet property="view" destination="qD6-4s-9x7" id="NUP-Ml-xEN"/>
                 <outlet property="webView" destination="Ye6-O6-I12" id="77y-i2-OE5"/>
             </connections>
@@ -17,19 +19,46 @@
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <subviews>
                 <webView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ye6-O6-I12">
-                    <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                    <rect key="frame" x="0.0" y="64" width="600" height="492"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     <connections>
                         <outlet property="delegate" destination="-1" id="5Cx-KX-tTL"/>
                     </connections>
                 </webView>
+                <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Pam-uQ-wXS">
+                    <rect key="frame" x="0.0" y="556" width="600" height="44"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="44" identifier="toolbarHeight" id="fMD-wr-K2Y"/>
+                    </constraints>
+                    <items/>
+                </toolbar>
+                <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ia2-Nc-l84">
+                    <rect key="frame" x="0.0" y="20" width="600" height="44"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="44" identifier="navigationBarHeight" id="B49-Br-Kze"/>
+                    </constraints>
+                    <items>
+                        <navigationItem id="9gr-8H-mMf"/>
+                    </items>
+                    <connections>
+                        <outlet property="delegate" destination="-1" id="Ui5-W2-VWU"/>
+                    </connections>
+                </navigationBar>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
             <constraints>
-                <constraint firstItem="Ye6-O6-I12" firstAttribute="leading" secondItem="qD6-4s-9x7" secondAttribute="leading" id="KuG-OH-Z3l"/>
-                <constraint firstItem="Ye6-O6-I12" firstAttribute="top" secondItem="qD6-4s-9x7" secondAttribute="top" id="Qvy-RV-NSt"/>
-                <constraint firstItem="Ye6-O6-I12" firstAttribute="height" secondItem="qD6-4s-9x7" secondAttribute="height" id="iMc-CB-g56"/>
-                <constraint firstItem="Ye6-O6-I12" firstAttribute="width" secondItem="qD6-4s-9x7" secondAttribute="width" id="tX4-vT-cVy"/>
+                <constraint firstAttribute="bottom" secondItem="Pam-uQ-wXS" secondAttribute="bottom" identifier="toolbarBottom" id="0dW-uq-jow"/>
+                <constraint firstItem="Pam-uQ-wXS" firstAttribute="width" secondItem="qD6-4s-9x7" secondAttribute="width" identifier="toolbarWidth" id="4jQ-Bj-lbe"/>
+                <constraint firstItem="ia2-Nc-l84" firstAttribute="width" secondItem="qD6-4s-9x7" secondAttribute="width" identifier="navigationBarWidth" id="4o9-SA-kkm"/>
+                <constraint firstItem="Pam-uQ-wXS" firstAttribute="top" secondItem="Ye6-O6-I12" secondAttribute="bottom" identifier="webViewBottomBar" id="7SR-6n-YXg"/>
+                <constraint firstItem="Ye6-O6-I12" firstAttribute="width" secondItem="qD6-4s-9x7" secondAttribute="width" identifier="webViewWidth" id="VkD-5H-t4z"/>
+                <constraint firstItem="Ye6-O6-I12" firstAttribute="top" secondItem="qD6-4s-9x7" secondAttribute="top" priority="750" identifier="webViewTopFull" id="amA-7N-Wp5"/>
+                <constraint firstItem="Ye6-O6-I12" firstAttribute="top" secondItem="ia2-Nc-l84" secondAttribute="bottom" identifier="webViewTopBar" id="iPT-U4-ejh"/>
+                <constraint firstItem="ia2-Nc-l84" firstAttribute="leading" secondItem="qD6-4s-9x7" secondAttribute="leading" identifier="navigationBarLeft" id="lTE-L2-LK3"/>
+                <constraint firstItem="Pam-uQ-wXS" firstAttribute="leading" secondItem="qD6-4s-9x7" secondAttribute="leading" identifier="toolbarLeft" id="neh-XB-IMY"/>
+                <constraint firstItem="ia2-Nc-l84" firstAttribute="top" secondItem="qD6-4s-9x7" secondAttribute="top" constant="20" identifier="navigationBarTop" id="oL8-kO-07X"/>
+                <constraint firstItem="Ye6-O6-I12" firstAttribute="leading" secondItem="qD6-4s-9x7" secondAttribute="leading" identifier="webViewLeft" id="w4F-Et-8vE"/>
+                <constraint firstAttribute="bottom" secondItem="Ye6-O6-I12" secondAttribute="bottom" priority="750" identifier="webViewBottomFull" id="xCH-s0-cfl"/>
             </constraints>
             <point key="canvasLocation" x="370" y="294"/>
         </view>
