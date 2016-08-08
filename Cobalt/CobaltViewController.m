@@ -994,13 +994,8 @@ forBarButtonItemNamed:(NSString *)name {
 }
 
 - (BOOL)onCobaltMessage:(NSString *)message {
-    NSDictionary * jsonObj = [Cobalt dictionaryWithString:message];
-    return [self handleDictionarySentByJavaScript: jsonObj];
-}
-
-- (BOOL)handleDictionarySentByJavaScript:(NSDictionary *)dict
-{
-    NSString * type = [dict objectForKey:kJSType];
+    NSDictionary *dict = [Cobalt dictionaryWithString:message];
+    NSString *type = [dict objectForKey:kJSType];
     
     if (type
         && [type isKindOfClass:[NSString class]]) {
@@ -1138,7 +1133,7 @@ forBarButtonItemNamed:(NSString *)name {
                     NSDictionary * data = [dict objectForKey:kJSData];
                     if (data
                         && [data isKindOfClass:[NSDictionary class]]) {
-                            [self presentViewControllerWithData:data];
+                        [self presentViewControllerWithData:data];
                     }
 #if DEBUG_COBALT
                     else {
@@ -1320,7 +1315,7 @@ forBarButtonItemNamed:(NSString *)name {
                                     && visible != nil && [visible isKindOfClass:[NSNumber class]]) {
                                     dispatch_async(dispatch_get_main_queue(), ^(void) {
                                         [self setVisible:[visible boolValue]
-                                          forBarButtonItemNamed:barButtonItemName];
+                                   forBarButtonItemNamed:barButtonItemName];
                                     });
                                 }
                             }
@@ -1403,7 +1398,7 @@ forBarButtonItemNamed:(NSString *)name {
 #if DEBUG_COBALT
             else {
                 NSLog(@"handleDictionarySentByJavaScript: action field missing or not a string (message: %@)", [dict description]);
-
+                
             }
 #endif
         }
@@ -1814,6 +1809,11 @@ clickedButtonAtIndex:(NSInteger)index {
         
         [self loadPage:webLayerPage inWebView:webLayer];
         
+        if([JSContext class]) {
+            JSContext *context = [webLayer valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+            context[@"CobaltViewController"] = self;
+        }
+        
         [self.view addSubview:webLayer];
         [UIView animateWithDuration:fadeDuration.floatValue animations:^{
             [webLayer setAlpha:1.0];
@@ -1860,33 +1860,6 @@ clickedButtonAtIndex:(NSInteger)index {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)webView:(UIWebView *)webView
-shouldStartLoadWithRequest:(NSURLRequest *)request
- navigationType:(UIWebViewNavigationType)navigationType {
-    NSString *requestURL = [[[request URL] absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    
-    // if requestURL contains cobaltSpecialJSKey, extracts the JSON received.
-    NSString *cobaltSpecialJSKey = @"cob@l7#k&y";
-    NSRange range = [requestURL rangeOfString:cobaltSpecialJSKey];
-    if (range.location != NSNotFound) {
-        NSString *json = [requestURL substringFromIndex:range.location + cobaltSpecialJSKey.length];
-        NSDictionary *jsonObj = [Cobalt dictionaryWithString:json];
-        
-        [fromJavaScriptOperationQueue addOperationWithBlock:^{
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                [self handleDictionarySentByJavaScript:jsonObj];
-            });
-        }];
-        
-        [self sendACK];
-        
-        return NO;
-    }
-    
-    // Returns YES to ensure regular navigation working as expected.
-    return YES;
-}
-
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     [activityIndicator startAnimating];
     
@@ -1898,18 +1871,6 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     // start queue
     [toJavaScriptOperationQueue setSuspended:NO];
     [activityIndicator stopAnimating];
-}
-
-- (void)sendACK
-{
-    [self sendCallback:JSCallbackSimpleAcquitment withData:nil];
-    
-    if (webLayer) {
-        NSDictionary * dict = [NSDictionary dictionaryWithObjectsAndKeys:   JSTypeCallBack, kJSType,
-                                                                            JSCallbackSimpleAcquitment, kJSCallback,
-                                                                            nil];
-        [self executeScriptInWebView:WEB_LAYER withDictionary:dict];
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

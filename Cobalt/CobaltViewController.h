@@ -59,7 +59,6 @@
 
 // CALLBACK
 #define JSTypeCallBack                      @"callback"
-#define JSCallbackSimpleAcquitment          @"callbackSimpleAcquitment"
 
 // COBALT IS READY
 #define JSTypeCobaltIsReady                 @"cobaltIsReady"
