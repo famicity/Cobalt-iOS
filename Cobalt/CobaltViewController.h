@@ -41,9 +41,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-//COBALT VERSION
-#define IOSCurrentVersion                   @"0.5.1"
-
 // GENERAL
 #define kJSAction                           @"action"
 #define kJSCallback                         @"callback"
@@ -313,7 +310,7 @@ typedef enum {
        andController:(nullable NSString *)controller;
     
 /*!
- @method		- (void)setDelegate:(id)delegate
+ @method		- (void)setDelegate:(id<CobaltDelegate>)delegate
  @abstract		this method sets the delegate which responds to CobaltDelegate protocol
  */
 - (void)setDelegate:(id<CobaltDelegate>)delegate;
