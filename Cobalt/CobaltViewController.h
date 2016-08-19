@@ -180,7 +180,7 @@
 
 @protocol CobaltViewControllerJS <JSExport>
 
-- (BOOL)onCobaltMessage:(NSString *)message;
+- (void)onCobaltMessage:(NSString *)message;
 
 @end
 

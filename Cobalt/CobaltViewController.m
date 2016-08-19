@@ -993,7 +993,7 @@ forBarButtonItemNamed:(NSString *)name {
 }
 
 // Unable to get result from the onUnhandled methods of the delegate and from the CobaltPluginManager one since we cannot called it synchronously (WebThread is blocking the MainThread so waiting the MainThread from the WebThread would completely stuck the app)
-- (BOOL)onCobaltMessage:(NSString *)message {
+- (void)onCobaltMessage:(NSString *)message {
     __block BOOL messageHandled = NO;
     
     NSDictionary *dict = [Cobalt dictionaryWithString:message];
@@ -1037,6 +1037,7 @@ forBarButtonItemNamed:(NSString *)name {
                         NSLog(@"handleDictionarySentByJavaScript: unhandled callback %@", [dict description]);
                     }
 #endif
+                    messageHandled = YES;
                 }
             }
 #if DEBUG_COBALT
@@ -1086,6 +1087,7 @@ forBarButtonItemNamed:(NSString *)name {
                     NSLog(@"handleDictionarySentByJavaScript: unhandled event %@", [dict description]);
                 }
 #endif
+                messageHandled = YES;
             }
 #if DEBUG_COBALT
             else {
@@ -1100,7 +1102,14 @@ forBarButtonItemNamed:(NSString *)name {
             if (text
                 && [text isKindOfClass:[NSString class]]) {
                 NSLog(@"JS LOG: %@", text);
+                
+                messageHandled = YES;
             }
+#if DEBUG_COBALT
+            else {
+                NSLog(@"handleDictionarySentByJavaScript: text field missing or not a string (message: %@)", [dict description]);
+            }
+#endif
         }
         
         // NAVIGATION
@@ -1512,7 +1521,8 @@ forBarButtonItemNamed:(NSString *)name {
             });
         }
     }
-    else {
+    
+    if (! messageHandled) {
         if (_delegate != nil
             && [_delegate respondsToSelector:@selector(onUnhandledMessage:)]) {
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -1525,8 +1535,6 @@ forBarButtonItemNamed:(NSString *)name {
         }
 #endif
     }
-    
-    return messageHandled;
 }
 
 - (void) sendMessage:(NSDictionary *) message {
