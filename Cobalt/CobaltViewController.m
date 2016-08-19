@@ -1519,6 +1519,8 @@ forBarButtonItemNamed:(NSString *)name {
                 [[CobaltPluginManager sharedInstance] onMessageFromCobaltViewController:self
                                                                                 andData:dict];
             });
+            
+            messageHandled = YES;
         }
     }
     
