@@ -1953,7 +1953,14 @@ clickedButtonAtIndex:(NSInteger)index {
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
-    // start queue
+    // (re)start queue
+    [toJavaScriptOperationQueue setSuspended:NO];
+    [activityIndicator stopAnimating];
+}
+
+- (void)webView:(UIWebView *)webView
+didFailLoadWithError:(NSError *)error {
+    // (re)start queue
     [toJavaScriptOperationQueue setSuspended:NO];
     [activityIndicator stopAnimating];
 }
