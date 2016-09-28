@@ -318,9 +318,12 @@ NSString * webLayerPage;
     [self sendEvent:JSEventOnAppForeground
            withData:nil
         andCallback:nil];
+    
     [self sendEvent:JSEventOnPageShown
-           withData:nil
+           withData:_navigationData
         andCallback:nil];
+    
+    _navigationData = nil;
 }
 
 
