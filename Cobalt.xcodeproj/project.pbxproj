@@ -23,6 +23,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		710EAF3E1DAE3924008729F1 /* Cobalt-Bridging-Header.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 710EAF3D1DAE390A008729F1 /* Cobalt-Bridging-Header.h */; };
 		BE31EB211C3EC52100141B6E /* Cobalt.m in Sources */ = {isa = PBXBuildFile; fileRef = BE31EB201C3EC52100141B6E /* Cobalt.m */; };
 		BE31EB3D1C3EC62900141B6E /* BackBarButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = BE31EB281C3EC62900141B6E /* BackBarButtonItem.m */; };
 		BE31EB3E1C3EC62900141B6E /* CobaltAbstractPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = BE31EB2B1C3EC62900141B6E /* CobaltAbstractPlugin.m */; };
@@ -84,6 +85,7 @@
 			files = (
 				BED87CC41C5A661F00C4C0C1 /* BackBarButtonItem.h in CopyFiles */,
 				BECF92221D536DFE00D8081D /* CobaltAlert.h in CopyFiles */,
+				710EAF3E1DAE3924008729F1 /* Cobalt-Bridging-Header.h in CopyFiles */,
 				BED87CBD1C5A660000C4C0C1 /* Cobalt.h in CopyFiles */,
 				BED87CC21C5A661500C4C0C1 /* CobaltAbstractPlugin.h in CopyFiles */,
 				BED87CC51C5A662600C4C0C1 /* CobaltBarButtonItem.h in CopyFiles */,
@@ -102,6 +104,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		710EAF3D1DAE390A008729F1 /* Cobalt-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Cobalt-Bridging-Header.h"; sourceTree = "<group>"; };
 		BE31EB1B1C3EC52100141B6E /* libCobalt.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libCobalt.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE31EB1E1C3EC52100141B6E /* Cobalt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Cobalt.h; sourceTree = "<group>"; };
 		BE31EB201C3EC52100141B6E /* Cobalt.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Cobalt.m; sourceTree = "<group>"; };
@@ -183,6 +186,7 @@
 		BE31EB1D1C3EC52100141B6E /* Cobalt */ = {
 			isa = PBXGroup;
 			children = (
+				710EAF3D1DAE390A008729F1 /* Cobalt-Bridging-Header.h */,
 				BE31EB1E1C3EC52100141B6E /* Cobalt.h */,
 				BE31EB201C3EC52100141B6E /* Cobalt.m */,
 				BE31EB471C3EC63000141B6E /* Controller */,
