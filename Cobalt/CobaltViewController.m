@@ -351,6 +351,8 @@ NSString * webLayerPage;
 }
 
 - (void)configureBars {
+    BOOL barsVisibleSet = NO;
+    
     if (_barsConfiguration != nil) {
         id title = [_barsConfiguration objectForKey:kConfigurationBarsTitle];
         id backgroundColor = [_barsConfiguration objectForKey:kConfigurationBarsBackgroundColor];
@@ -387,14 +389,13 @@ NSString * webLayerPage;
             id top = [visible objectForKey:kConfigurationBarsVisibleTop];
             id bottom = [visible objectForKey:kConfigurationBarsVisibleBottom];
             
-            
             if (top != nil
                 && [top isKindOfClass:[NSNumber class]]) {
                 [self.navigationController setNavigationBarHidden:! [top boolValue]
                                                          animated:YES];
             }
             else {
-                [self.navigationController setNavigationBarHidden:YES
+                [self.navigationController setNavigationBarHidden:NO
                                                          animated:YES];
             }
             
@@ -407,6 +408,8 @@ NSString * webLayerPage;
                 [self.navigationController setToolbarHidden:YES
                                                    animated:YES];
             }
+            
+            barsVisibleSet = YES;
         }
         
         if (actions != nil
@@ -477,6 +480,13 @@ NSString * webLayerPage;
                 [bottomBarButtonItems addObject:flexibleSpace];
             }
         }
+    }
+    
+    if (! barsVisibleSet) {
+        [self.navigationController setNavigationBarHidden:NO
+                                                 animated:YES];
+        [self.navigationController setToolbarHidden:YES
+                                           animated:YES];
     }
 }
 
