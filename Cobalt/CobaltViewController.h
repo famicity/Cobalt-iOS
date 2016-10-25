@@ -234,12 +234,6 @@ typedef enum {
 @property (strong, nonatomic) IBOutlet UIWebView * webView;
 
 /*!
- @property		activityIndicator
- @abstract		an activity indicator shown- while the webView is loading
- */
-@property (strong, nonatomic) UIActivityIndicatorView * activityIndicator;
-
-/*!
  @property		pageName
  @abstract		the name of the HTML file with the content to display in the webview
  @discussion    the file must be located at ressourcePath

@@ -64,8 +64,7 @@
 
 @implementation CobaltViewController
 
-@synthesize activityIndicator,
-            isInfiniteScrollEnabled,
+@synthesize isInfiniteScrollEnabled,
             isPullToRefreshEnabled,
             pageName,
             webLayer,
@@ -169,7 +168,7 @@ NSString * webLayerPage;
     _currentAlerts = [[NSMutableArray alloc] init];
     toastsToShow = [[NSMutableArray alloc] init];
     
-    [activityIndicator startAnimating];
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     
     if ([webView respondsToSelector:@selector(setKeyboardDisplayRequiresUserAction:)]) {
         [webView setKeyboardDisplayRequiresUserAction:NO];
@@ -284,7 +283,6 @@ NSString * webLayerPage;
     fromJavaScriptOperationQueue = nil;
     _delegate = nil;
     webView = nil;
-    activityIndicator = nil;
     pageName = nil;
     webLayer = nil;
     
@@ -1959,23 +1957,22 @@ clickedButtonAtIndex:(NSInteger)index {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
-    [activityIndicator startAnimating];
-    
     // Stops queues until Web view is loaded
     [toJavaScriptOperationQueue setSuspended:YES];
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
     // (re)start queue
     [toJavaScriptOperationQueue setSuspended:NO];
-    [activityIndicator stopAnimating];
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 
 - (void)webView:(UIWebView *)webView
 didFailLoadWithError:(NSError *)error {
     // (re)start queue
     [toJavaScriptOperationQueue setSuspended:NO];
-    [activityIndicator stopAnimating];
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
