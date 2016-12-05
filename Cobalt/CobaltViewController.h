@@ -31,6 +31,7 @@
 #import <JavaScriptCore/JavaScriptCore.h>
 #import <WebKit/WebKit.h>
 
+#import "CobaltAlert.h"
 #import "CobaltToast.h"
 #import "CobaltBarButtonItem.h"
 #import "BackBarButtonItem.h"
@@ -40,9 +41,6 @@
 #pragma mark JAVASCRIPT KEYS
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-
-//COBALT VERSION
-#define IOSCurrentVersion                   @"0.5.0"
 
 // GENERAL
 #define kJSAction                           @"action"
@@ -59,7 +57,6 @@
 
 // CALLBACK
 #define JSTypeCallBack                      @"callback"
-#define JSCallbackSimpleAcquitment          @"callbackSimpleAcquitment"
 
 // COBALT IS READY
 #define JSTypeCobaltIsReady                 @"cobaltIsReady"
@@ -184,7 +181,7 @@
 
 @protocol CobaltViewControllerJS <JSExport>
 
-- (BOOL)onCobaltMessage:(NSString *)message;
+- (void)onCobaltMessage:(NSString *)message;
 
 @end
 
@@ -203,8 +200,7 @@ typedef enum {
  @class			CobaltViewController
  @abstract		Base class for a webView controller that allows javascript/native dialogs
  */
-@interface CobaltViewController : UIViewController <UIAlertViewDelegate, UIScrollViewDelegate, UIWebViewDelegate, WKScriptMessageHandler, WKNavigationDelegate, CobaltToastDelegate, CobaltViewControllerJS, CobaltBarButtonItemDelegate, BackBarButtonItemDelegate>
-{
+@interface CobaltViewController : UIViewController <UIScrollViewDelegate, UIWebViewDelegate, WKScriptMessageHandler, WKNavigationDelegate, CobaltViewControllerJS, CobaltAlertDelegate, CobaltToastDelegate, CobaltBarButtonItemDelegate, BackBarButtonItemDelegate> {
     // Javascript queues
     NSOperationQueue * toJavaScriptOperationQueue;
     NSOperationQueue * fromJavaScriptOperationQueue;
@@ -217,7 +213,6 @@ typedef enum {
 @private
     
     id<CobaltDelegate> _delegate;
-    int _alertViewCounter;
     float _lastWebviewContentOffset;
 	BOOL _isLoadingMore;
     BOOL _isRefreshing;
@@ -253,12 +248,6 @@ typedef enum {
 @property (strong, nonatomic) UIView *webLayer;
 
 /*!
- @property		activityIndicator
- @abstract		an activity indicator shown- while the webView is loading
- */
-@property (strong, nonatomic) UIActivityIndicatorView * activityIndicator;
-
-/*!
  @property		pageName
  @abstract		the name of the HTML file with the content to display in the webview
  @discussion    the file must be located at ressourcePath
@@ -276,6 +265,18 @@ typedef enum {
  @abstract             a refresh control shown for Pull-to-refresh feature
  */
 @property (strong, nonatomic) UIRefreshControl *refreshControl;
+
+/*!
+ @property		background
+ @abstract		background color of the WebView
+ */
+@property (strong, nonatomic) UIColor *background;
+
+/*!
+ @property		scrollsToTop
+ @abstract		allows or not the scrollsToTop functionality
+ */
+@property BOOL scrollsToTop;
 
 /*!
  @property		isPullToRefreshEnabled
@@ -315,7 +316,7 @@ typedef enum {
        andController:(nullable NSString *)controller;
     
 /*!
- @method		- (void)setDelegate:(id)delegate
+ @method		- (void)setDelegate:(id<CobaltDelegate>)delegate
  @abstract		this method sets the delegate which responds to CobaltDelegate protocol
  */
 - (void)setDelegate:(id<CobaltDelegate>)delegate;
@@ -394,7 +395,7 @@ typedef enum {
 - (void)configureBars;
 - (void)setBarButtonItems;
 - (CobaltBarButtonItem *)barButtonItemForAction:(NSDictionary *)action;
-    
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma mark PULL-TO-REFRESH METHODS

@@ -64,13 +64,11 @@
 
 @implementation CobaltViewController
 
-@synthesize activityIndicator,
-            isInfiniteScrollEnabled,
+@synthesize isInfiniteScrollEnabled,
             isPullToRefreshEnabled,
             pageName;
 
-NSMutableDictionary * alertCallbacks;
-
+NSMutableArray * _currentAlerts;
 NSMutableArray * toastsToShow;
 BOOL toastIsShown;
 
@@ -104,6 +102,9 @@ NSString * webLayerPage;
     toJavaScriptOperationQueue = [[NSOperationQueue alloc] init] ;
     [toJavaScriptOperationQueue setSuspended:YES];
     
+    fromJavaScriptOperationQueue = [[NSOperationQueue alloc] init] ;
+    [fromJavaScriptOperationQueue setSuspended:YES];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(onAppStarted:)
                                                  name:kOnAppStarted object:nil];
@@ -119,17 +120,30 @@ NSString * webLayerPage;
     }
     
     if (configuration == nil) {
+        _background = [UIColor whiteColor];
+        _scrollsToTop = YES;
         self.isPullToRefreshEnabled = false;
         self.isInfiniteScrollEnabled = false;
         self.infiniteScrollOffset = 0;
         self.barsConfiguration = nil;
     }
     else {
+        id backgroundColor = [configuration objectForKey:kConfigurationControllerBackgroundColor];
+        BOOL scrollsToTop = [configuration objectForKey:kConfigurationControllerScrollsToTop] != nil ? [[configuration objectForKey:kConfigurationControllerScrollsToTop] boolValue] : YES;
         BOOL pullToRefreshEnabled = [[configuration objectForKey:kConfigurationControllerPullToRefresh] boolValue];
         BOOL infiniteScrollEnabled = [[configuration objectForKey:kConfigurationControllerInfiniteScroll] boolValue];
         int infiniteScrollOffset = [configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] != nil ? [[configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] intValue] : 0;
         NSDictionary *barsDictionary = [configuration objectForKey:kConfigurationBars];
 
+        _background = [UIColor whiteColor];
+        if (backgroundColor != nil
+            && [backgroundColor isKindOfClass:[NSString class]]) {
+            UIColor *parsedBackgroundColor = [Cobalt colorFromHexString:backgroundColor];
+            if (parsedBackgroundColor != nil) {
+                _background = parsedBackgroundColor;
+            }
+        }
+        _scrollsToTop = scrollsToTop;
         self.isPullToRefreshEnabled = pullToRefreshEnabled;
         self.isInfiniteScrollEnabled = infiniteScrollEnabled;
         self.infiniteScrollOffset = infiniteScrollOffset;
@@ -141,6 +155,27 @@ NSString * webLayerPage;
     [super viewDidLoad];
     
     // Do any additional setup after loading the view from its nib.
+    self.view.backgroundColor = _background;
+    webView.scrollView.scrollsToTop = _scrollsToTop;
+    
+    [self customWebView];
+    
+    [webView setDelegate:self];
+    
+    _currentAlerts = [[NSMutableArray alloc] init];
+    toastsToShow = [[NSMutableArray alloc] init];
+    
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    
+    if ([webView respondsToSelector:@selector(setKeyboardDisplayRequiresUserAction:)]) {
+        [webView setKeyboardDisplayRequiresUserAction:NO];
+    }
+    
+    if (! pageName
+        || pageName.length == 0) {
+        pageName = defaultHtmlPage;
+    }
+    
     // Configure pull-to-refresh header view
     if (isPullToRefreshEnabled) {
         NSBundle *cobaltBundle = [Cobalt bundleResources];
@@ -242,6 +277,13 @@ NSString * webLayerPage;
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(onAppForeground:)
                                                  name:kOnAppForegroundNotification object:nil];
+    if ([[UIDevice currentDevice].systemVersion compare:@"8.0"
+                                                options:NSNumericSearch] == NSOrderedAscending) {
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(orientationDidChange:)
+                                                     name:UIDeviceOrientationDidChangeNotification
+                                                   object:nil];
+    }
     
     [self sendEvent:JSEventOnPageShown
            withData:_navigationData
@@ -252,10 +294,14 @@ NSString * webLayerPage;
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    
+    [fromJavaScriptOperationQueue setSuspended:NO];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
+    
+    [fromJavaScriptOperationQueue setSuspended:YES];
     
     [self resetBars];
     
@@ -267,12 +313,22 @@ NSString * webLayerPage;
                                                   object:nil];
 }
 
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    
+    if ([[UIDevice currentDevice].systemVersion compare:@"8.0"
+                                                options:NSNumericSearch] == NSOrderedAscending) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                        name:UIDeviceOrientationDidChangeNotification
+                                                      object:nil];
+    }
+}
+
 - (void)dealloc {
     toJavaScriptOperationQueue = nil;
     fromJavaScriptOperationQueue = nil;
     _delegate = nil;
-    _webView = nil;
-    activityIndicator = nil;
+    webView = nil;
     pageName = nil;
     _webLayer = nil;
     
@@ -306,17 +362,27 @@ NSString * webLayerPage;
     [self sendEvent:JSEventOnAppForeground
            withData:nil
         andCallback:nil];
+    
     [self sendEvent:JSEventOnPageShown
-           withData:nil
+           withData:_navigationData
         andCallback:nil];
+    
+    _navigationData = nil;
 }
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#pragma mark -
 #pragma mark BARS
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark Methods
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)saveBars {
     oldNavigationBarBarTintColor = self.navigationController.navigationBar.barTintColor;
@@ -329,6 +395,8 @@ NSString * webLayerPage;
 }
 
 - (void)configureBars {
+    BOOL barsVisibleSet = NO;
+    
     if (_barsConfiguration != nil) {
         id title = [_barsConfiguration objectForKey:kConfigurationBarsTitle];
         id backgroundColor = [_barsConfiguration objectForKey:kConfigurationBarsBackgroundColor];
@@ -365,14 +433,13 @@ NSString * webLayerPage;
             id top = [visible objectForKey:kConfigurationBarsVisibleTop];
             id bottom = [visible objectForKey:kConfigurationBarsVisibleBottom];
             
-            
             if (top != nil
                 && [top isKindOfClass:[NSNumber class]]) {
                 [self.navigationController setNavigationBarHidden:! [top boolValue]
                                                          animated:YES];
             }
             else {
-                [self.navigationController setNavigationBarHidden:YES
+                [self.navigationController setNavigationBarHidden:NO
                                                          animated:YES];
             }
             
@@ -385,6 +452,8 @@ NSString * webLayerPage;
                 [self.navigationController setToolbarHidden:YES
                                                    animated:YES];
             }
+            
+            barsVisibleSet = YES;
         }
         
         if (actions != nil
@@ -455,6 +524,13 @@ NSString * webLayerPage;
                 [bottomBarButtonItems addObject:flexibleSpace];
             }
         }
+    }
+    
+    if (! barsVisibleSet) {
+        [self.navigationController setNavigationBarHidden:NO
+                                                 animated:YES];
+        [self.navigationController setToolbarHidden:YES
+                                           animated:YES];
     }
 }
 
@@ -548,9 +624,12 @@ NSString * webLayerPage;
     
     if (actions != nil
         && [actions isKindOfClass:[NSArray class]]) {
-        for (id action in actions) {
+        for (__strong id action in actions) {
             if (action != nil
                 && [action isKindOfClass:[NSDictionary class]]) {
+                action = [action mutableCopy];
+                [action setObject:[group objectForKey:kConfigurationBarsActionPosition]
+                           forKey:kConfigurationBarsActionPosition];
                 CobaltBarButtonItem *barButtonItem = [self barButtonItemForAction:action];
                 if (barButtonItem != nil) {
                     [barButtonItems addObject:barButtonItem];
@@ -563,7 +642,10 @@ NSString * webLayerPage;
 }
 
 - (CobaltBarButtonItem *)barButtonItemForAction:(NSDictionary *)action {
+    NSString *iosPosition = (NSString *)[action objectForKey:kConfigurationBarsActionPosition];
+    
     return [[CobaltBarButtonItem alloc] initWithAction:action
+                                             barHeight:[iosPosition isEqualToString:kConfigurationBarsActionPositionBottom] ? self.navigationController.toolbar.bounds.size.height : self.navigationController.navigationBar.bounds.size.height
                                               barColor:self.navigationController.navigationBar.tintColor
                                            andDelegate:self];
 }
@@ -765,11 +847,35 @@ forBarButtonItemNamed:(NSString *)name {
     }
 }
 
+- (void)resizeBarButtonitems {
+    for (UIBarButtonItem *barButtonItem in topLeftBarButtonItems) {
+        if ([barButtonItem isKindOfClass:[CobaltBarButtonItem class]]) {
+            [(CobaltBarButtonItem *)barButtonItem resizeWithBarHeight:self.navigationController.navigationBar.bounds.size.height];
+        }
+    }
+    for (UIBarButtonItem *barButtonItem in topRightBarButtonItems) {
+        if ([barButtonItem isKindOfClass:[CobaltBarButtonItem class]]) {
+            [(CobaltBarButtonItem *)barButtonItem resizeWithBarHeight:self.navigationController.navigationBar.bounds.size.height];
+        }
+    }
+    for (UIBarButtonItem *barButtonItem in bottomBarButtonItems) {
+        if ([barButtonItem isKindOfClass:[CobaltBarButtonItem class]]) {
+            [(CobaltBarButtonItem *)barButtonItem resizeWithBarHeight:self.navigationController.toolbar.bounds.size.height];
+        }
+    }
+}
+
 - (void)resetBarButtonItems {
     self.navigationItem.leftBarButtonItems = @[];
     self.navigationItem.rightBarButtonItems = @[];
     self.toolbarItems = @[];
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark CobaltBarButtonItemDelegate
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)onBarButtonItemPressed:(NSString *)name {
     [self sendMessage:@{
@@ -784,12 +890,34 @@ forBarButtonItemNamed:(NSString *)name {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+#pragma mark Orientation delegate
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)orientationDidChange:(NSNotification *)notification {
+    [self resizeBarButtonitems];
+}
+
+- (void)viewWillTransitionToSize:(CGSize)size
+       withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [super viewWillTransitionToSize:size
+          withTransitionCoordinator:coordinator];
+    
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> _Nonnull context) {
+        [self resizeBarButtonitems];
+    }
+                                 completion:nil];
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark -
 #pragma mark METHODS
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)setDelegate:(id)delegate
-{
+- (void)setDelegate:(id<CobaltDelegate>)delegate {
     if (delegate) {
         _delegate = delegate;
     }
@@ -941,20 +1069,17 @@ forBarButtonItemNamed:(NSString *)name {
 #endif
 }
 
-- (BOOL)onCobaltMessage:(NSString *)message {
-    NSDictionary * jsonObj = [Cobalt dictionaryWithString:message];
-    return [self handleDictionarySentByJavaScript: jsonObj];
-}
-
 - (void)userContentController:(WKUserContentController *)userContentController
       didReceiveScriptMessage:(WKScriptMessage *)message {
-    NSDictionary *jsonObj = [Cobalt dictionaryWithString:message.body];
-    [self handleDictionarySentByJavaScript:jsonObj];
+    [self onCobaltMessage:message.body;
 }
 
-- (BOOL)handleDictionarySentByJavaScript:(NSDictionary *)dict
-{
-    NSString * type = [dict objectForKey:kJSType];
+// Unable to get result from the onUnhandled methods of the delegate and from the CobaltPluginManager one since we cannot called it synchronously (WebThread is blocking the MainThread so waiting the MainThread from the WebThread would completely stuck the app)
+- (void)onCobaltMessage:(NSString *)message {
+    __block BOOL messageHandled = NO;
+    
+    NSDictionary *dict = [Cobalt dictionaryWithString:message];
+    NSString *type = [dict objectForKey:kJSType];
     
     if (type
         && [type isKindOfClass:[NSString class]]) {
@@ -968,26 +1093,33 @@ forBarButtonItemNamed:(NSString *)name {
                 && [callback isKindOfClass:[NSString class]]) {
                 if ([callback isEqualToString:JSEventCallbackOnBackButtonPressed]) {
                     [self popViewController];
+                    
+                    messageHandled = YES;
                 }
                 else if ([callback isEqualToString:JSCallbackPullToRefreshDidRefresh]) {
-                    [self.refreshControl endRefreshing];
-                    self.refreshControl.attributedTitle = _ptrRefreshText;
-                    _isRefreshing = NO;
+                    [self onPullToRefreshDidRefresh];
+                    
+                    messageHandled = YES;
                 }
                 else if ([callback isEqualToString:JSCallbackInfiniteScrollDidRefresh]) {
                     [self onInfiniteScrollDidRefresh];
+                    
+                    messageHandled = YES;
                 }
                 else {
-#if DEBUG_COBALT
-                    NSLog(@"handleDictionarySentByJavaScript: unhandled callback %@", [dict description]);
-#endif
                     if (_delegate != nil
                         && [_delegate respondsToSelector:@selector(onUnhandledCallback:withData:)]) {
-                        return [_delegate onUnhandledCallback:callback withData:data];
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [_delegate onUnhandledCallback:callback
+                                                  withData:data];
+                        });
                     }
+#if DEBUG_COBALT
                     else {
-                        return NO;
+                        NSLog(@"handleDictionarySentByJavaScript: unhandled callback %@", [dict description]);
                     }
+#endif
+                    messageHandled = YES;
                 }
             }
 #if DEBUG_COBALT
@@ -1000,46 +1132,44 @@ forBarButtonItemNamed:(NSString *)name {
         // COBALT IS READY
         else if ([type isEqualToString:JSTypeCobaltIsReady]) {
             [toJavaScriptOperationQueue setSuspended:NO];
+            
             if (_delegate != nil
                 && [_delegate respondsToSelector:@selector(onCobaltIsReady)]) {
-                [_delegate onCobaltIsReady];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [_delegate onCobaltIsReady];
+                });
             }
 #if DEBUG_COBALT
-            NSString * versionWeb = [dict objectForKey:KJSVersion];
-            if (![IOSCurrentVersion isEqualToString:versionWeb]) {
-                NSLog(@"Warning : Cobalt version mismatch : iOS Cobalt version is %@ but Web Cobalt version is %@. You should fix this.",IOSCurrentVersion, versionWeb);
-            }else{
-                NSLog(@"handleDictionarySentByJavaScript: CobaltIsReady, version %@",versionWeb);
+            NSString *version = [dict objectForKey:KJSVersion];
+            if (! [version isEqualToString:COBALT_VERSION]) {
+                NSLog(@"handleDictionarySentByJavaScript - cobaltIsReady: Cobalt version mismatch (iOS: %@, Web: %@).", COBALT_VERSION, version);
             }
-            
-            
 #endif
+            messageHandled = YES;
         }
+        
         // EVENT
         else if ([type isEqualToString:JSTypeEvent]) {
-            NSString * event = [dict objectForKey:kJSEvent];
-            NSDictionary * data = [dict objectForKey:kJSData];
-            NSString * callback = [dict objectForKey:kJSCallback];
+            NSString *event = [dict objectForKey:kJSEvent];
+            NSDictionary *data = [dict objectForKey:kJSData];
+            NSString *callback = [dict objectForKey:kJSCallback];
             
             if (event &&
                 [event isKindOfClass:[NSString class]]) {
                 if (_delegate != nil
                     && [_delegate respondsToSelector:@selector(onUnhandledEvent:withData:andCallback:)]) {
-                    BOOL toReturn = [_delegate onUnhandledEvent:event withData:data andCallback:callback];
-                    if(!toReturn) {
-#if DEBUG_COBALT
-                        NSLog(@"handleDictionarySentByJavaScript: unhandled event %@", [dict description]);
-#endif
-                    }
-                    
-                    return toReturn;
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [_delegate onUnhandledEvent:event
+                                           withData:data
+                                        andCallback:callback];
+                    });
                 }
+#if DEBUG_COBALT
                 else {
-#if DEBUG_COBALT
                     NSLog(@"handleDictionarySentByJavaScript: unhandled event %@", [dict description]);
-#endif
-                    return NO;
                 }
+#endif
+                messageHandled = YES;
             }
 #if DEBUG_COBALT
             else {
@@ -1054,7 +1184,14 @@ forBarButtonItemNamed:(NSString *)name {
             if (text
                 && [text isKindOfClass:[NSString class]]) {
                 NSLog(@"JS LOG: %@", text);
+                
+                messageHandled = YES;
             }
+#if DEBUG_COBALT
+            else {
+                NSLog(@"handleDictionarySentByJavaScript: text field missing or not a string (message: %@)", [dict description]);
+            }
+#endif
         }
         
         // NAVIGATION
@@ -1069,6 +1206,8 @@ forBarButtonItemNamed:(NSString *)name {
                     if (data
                         && [data isKindOfClass:[NSDictionary class]]) {
                         [self pushViewControllerWithData:data];
+                        
+                        messageHandled = YES;
                     }
 #if DEBUG_COBALT
                     else {
@@ -1086,13 +1225,17 @@ forBarButtonItemNamed:(NSString *)name {
                     else {
                         [self popViewController];
                     }
+                    
+                    messageHandled = YES;
                 }
                 //MODAL
                 else if ([action isEqualToString:JSActionNavigationModal]) {
                     NSDictionary * data = [dict objectForKey:kJSData];
                     if (data
                         && [data isKindOfClass:[NSDictionary class]]) {
-                            [self presentViewControllerWithData:data];
+                        [self presentViewControllerWithData:data];
+                        
+                        messageHandled = YES;
                     }
 #if DEBUG_COBALT
                     else {
@@ -1110,6 +1253,8 @@ forBarButtonItemNamed:(NSString *)name {
                     else {
                         [self dismissViewController];
                     }
+                    
+                     messageHandled = YES;
                 }
                 //REPLACE
                 else if ([action isEqualToString:kJSActionNavigationReplace]) {
@@ -1117,6 +1262,8 @@ forBarButtonItemNamed:(NSString *)name {
                     if (data
                         && [data isKindOfClass:[NSDictionary class]]) {
                         [self replaceViewControllerWithData:data];
+                        
+                        messageHandled = YES;
                     }
 #if DEBUG_COBALT
                     else {
@@ -1124,19 +1271,6 @@ forBarButtonItemNamed:(NSString *)name {
                     }
 #endif
                 }
-                else {
-#if DEBUG_COBALT
-                    NSLog(@"handleDictionarySentByJavaScript: unhandled navigation %@", [dict description]);
-#endif
-                    if (_delegate != nil
-                        && [_delegate respondsToSelector:@selector(onUnhandledMessage:)]) {
-                        return [_delegate onUnhandledMessage:dict];
-                    }
-                    else {
-                        return NO;
-                    }
-                }
-                
             }
 #if DEBUG_COBALT
             else {
@@ -1170,6 +1304,8 @@ forBarButtonItemNamed:(NSString *)name {
                                     [toast show];
                                 });
                             }
+                            
+                            messageHandled = YES;
                         }
 #if DEBUG_COBALT
                         else {
@@ -1185,31 +1321,42 @@ forBarButtonItemNamed:(NSString *)name {
                 }
                 
                 // ALERT
-                else if([control isEqualToString:JSControlAlert]) {
+                else if ([control isEqualToString:JSControlAlert]) {
                     [self showAlert:dict];
+                    
+                    messageHandled = YES;
                 }
                 
                 // PULL TO REFRESH
                 else if([control isEqualToString:JSControlPullToRefresh]) {
                     if (data
                         && [data isKindOfClass:[NSDictionary class]]) {
-                        
-                        NSString * action = [data objectForKey: kJSAction];
-                        
+                        NSString *action = [data objectForKey: kJSAction];
                         if (action
                             && [action isKindOfClass: [NSString class]]) {
-                            
-                            
-                            if([action isEqualToString:JSActionSetTexts]) {
+                            if ([action isEqualToString:JSActionSetTexts]) {
                                 NSDictionary * texts = [data objectForKey: kJSTexts];
                                 NSString * pullToRefreshText = [texts objectForKey:kJSTextsPullToRefresh];
                                 NSString * refreshingText = [texts objectForKey:kJSTextsRefreshing];
                                 
-                                [self customizeRefreshControlWithAttributedRefreshText: [[NSAttributedString alloc] initWithString: pullToRefreshText] andAttributedRefreshText: [[NSAttributedString alloc] initWithString: refreshingText] andTintColor: self.refreshControl.tintColor];
+                                [self customizeRefreshControlWithAttributedRefreshText:[[NSAttributedString alloc] initWithString:pullToRefreshText]
+                                                              andAttributedRefreshText:[[NSAttributedString alloc] initWithString:refreshingText]
+                                                                          andTintColor:self.refreshControl.tintColor];
                                 
+                                messageHandled = YES;
                             }
                         }
+#if DEBUG_COBALT
+                        else {
+                            NSLog(@"handleDictionarySentByJavaScript: action field missing or not a string (message: %@)", [dict description]);
+                        }
+#endif
                     }
+#if DEBUG_COBALT
+                    else {
+                        NSLog(@"handleDictionarySentByJavaScript: data field missing or not an object (message: %@)", [dict description]);
+                    }
+#endif
                 }
                 
                 // BARS
@@ -1230,7 +1377,14 @@ forBarButtonItemNamed:(NSString *)name {
                                         [self resetBarButtonItems];
                                         [self setBarButtonItems];
                                     });
+                                    
+                                    messageHandled = YES;
                                 }
+#if DEBUG_COBALT
+                                else {
+                                    NSLog(@"handleDictionarySentByJavaScript: bars field missing or not an object (message: %@)", [dict description]);
+                                }
+#endif
                             }
                             // SET BARS VISIBLE
                             else if ([action isEqualToString:JSActionSetBarsVisible]) {
@@ -1240,7 +1394,14 @@ forBarButtonItemNamed:(NSString *)name {
                                     dispatch_async(dispatch_get_main_queue(), ^(void) {
                                         [self setBarsVisible:visible];
                                     });
+                                    
+                                    messageHandled = YES;
                                 }
+#if DEBUG_COBALT
+                                else {
+                                    NSLog(@"handleDictionarySentByJavaScript: visible field missing or not an object (message: %@)", [dict description]);
+                                }
+#endif
                             }
                             // SET BAR CONTENT
                             else if ([action isEqualToString:JSActionSetBarContent]) {
@@ -1250,7 +1411,14 @@ forBarButtonItemNamed:(NSString *)name {
                                     dispatch_async(dispatch_get_main_queue(), ^(void) {
                                         [self setBarContent:content];
                                     });
+                                    
+                                    messageHandled = YES;
                                 }
+#if DEBUG_COBALT
+                                else {
+                                    NSLog(@"handleDictionarySentByJavaScript: content field missing or not an object (message: %@)", [dict description]);
+                                }
+#endif
                             }
                             // SET ACTION BADGE
                             else if ([action isEqualToString:JSActionSetActionBadge]) {
@@ -1263,7 +1431,14 @@ forBarButtonItemNamed:(NSString *)name {
                                         [self setBadgeLabelText:badge
                                           forBarButtonItemNamed:barButtonItemName];
                                     });
+                                    
+                                    messageHandled = YES;
                                 }
+#if DEBUG_COBALT
+                                else {
+                                    NSLog(@"handleDictionarySentByJavaScript: name and/or badge fields missing or not strings (message: %@)", [dict description]);
+                                }
+#endif
                             }
                             // SET ACTION VISIBLE
                             else if ([action isEqualToString:JSActionSetActionVisible]) {
@@ -1274,9 +1449,16 @@ forBarButtonItemNamed:(NSString *)name {
                                     && visible != nil && [visible isKindOfClass:[NSNumber class]]) {
                                     dispatch_async(dispatch_get_main_queue(), ^(void) {
                                         [self setVisible:[visible boolValue]
-                                          forBarButtonItemNamed:barButtonItemName];
+                                   forBarButtonItemNamed:barButtonItemName];
                                     });
+                                    
+                                    messageHandled = YES;
                                 }
+#if DEBUG_COBALT
+                                else {
+                                    NSLog(@"handleDictionarySentByJavaScript: name and/or visible fields missing or not string/number (message: %@)", [dict description]);
+                                }
+#endif
                             }
                             // SET ACTION ENABLED
                             else if ([action isEqualToString:JSActionSetActionEnabled]) {
@@ -1289,7 +1471,14 @@ forBarButtonItemNamed:(NSString *)name {
                                         [self setEnabled:[enabled boolValue]
                                    forBarButtonItemNamed:barButtonItemName];
                                     });
+                                    
+                                    messageHandled = YES;
                                 }
+#if DEBUG_COBALT
+                                else {
+                                    NSLog(@"handleDictionarySentByJavaScript: name and/or enabled fields missing or not string/number (message: %@)", [dict description]);
+                                }
+#endif
                             }
                             // SET ACTION CONTENT
                             else if ([action isEqualToString:JSActionSetActionContent]) {
@@ -1302,22 +1491,27 @@ forBarButtonItemNamed:(NSString *)name {
                                         [self setContent:content
                                    forBarButtonItemNamed:barButtonItemName];
                                     });
+                                    
+                                    messageHandled = YES;
                                 }
+#if DEBUG_COBALT
+                                else {
+                                    NSLog(@"handleDictionarySentByJavaScript: name and/or content fields missing or not string/object (message: %@)", [dict description]);
+                                }
+#endif
                             }
                         }
-                    }
-                }
-                else {
 #if DEBUG_COBALT
-                    NSLog(@"handleDictionarySentByJavaScript: unhandled message %@", [dict description]);
+                        else {
+                            NSLog(@"handleDictionarySentByJavaScript: action field missing or not a string (message: %@)", [dict description]);
+                        }
 #endif
-                    if (_delegate != nil
-                        && [_delegate respondsToSelector:@selector(onUnhandledMessage:)]) {
-                        return [_delegate onUnhandledMessage:dict];
                     }
+#if DEBUG_COBALT
                     else {
-                        return NO;
+                        NSLog(@"handleDictionarySentByJavaScript: data field missing or not an object (message: %@)", [dict description]);
                     }
+#endif
                 }
             }
 #if DEBUG_COBALT
@@ -1339,25 +1533,31 @@ forBarButtonItemNamed:(NSString *)name {
                 if ([action isEqualToString:JSActionWebLayerShow]) {
                     if (data
                         && [data isKindOfClass:[NSDictionary class]]) {
-                        [self showWebLayer:data];
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [self showWebLayer:data];
+                        });
+                        
+                        messageHandled = YES;
                     }
 #if DEBUG_COBALT
                     else {
                         NSLog(@"handleDictionarySentByJavaScript: data field missing or not an object (message: %@)", [dict description]);
-                        
                     }
 #endif
                 }
                 
                 // DISMISS
                 else if([action isEqualToString:JSActionWebLayerDismiss]) {
-                    [self dismissWebLayer:data];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self dismissWebLayer:data];
+                    });
+                    
+                    messageHandled = YES;
                 }
             }
 #if DEBUG_COBALT
             else {
                 NSLog(@"handleDictionarySentByJavaScript: action field missing or not a string (message: %@)", [dict description]);
-
             }
 #endif
         }
@@ -1375,42 +1575,50 @@ forBarButtonItemNamed:(NSString *)name {
                     if([urlString isKindOfClass:[NSString class]]) {
                         NSString *encodedUrlString = [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
                         NSURL *url = [NSURL URLWithString:encodedUrlString];
-                        [[UIApplication sharedApplication] openURL:url];
+                        
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [[UIApplication sharedApplication] openURL:url];
+                        });
+                        
+                        messageHandled = YES;
                     }
+#if DEBUG_COBALT
+                    else {
+                        NSLog(@"handleDictionarySentByJavaScript: url field missing or not a string (message: %@)", [dict description]);
+                    }
+#endif
                 }
             }
+#if DEBUG_COBALT
+            else {
+                NSLog(@"handleDictionarySentByJavaScript: action field missing or not a string (message: %@)", [dict description]);
+            }
+#endif
         }
         // PLUGIN
         else if ([type isEqualToString: kJSTypePlugin]) {
-            [[CobaltPluginManager sharedInstance] onMessageFromCobaltViewController: self andData: dict];
-        }
-        else {
-#if DEBUG_COBALT
-            NSLog(@"handleDictionarySentByJavaScript: unhandled message %@", [dict description]);
-#endif
-            if (_delegate != nil
-                && [_delegate respondsToSelector:@selector(onUnhandledMessage:)]) {
-                return [_delegate onUnhandledMessage:dict];
-            }
-            else {
-                return NO;
-            }
-        }
-    }
-    else {
-#if DEBUG_COBALT
-        NSLog(@"handleDictionarySentByJavaScript: unhandled message %@", [dict description]);
-#endif
-        if (_delegate != nil
-            && [_delegate respondsToSelector:@selector(onUnhandledMessage:)]) {
-            return [_delegate onUnhandledMessage:dict];
-        }
-        else {
-            return NO;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[CobaltPluginManager sharedInstance] onMessageFromCobaltViewController:self
+                                                                                andData:dict];
+            });
+            
+            messageHandled = YES;
         }
     }
     
-    return YES;
+    if (! messageHandled) {
+        if (_delegate != nil
+            && [_delegate respondsToSelector:@selector(onUnhandledMessage:)]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [_delegate onUnhandledMessage:dict];
+            });
+        }
+#if DEBUG_COBALT
+        else {
+            NSLog(@"handleDictionarySentByJavaScript: unhandled message %@", [dict description]);
+        }
+#endif
+    }
 }
 
 - (void) sendMessage:(NSDictionary *) message {
@@ -1720,112 +1928,25 @@ forBarButtonItemNamed:(NSString *)name {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)showAlert:(NSDictionary *)dict
-{
-    NSDictionary * data = [dict objectForKey:kJSData];
-    NSString * callback = [dict objectForKey:kJSCallback];
+- (void)showAlert:(NSDictionary *)dict {
+    NSDictionary *data = [dict objectForKey:kJSData];
+    NSString *callback = [dict objectForKey:kJSCallback];
     
-    if (data && [data isKindOfClass:[NSDictionary class]]) {
-        NSString * title = ([data objectForKey:kJSAlertTitle] && [[data objectForKey:kJSAlertTitle] isKindOfClass:[NSString class]]) ? [data objectForKey:kJSAlertTitle] : @"";
-        NSString * message = ([data objectForKey:kJSAlertMessage] && [[data objectForKey:kJSAlertMessage] isKindOfClass:[NSString class]]) ? [data objectForKey:kJSAlertMessage] : @"";
-        NSArray * buttons = ([data objectForKey:kJSAlertButtons] && [[data objectForKey:kJSAlertButtons] isKindOfClass:[NSArray class]]) ? [data objectForKey:kJSAlertButtons] : [NSArray array];
-        
-        NSString * systemVersion = [[UIDevice currentDevice] systemVersion];
-        if ([systemVersion compare: @"8.0" options:NSNumericSearch] != NSOrderedAscending) {
-            UIAlertController * alertController = [UIAlertController alertControllerWithTitle:title
-                                                                                      message:message
-                                                                               preferredStyle:UIAlertControllerStyleAlert];
-            if (! buttons.count) {
-                UIAlertAction * cancelAction = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"OK",
-                                                                                                                 @"Localizable",
-                                                                                                                 [Cobalt bundleResources],
-                                                                                                                 @"OK")
-                                                                        style:UIAlertActionStyleCancel
-                                                                      handler:^(UIAlertAction * action) {
-                        if (callback && [callback isKindOfClass:[NSString class]]) {
-                            NSDictionary * data = [NSDictionary dictionaryWithObjectsAndKeys:@0, kJSAlertButtonIndex, nil];
-                            [self sendCallback:callback withData:data];
-                        }
-                    }
-                ];
-                
-                [alertController addAction:cancelAction];
-            }
-            else {
-                for (int i = 0 ; i < buttons.count ; i++) {
-                    UIAlertAction * action = [UIAlertAction actionWithTitle:[buttons objectAtIndex:i]
-                                                                      style:UIAlertActionStyleDefault
-                                                                    handler:^(UIAlertAction * action) {
-                           if (callback && [callback isKindOfClass:[NSString class]]) {
-                               NSDictionary * data = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:i], kJSAlertButtonIndex, nil];
-                               [self sendCallback:callback withData:data];
-                           }
-                       }
-                    ];
-                    
-                    [alertController addAction:action];
-                }
-            }
-            
-            [[NSOperationQueue mainQueue] addOperationWithBlock:^ {
-                [self presentViewController:alertController animated:YES completion:nil];
-            }];
-        }
-        else {
-            UIAlertView * alertView;
-            id delegate = (callback && [callback isKindOfClass:[NSString class]]) ? self : nil;
-            
-            if (! buttons.count) {
-                alertView = [[UIAlertView alloc] initWithTitle:title
-                                                       message:message
-                                                      delegate:delegate
-                                             cancelButtonTitle:NSLocalizedStringFromTableInBundle(@"OK",
-                                                                                                  @"Localizable",
-                                                                                                  [Cobalt bundleResources],
-                                                                                                  @"OK")
-                                             otherButtonTitles:nil];
-            }
-            else {
-                alertView = [[UIAlertView alloc] initWithTitle:title
-                                                       message:message
-                                                      delegate:delegate
-                                             cancelButtonTitle:nil
-                                             otherButtonTitles:nil];
-                
-                // Add buttons
-                for (int i = 0 ; i < buttons.count ; i++) {
-                    [alertView addButtonWithTitle:[buttons objectAtIndex:i]];
-                }
-            }
-            
-            if (delegate) {
-                alertView.tag = ++_alertViewCounter;
-                [alertCallbacks setObject:callback
-                                   forKey:[NSString stringWithFormat:@"%ld", (long)alertView.tag]];
-            }
-            
-            [[NSOperationQueue mainQueue] addOperationWithBlock:^ {
-                [alertView show];
-            }];
-        }
-    }
-#if DEBUG_COBALT
-    else {
-        NSLog(@"showAlert: data field missing or not an object (message: %@)", [dict description]);
-    }
-#endif
+    CobaltAlert *alert = [[CobaltAlert alloc] initWithData:data
+                                                  callback:callback
+                                               andDelegate:self
+                                        fromViewController:self];
+    [_currentAlerts addObject:alert];
+    [alert show];
 }
 
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    NSString * callback = [alertCallbacks objectForKey:[NSString stringWithFormat:@"%ld", (long)alertView.tag]];
+- (void)alert:(CobaltAlert *)alert
+ withCallback:(NSString *)callback
+clickedButtonAtIndex:(NSInteger)index {
+    [self sendCallback:callback
+              withData:@{kJSAlertButtonIndex: [NSNumber numberWithInteger:index]}];
     
-    if (callback
-        && [callback isKindOfClass:[NSString class]]) {
-        NSDictionary * data = [NSDictionary dictionaryWithObjectsAndKeys:   [NSNumber numberWithInteger:buttonIndex], kJSAlertButtonIndex,
-                                                                            nil];
-        [self sendCallback:callback withData:data];
-    }
+    [_currentAlerts removeObject:alert];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1874,11 +1995,16 @@ forBarButtonItemNamed:(NSString *)name {
         [self loadPage:webLayerPage
              inWebView:_webLayer];
         
-        [self.view addSubview:_webLayer];
-        [UIView animateWithDuration:fadeDuration.floatValue
+        if ([JSContext class]) {
+            JSContext *context = [webLayer valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+            context[@"CobaltViewController"] = self;
+        }
+        
+        [self.view addSubview:webLayer];
+        [UIView animateWithDuration:fadeDuration.floatValue 
                          animations:^{
-                             [_webLayer setAlpha:1.0];
-                         }
+                             [webLayer setAlpha:1.0];
+                         } 
                          completion:nil];
     }
 #if DEBUG_COBALT
@@ -1934,12 +2060,6 @@ forBarButtonItemNamed:(NSString *)name {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)webView:(UIWebView *)webView
-shouldStartLoadWithRequest:(NSURLRequest *)request
- navigationType:(UIWebViewNavigationType)navigationType {
-    return [self webViewShouldLoadPageWithRequest:request];
-}
-
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     [self webViewStartLoadingPage];
 }
@@ -1948,17 +2068,16 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     [self webViewDidLoadPage];
 }
 
+- (void)webView:(UIWebView *)webView
+didFailLoadWithError:(NSError *)error {
+    [self webViewDidFailLoadPage];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma mark WKWebView
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (void)webView:(WKWebView *)webView
-decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction
-decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
-    [self webViewShouldLoadPageWithRequest:navigationAction.request] ? decisionHandler(WKNavigationActionPolicyAllow) : decisionHandler(WKNavigationActionPolicyCancel);
-}
 
 - (void)webView:(WKWebView *)webView
 didCommitNavigation:(WKNavigation *)navigation {
@@ -1970,59 +2089,34 @@ didFinishNavigation:(WKNavigation *)navigation {
     [self webViewDidLoadPage];
 }
 
+- (void)webView:(WKWebView *)webView 
+didFailNavigation:(WKNavigation *)navigation 
+      withError:(NSError *)error {
+    [self webViewDidFailLoadPage];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma mark Common
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)webViewShouldLoadPageWithRequest:(NSURLRequest *)request {
-    NSString *requestURL = [[[request URL] absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    
-    // if requestURL contains cobaltSpecialJSKey, extracts the JSON received.
-    NSString *cobaltSpecialJSKey = @"cob@l7#k&y";
-    NSRange range = [requestURL rangeOfString:cobaltSpecialJSKey];
-    if (range.location != NSNotFound) {
-        NSString *json = [requestURL substringFromIndex:range.location + cobaltSpecialJSKey.length];
-        NSDictionary *jsonObj = [Cobalt dictionaryWithString:json];
-        
-        [fromJavaScriptOperationQueue addOperationWithBlock:^{
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                [self handleDictionarySentByJavaScript:jsonObj];
-            });
-        }];
-        
-        [self sendACK];
-        
-        return NO;
-    }
-    
-    // Returns YES to ensure regular navigation working as expected.
-    return YES;
-}
-
 - (void)webViewStartLoadingPage {
-    [activityIndicator startAnimating];
-    
     // Stops queues until Web view is loaded
     [toJavaScriptOperationQueue setSuspended:YES];
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 }
 
 - (void)webViewDidLoadPage {
-    // start queue
+    // (re)start queue
     [toJavaScriptOperationQueue setSuspended:NO];
-    [activityIndicator stopAnimating];
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 
-- (void)sendACK {
-    [self sendCallback:JSCallbackSimpleAcquitment
-              withData:nil];
-    
-    if (_webLayer) {
-        [self executeScriptInWebView:WEB_LAYER
-                      withDictionary:@{kJSType: JSTypeCallBack,
-                                       kJSCallback: JSCallbackSimpleAcquitment}];
-    }
+- (void)webViewDidFailLoadPage {
+    // (re)start queue
+    [toJavaScriptOperationQueue setSuspended:NO];
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2118,11 +2212,28 @@ didFinishNavigation:(WKNavigation *)navigation {
  @method		- (void)refreshWebView
  @abstract		Sends event to refresh Web view content.
  */
-- (void)refreshWebView
-{
-    [self sendEvent:JSEventPullToRefresh withData:nil andCallback:JSCallbackPullToRefreshDidRefresh];
+- (void)refreshWebView {
+    [self sendEvent:JSEventPullToRefresh
+           withData:nil
+        andCallback:JSCallbackPullToRefreshDidRefresh];
 }
 
+
+//*********************************
+// ON PULL TO REFRESH DID REFRESH *
+//*********************************
+/*!
+ @method		- (void)onPullToRefreshDidRefresh
+ @abstract		Tells the control that a refresh operation has ended.
+ */
+- (void)onPullToRefreshDidRefresh {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.refreshControl endRefreshing];
+        self.refreshControl.attributedTitle = _ptrRefreshText;
+    });
+    
+    _isRefreshing = NO;
+}
 
 /*!
  @method		- (void)customizeRefreshControlWithAttributedRefreshText:(NSAttributedString *)attributedRefreshText andAttributedRefreshText:(NSAttributedString *)attributedRefreshingText andTintColor: (UIColor *)tintColor;
@@ -2132,8 +2243,10 @@ didFinishNavigation:(WKNavigation *)navigation {
     _ptrRefreshText = attributedRefreshText;
     _ptrRefreshingText = attributedRefreshingText;
     
-    self.refreshControl.attributedTitle = attributedRefreshText;
-    self.refreshControl.tintColor = tintColor;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.refreshControl.attributedTitle = attributedRefreshText;
+        self.refreshControl.tintColor = tintColor;
+    });
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -29,6 +29,8 @@
 
 #import <UIKit/UIKit.h>
 
+#import "CobaltButton.h"
+
 @protocol CobaltBarButtonItemDelegate <NSObject>
 
 @required
@@ -38,22 +40,26 @@
 @end
 
 @interface CobaltBarButtonItem : UIBarButtonItem {
+    CGFloat _barHeight;
     UIColor *_color;
     UIColor *_barColor;
+    NSString *_icon;
+    NSString *_position;
 }
 
 @property (strong, nonatomic) NSString *name;
 @property (assign, nonatomic) BOOL visible;
 @property (weak, nonatomic) id<CobaltBarButtonItemDelegate> delegate;
-@property (strong, nonatomic) UIButton *button;
-@property (strong, nonatomic) UILabel *badgeLabel;
+@property (strong, nonatomic) CobaltButton *button;
 
 - (instancetype)initWithAction:(NSDictionary *)action
+                     barHeight:(CGFloat)barHeight
                       barColor:(UIColor *)barColor
                    andDelegate:(id<CobaltBarButtonItemDelegate>)delegate;
 
-- (void)setBadge:(NSString *)text;
-- (void)resizeBadge;
+- (void)resizeWithBarHeight:(CGFloat)barHeight;
 - (void)setContent:(NSDictionary *)content;
+
+- (void)setBadge:(NSString *)text;
 
 @end

@@ -83,16 +83,18 @@ static NSString *sResourcePath;
     
     NSBundle *mainBundle = [NSBundle mainBundle];
     NSBundle *cobaltBundle = [Cobalt bundleResources];
-    NSString *nib = NIB_DEFAULT;
+    NSString *nibName = NIB_DEFAULT;
     
     NSDictionary *configuration = [Cobalt configurationForController:controller];
     if (configuration == nil) {
         configuration = [Cobalt defaultConfiguration];
     }
     if (configuration == nil) {
-        CobaltViewController *viewController = [[CobaltViewController alloc] initWithNibName:nib
+        CobaltViewController *viewController = [[CobaltViewController alloc] initWithNibName:nibName
                                                                                       bundle:cobaltBundle];
         viewController.pageName = page;
+        viewController.background = [UIColor whiteColor];
+        viewController.scrollsToTop = YES;
         viewController.isPullToRefreshEnabled = false;
         viewController.isInfiniteScrollEnabled = false;
         viewController.infiniteScrollOffset = 0;
@@ -101,38 +103,53 @@ static NSString *sResourcePath;
         return viewController;
     }
     
-    NSString *class = [configuration objectForKey:kConfigurationIOS];
-    nib = [configuration objectForKey:kConfigurationControllerIOSNibName];
+    NSString *className = [configuration objectForKey:kConfigurationIOS];
+    nibName = [configuration objectForKey:kConfigurationControllerIOSNibName];
+    
+    id backgroundColor = [configuration objectForKey:kConfigurationControllerBackgroundColor];
+    UIColor *background = [UIColor whiteColor];
+    if (backgroundColor != nil
+        && [backgroundColor isKindOfClass:[NSString class]]) {
+        UIColor *parsedBackgroundColor = [Cobalt colorFromHexString:backgroundColor];
+        if (parsedBackgroundColor != nil) {
+            background = parsedBackgroundColor;
+        }
+    }
+    
+    BOOL scrollsToTop = [configuration objectForKey:kConfigurationControllerScrollsToTop] != nil ? [[configuration objectForKey:kConfigurationControllerScrollsToTop] boolValue] : YES;
     BOOL pullToRefreshEnabled = [[configuration objectForKey:kConfigurationControllerPullToRefresh] boolValue];
     BOOL infiniteScrollEnabled = [[configuration objectForKey:kConfigurationControllerInfiniteScroll] boolValue];
     int infiniteScrollOffset = [configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] != nil ? [[configuration objectForKey:kConfigurationControllerInfiniteScrollOffset] intValue] : 0;
     NSDictionary *barsDictionary = [configuration objectForKey:kConfigurationBars];
     
-    if (class == nil) {
+    if (className == nil) {
 #if DEBUG_COBALT
         NSLog(@"cobaltViewControllerForController:andPage: no class found for %@ controller", controller);
 #endif
         return nil;
     }
     
-    if ([Cobalt isValidCobaltViewControllerWithClassName:class]) {
-        if (nib == nil) {
+    Class class = [Cobalt cobaltViewControllerClassWithName:className];
+    if (class != nil) {
+        if (nibName == nil) {
             CobaltViewController *viewController;
             // If nib not defined in configuration file, use same as class if it exists!
-            if ([Cobalt isValidNib:class
+            if ([Cobalt isValidNib:className
                          forBundle:mainBundle]) {
-                viewController = [[NSClassFromString(class) alloc] initWithNibName:class
-                                                                            bundle:mainBundle];
+                viewController = [[class alloc] initWithNibName:className
+                                                         bundle:mainBundle];
             }
             // If nib file does no exists, use default one i.e. CobaltViewController.xib
             else {
-                nib = NIB_DEFAULT;
+                nibName = NIB_DEFAULT;
                 
-                viewController = [[NSClassFromString(class) alloc] initWithNibName:nib
-                                                                            bundle:cobaltBundle];
+                viewController = [[class alloc] initWithNibName:nibName
+                                                         bundle:cobaltBundle];
             }
             
             viewController.pageName = page;
+            viewController.background = background;
+            viewController.scrollsToTop = scrollsToTop;
             viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
             viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
             viewController.infiniteScrollOffset = infiniteScrollOffset;
@@ -140,11 +157,13 @@ static NSString *sResourcePath;
             
             return viewController;
         }
-        else if ([Cobalt isValidNib:nib
+        else if ([Cobalt isValidNib:nibName
                           forBundle:mainBundle]) {
-            CobaltViewController *viewController = [[NSClassFromString(class) alloc] initWithNibName:nib
-                                                                                              bundle:mainBundle];
+            CobaltViewController *viewController = [[class alloc] initWithNibName:nibName
+                                                                           bundle:mainBundle];
             viewController.pageName = page;
+            viewController.background = background;
+            viewController.scrollsToTop = scrollsToTop;
             viewController.isPullToRefreshEnabled = pullToRefreshEnabled;
             viewController.isInfiniteScrollEnabled = infiniteScrollEnabled;
             viewController.infiniteScrollOffset = infiniteScrollOffset;
@@ -167,77 +186,89 @@ static NSString *sResourcePath;
     }
     
     NSBundle *bundle = [NSBundle mainBundle];
-    NSString *class = [configuration objectForKey:kConfigurationIOS];
-    NSString *nib = [configuration objectForKey:kConfigurationControllerIOSNibName];
+    NSString *className = [configuration objectForKey:kConfigurationIOS];
+    NSString *nibName = [configuration objectForKey:kConfigurationControllerIOSNibName];
     
-    if (class == nil) {
+    if (className == nil) {
 #if DEBUG_COBALT
         NSLog(@"nativeViewControllerForController: no class found for %@ controller", controller);
 #endif
         return nil;
     }
     
-    if (! [Cobalt isValidNativeViewControllerWithClassName:class]) {
+    Class class = [Cobalt nativeViewControllerClassWithName:className];
+    if (class == nil) {
         return nil;
     }
     
-    if (nib == nil) {
+    if (nibName == nil) {
         // If nib not defined in configuration file, use same as class if it exists!
-        if ([Cobalt isValidNib:class
+        if ([Cobalt isValidNib:className
                      forBundle:bundle]) {
-            return [[NSClassFromString(class) alloc] initWithNibName:class
-                                                              bundle:bundle];
+            return [[class alloc] initWithNibName:className
+                                           bundle:bundle];
         }
         else {
-            return [[NSClassFromString(class) alloc] init];
+            return [[class alloc] init];
         }
     }
-    else if ([Cobalt isValidNib:nib
+    else if ([Cobalt isValidNib:nibName
                       forBundle:bundle]) {
-        return [[NSClassFromString(class) alloc] initWithNibName:nib
-                                                          bundle:bundle];
+        return [[class alloc] initWithNibName:nibName
+                                       bundle:bundle];
     }
     else {
         return nil;
     }
 }
 
-+ (BOOL)isValidNativeViewControllerWithClassName:(NSString *)className {
++ (Class)nativeViewControllerClassWithName:(NSString *)className {
     Class class = NSClassFromString(className);
-    BOOL isValidViewControllerClass = class
-    && [class isSubclassOfClass:UIViewController.class];
-    BOOL isValidNativeViewControllerClass = class
-    && ! [class isSubclassOfClass:CobaltViewController.class];
+    if (class == nil) {
+        // Try Swift class
+        NSString *moduleName = [[[NSBundle mainBundle].infoDictionary[@"CFBundleName"]
+                                 componentsSeparatedByCharactersInSet:[[NSCharacterSet alphanumericCharacterSet] invertedSet]]
+                                componentsJoinedByString:@"_"];
+        class = NSClassFromString([NSString stringWithFormat:@"%@.%@", moduleName, className]);
+    }
+    BOOL isValidViewControllerClass = class != nil && [class isSubclassOfClass:UIViewController.class];
+    BOOL isValidNativeViewControllerClass = class != nil && ! [class isSubclassOfClass:CobaltViewController.class];
     
 #if DEBUG_COBALT
     if (! isValidViewControllerClass) {
-        NSLog(@"isValidNativeViewControllerWithClassName: class %@ not found", className);
+        NSLog(@"nativeViewControllerClassWithName: class %@ not found", className);
     }
     else if (! isValidNativeViewControllerClass) {
-        NSLog(@"isValidNativeViewControllerWithClassName: class %@ inherits from CobaltViewController", className);
+        NSLog(@"nativeViewControllerClassWithName: class %@ inherits from CobaltViewController", className);
     }
 #endif
     
-    return isValidViewControllerClass && isValidNativeViewControllerClass;
+    return isValidViewControllerClass && isValidNativeViewControllerClass ? class : nil;
 }
 
-+ (BOOL)isValidCobaltViewControllerWithClassName:(NSString *)className {
++ (Class)cobaltViewControllerClassWithName:(NSString *)className {
     Class class = NSClassFromString(className);
-    BOOL isValidViewControllerClass = class
-    && [class isSubclassOfClass:UIViewController.class];
-    BOOL isValidCobaltViewControllerClass = class
-    && [class isSubclassOfClass:CobaltViewController.class];
+    if (class == nil) {
+        // Try Swift class
+        NSString *moduleName = [[[NSBundle mainBundle].infoDictionary[@"CFBundleName"]
+                                 componentsSeparatedByCharactersInSet:[[NSCharacterSet alphanumericCharacterSet] invertedSet]]
+                                componentsJoinedByString:@"_"];
+        class = NSClassFromString([NSString stringWithFormat:@"%@.%@", moduleName, className]);
+    }
+    
+    BOOL isValidViewControllerClass = class != nil && [class isSubclassOfClass:UIViewController.class];
+    BOOL isValidCobaltViewControllerClass = class != nil && [class isSubclassOfClass:CobaltViewController.class];
     
 #if DEBUG_COBALT
     if (! isValidViewControllerClass) {
-        NSLog(@"isValidNativeViewControllerWithClassName: class %@ not found", className);
+        NSLog(@"cobaltViewControllerClassWithName: class %@ not found", className);
     }
     else if (! isValidCobaltViewControllerClass) {
-        NSLog(@"isValidCobaltViewControllerWithClassName: class %@ does not inherit from CobaltViewController", className);
+        NSLog(@"cobaltViewControllerClassWithName: class %@ does not inherit from CobaltViewController", className);
     }
 #endif
     
-    return isValidViewControllerClass && isValidCobaltViewControllerClass;
+    return isValidViewControllerClass && isValidCobaltViewControllerClass ? class : nil;
 }
 
 + (BOOL)isValidNib:(NSString *)nib
@@ -321,7 +352,7 @@ static NSString *sResourcePath;
 
 + (NSDictionary *)cobaltConfiguration {
     if (sCobaltConfiguration != nil) {
-        return sCobaltConfiguration;
+        return (NSMutableDictionary *) CFBridgingRelease(CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (CFDictionaryRef) sCobaltConfiguration, kCFPropertyListMutableContainersAndLeaves));
     }
     
     NSString *cobaltResourcePath = [Cobalt resourcePath];
@@ -337,7 +368,7 @@ static NSString *sResourcePath;
     }
     
     sCobaltConfiguration = [Cobalt dictionaryWithData:data];
-    return sCobaltConfiguration;
+    return (NSMutableDictionary *) CFBridgingRelease(CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (CFDictionaryRef) sCobaltConfiguration, kCFPropertyListMutableContainersAndLeaves));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

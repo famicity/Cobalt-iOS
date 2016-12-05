@@ -36,6 +36,6 @@
 
 + (UIImage *)imageWithIcon:(NSString *)identifier
                      color:(UIColor *)color
-                   andSize:(CGSize)size;
+                   andSize:(CGFloat)size;
 
 @end

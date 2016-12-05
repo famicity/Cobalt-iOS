@@ -59,6 +59,8 @@ FOUNDATION_EXPORT const unsigned char CobaltVersionString[];
 
 #import "CobaltViewController.h"
 
+#define COBALT_VERSION     @"0.5.1"
+
 #define viewControllerDeallocatedNotification   @"viewControllerDeallocatedNotification"
 
 // CONFIGURATION
@@ -66,6 +68,8 @@ FOUNDATION_EXPORT const unsigned char CobaltVersionString[];
 #define kConfigurationControllers                       @"controllers"
 #define kConfigurationControllerDefault                 @"default"
 #define kConfigurationControllerIOSNibName              @"iosNibName"
+#define kConfigurationControllerBackgroundColor         @"backgroundColor"
+#define kConfigurationControllerScrollsToTop            @"iosScrollToTop"
 #define kConfigurationControllerPullToRefresh           @"pullToRefresh"
 #define kConfigurationControllerInfiniteScroll          @"infiniteScroll"
 #define kConfigurationControllerInfiniteScrollOffset    @"infiniteScrollOffset"
