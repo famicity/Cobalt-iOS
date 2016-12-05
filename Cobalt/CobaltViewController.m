@@ -1955,7 +1955,14 @@ clickedButtonAtIndex:(NSInteger)index {
     
     if (webLayerPage) {
         if ([WKWebView class]) {
-            _webLayer = [[WKWebView alloc] initWithFrame:_webViewPlaceholder.frame];
+            WKUserContentController *controller = [[WKUserContentController alloc] init];
+            [controller addScriptMessageHandler:self
+                                           name:@"cobalt"];
+            WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
+            configuration.userContentController = controller;
+            
+            _webLayer = [[WKWebView alloc] initWithFrame:_webViewPlaceholder.frame
+                                           configuration:configuration];
             ((WKWebView *) _webLayer).navigationDelegate = self;
             ((WKWebView *) _webLayer).scrollView.bounces = NO;
         }
@@ -1967,6 +1974,11 @@ clickedButtonAtIndex:(NSInteger)index {
             if ([_webLayer respondsToSelector:@selector(setKeyboardDisplayRequiresUserAction:)]) {
                 [(UIWebView *)_webLayer setKeyboardDisplayRequiresUserAction:NO];
             }
+            
+            if ([JSContext class]) {
+                JSContext *context = [_webLayer valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+                context[@"CobaltViewController"] = self;
+            }
         }
         
         [_webLayer setAlpha:0.0];
@@ -1976,11 +1988,6 @@ clickedButtonAtIndex:(NSInteger)index {
         
         [self loadPage:webLayerPage
              inWebView:_webLayer];
-        
-        if ([JSContext class]) {
-            JSContext *context = [_webLayer valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
-            context[@"CobaltViewController"] = self;
-        }
         
         [self.view addSubview:_webLayer];
         [UIView animateWithDuration:fadeDuration.floatValue 
