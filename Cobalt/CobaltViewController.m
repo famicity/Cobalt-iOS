@@ -156,25 +156,6 @@ NSString * webLayerPage;
     
     // Do any additional setup after loading the view from its nib.
     self.view.backgroundColor = _background;
-    webView.scrollView.scrollsToTop = _scrollsToTop;
-    
-    [self customWebView];
-    
-    [webView setDelegate:self];
-    
-    _currentAlerts = [[NSMutableArray alloc] init];
-    toastsToShow = [[NSMutableArray alloc] init];
-    
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-    
-    if ([webView respondsToSelector:@selector(setKeyboardDisplayRequiresUserAction:)]) {
-        [webView setKeyboardDisplayRequiresUserAction:NO];
-    }
-    
-    if (! pageName
-        || pageName.length == 0) {
-        pageName = defaultHtmlPage;
-    }
     
     // Configure pull-to-refresh header view
     if (isPullToRefreshEnabled) {
@@ -208,6 +189,7 @@ NSString * webLayerPage;
         ((WKWebView *)_webView).navigationDelegate = self;
         
         UIScrollView *scrollView = ((WKWebView *) _webView).scrollView;
+        scrollView.scrollsToTop = _scrollsToTop;
         scrollView.delegate = self;
         if (_refreshControl != nil) {
             [scrollView addSubview:_refreshControl];
@@ -219,6 +201,7 @@ NSString * webLayerPage;
         ((UIWebView *)_webView).delegate = self;
         
         UIScrollView *scrollView = ((UIWebView *) _webView).scrollView;
+        scrollView.scrollsToTop = _scrollsToTop;
         scrollView.delegate = self;
         if (_refreshControl != nil) {
             [scrollView addSubview:_refreshControl];
@@ -249,8 +232,7 @@ NSString * webLayerPage;
     
     fromJavaScriptOperationQueue = [[NSOperationQueue alloc] init];
     
-    _alertViewCounter = 0;
-    alertCallbacks = [[NSMutableDictionary alloc] init];
+    _currentAlerts = [[NSMutableArray alloc] init];
     toastsToShow = [[NSMutableArray alloc] init];
     
     if (pageName == nil
@@ -258,7 +240,7 @@ NSString * webLayerPage;
         pageName = defaultHtmlPage;
     }
     
-    [activityIndicator startAnimating];
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     
     [self loadPage:pageName
          inWebView:_webView];
@@ -328,7 +310,7 @@ NSString * webLayerPage;
     toJavaScriptOperationQueue = nil;
     fromJavaScriptOperationQueue = nil;
     _delegate = nil;
-    webView = nil;
+    _webView = nil;
     pageName = nil;
     _webLayer = nil;
     
@@ -1071,7 +1053,7 @@ forBarButtonItemNamed:(NSString *)name {
 
 - (void)userContentController:(WKUserContentController *)userContentController
       didReceiveScriptMessage:(WKScriptMessage *)message {
-    [self onCobaltMessage:message.body;
+    [self onCobaltMessage:message.body];
 }
 
 // Unable to get result from the onUnhandled methods of the delegate and from the CobaltPluginManager one since we cannot called it synchronously (WebThread is blocking the MainThread so waiting the MainThread from the WebThread would completely stuck the app)
@@ -1996,14 +1978,14 @@ clickedButtonAtIndex:(NSInteger)index {
              inWebView:_webLayer];
         
         if ([JSContext class]) {
-            JSContext *context = [webLayer valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+            JSContext *context = [_webLayer valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
             context[@"CobaltViewController"] = self;
         }
         
-        [self.view addSubview:webLayer];
+        [self.view addSubview:_webLayer];
         [UIView animateWithDuration:fadeDuration.floatValue 
                          animations:^{
-                             [webLayer setAlpha:1.0];
+                             [_webLayer setAlpha:1.0];
                          } 
                          completion:nil];
     }

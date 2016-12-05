@@ -370,22 +370,6 @@ typedef enum {
 
 - (void)sendEventToWebLayer:(NSString *)event withData:(NSObject *)data andCallback:(NSString *)callback;
 
-/*!
- @method        - (BOOL)handleDictionarySentByJavaScript:(NSDictionary *)message
- @abstract      Catches the message sent by the WebView as JSON used to fire native methods (allows interactions from the WebView to the native)
- @param         message: the JSON sent by the WebView
- @result        Returns YES if the message has been catched by the native, NO otherwise.
- @discussion    This method SHOULD NOT be overridden in subclasses.
- */
-- (BOOL)handleDictionarySentByJavaScript:(NSDictionary *)message;
-
-/*!
- @method		- (void)sendACK
- @abstract		Sends an ACK event as soon as a JS message is received
- @discussion    This is the default acquitment way. More complex acquitment methods may be implemented but on iOS, every call received by JS should send at least this acquitment.
- */
-- (void)sendACK;
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma mark BARS
