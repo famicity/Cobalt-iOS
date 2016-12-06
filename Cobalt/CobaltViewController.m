@@ -178,7 +178,7 @@ NSString * webLayerPage;
     }
     
     if ([WKWebView class]
-        && [[WKWebView class] respondsToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
+        && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
         WKUserContentController *controller = [[WKUserContentController alloc] init];
         [controller addScriptMessageHandler:self
                                        name:@"cobalt"];
@@ -915,7 +915,7 @@ forBarButtonItemNamed:(NSString *)name {
     NSURLRequest *requestURL = [NSURLRequest requestWithURL:fileURL];
     
     if ([WKWebView class]
-        && [[WKWebView class] respondsToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
+        && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
         [(WKWebView *)webView loadFileURL:fileURL
                   allowingReadAccessToURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]]];
     }
@@ -952,7 +952,7 @@ forBarButtonItemNamed:(NSString *)name {
                 }
                 
                 if ([WKWebView class]
-                    && [[WKWebView class] respondsToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
+                    && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
                     [(WKWebView *)webViewToExecute evaluateJavaScript:script
                                                     completionHandler:nil];
                 }
@@ -1942,7 +1942,7 @@ clickedButtonAtIndex:(NSInteger)index {
         && _webLayer.superview != nil) {
         [_webLayer removeFromSuperview];
         if ([WKWebView class]
-            && [[WKWebView class] respondsToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
+            && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
             ((WKWebView *)_webLayer).navigationDelegate = nil;
         }
         else {
@@ -1956,7 +1956,7 @@ clickedButtonAtIndex:(NSInteger)index {
     
     if (webLayerPage) {
         if ([WKWebView class]
-            && [[WKWebView class] respondsToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
+            && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
             WKUserContentController *controller = [[WKUserContentController alloc] init];
             [controller addScriptMessageHandler:self
                                            name:@"cobalt"];
@@ -2019,7 +2019,7 @@ clickedButtonAtIndex:(NSInteger)index {
                      completion:^(BOOL finished) {
                          [_webLayer removeFromSuperview];
                          if ([WKWebView class]
-                             && [[WKWebView class] respondsToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
+                             && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
                              ((WKWebView *)_webLayer).navigationDelegate = nil;
                          }
                          else {
@@ -2152,7 +2152,7 @@ didFailNavigation:(WKNavigation *)navigation
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     UIScrollView *webScrollView = nil;
     if ([WKWebView class]
-        && [[WKWebView class] respondsToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
+        && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
         webScrollView = ((WKWebView *) _webView).scrollView;
     }
     else {
