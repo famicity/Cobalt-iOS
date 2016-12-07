@@ -953,8 +953,10 @@ forBarButtonItemNamed:(NSString *)name {
                 
                 if ([WKWebView class]
                     && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
-                    [(WKWebView *)webViewToExecute evaluateJavaScript:script
-                                                    completionHandler:nil];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [(WKWebView *)webViewToExecute evaluateJavaScript:script
+                                                        completionHandler:nil];
+                    });
                 }
                 else {
                     [(UIWebView *)webViewToExecute performSelectorOnMainThread:@selector(stringByEvaluatingJavaScriptFromString:)
