@@ -884,8 +884,13 @@ forBarButtonItemNamed:(NSString *)name {
 
 - (void)loadPage:(NSString *)page inWebView:(UIWebView *)mWebView
 {
-    NSURL * fileURL = [NSURL fileURLWithPath:[[Cobalt resourcePath] stringByAppendingPathComponent:page]];
-    NSURLRequest * requestURL = [NSURLRequest requestWithURL:fileURL];
+    NSURL * url;
+    if([page hasPrefix:@"http://"] || [page hasPrefix:@"https://"]) {
+        url = [NSURL URLWithString:page];
+    } else {
+        url = [NSURL fileURLWithPath:[[Cobalt resourcePath] stringByAppendingPathComponent:page]];
+    }
+    NSURLRequest *requestURL = [NSURLRequest requestWithURL:url];
     [mWebView loadRequest:requestURL];
 }
 
