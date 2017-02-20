@@ -1956,20 +1956,18 @@ clickedButtonAtIndex:(NSInteger)index {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)webViewDidStartLoad:(UIWebView *)webView {
+- (void)webViewDidStartLoad:(UIWebView *)currentWebView {
     // Stops queues until Web view is loaded
     [toJavaScriptOperationQueue setSuspended:YES];
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 }
 
-- (void)webViewDidFinishLoad:(UIWebView *)webView {
-    // (re)start queue
-    [toJavaScriptOperationQueue setSuspended:NO];
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-}
-
-- (void)webView:(UIWebView *)webView
-didFailLoadWithError:(NSError *)error {
+- (void)webViewDidFinishLoad:(UIWebView *)currentWebView {
+    //(res)set context
+    if([JSContext class]) {
+        JSContext *context = [currentWebView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+        context[@"CobaltViewController"] = self;
+    }
     // (re)start queue
     [toJavaScriptOperationQueue setSuspended:NO];
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
