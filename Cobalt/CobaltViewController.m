@@ -1956,13 +1956,25 @@ clickedButtonAtIndex:(NSInteger)index {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)webViewDidStartLoad:(UIWebView *)webView {
+- (void)webViewDidStartLoad:(UIWebView *)currentWebView {
+    //warn parent webview that weblayer is loading page (or changin page)
+    if (currentWebView == webLayer) {
+        [self sendEvent:JSEventWebLayerOnLoading
+               withData:nil
+            andCallback:nil];
+    }
     // Stops queues until Web view is loaded
     [toJavaScriptOperationQueue setSuspended:YES];
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 }
 
-- (void)webViewDidFinishLoad:(UIWebView *)webView {
+- (void)webViewDidFinishLoad:(UIWebView *)currentWebView {
+    //warn parent webview that weblayer has finished loading page
+    if (currentWebView == webLayer) {
+        [self sendEvent:JSEventWebLayerOnLoaded
+               withData:nil
+            andCallback:nil];
+    }
     // (re)start queue
     [toJavaScriptOperationQueue setSuspended:NO];
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;

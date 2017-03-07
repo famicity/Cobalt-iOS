@@ -141,6 +141,8 @@
 #define JSActionWebLayerDismiss             @"dismiss"
 #define kJSWebLayerFadeDuration             @"fadeDuration"
 #define JSEventWebLayerOnDismiss            @"onWebLayerDismissed"
+#define JSEventWebLayerOnLoading            @"onWebLayerLoading"
+#define JSEventWebLayerOnLoaded             @"onWebLayerLoaded"
 #define kJSIsWebLayer                       @"isWebLayer"
 
 //INTENT
