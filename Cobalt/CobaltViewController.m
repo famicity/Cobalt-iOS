@@ -204,17 +204,6 @@ NSString * webLayerPage;
     [webView.scrollView setDelegate:self];
     
     [self loadPage:pageName inWebView:webView];
-    
-    if([JSContext class]) {
-        JSContext *context = [self.webView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
-    
-        //[context setExceptionHandler:^(JSContext *context, JSValue *value) {
-        //    NSLog(@"%@", value);
-        //}];
-    
-        // register CobaltViewController class
-        context[@"CobaltViewController"] = self;
-    }
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -1905,11 +1894,6 @@ clickedButtonAtIndex:(NSInteger)index {
         
         [self loadPage:webLayerPage inWebView:webLayer];
         
-        if([JSContext class]) {
-            JSContext *context = [webLayer valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
-            context[@"CobaltViewController"] = self;
-        }
-        
         [self.view addSubview:webLayer];
         [UIView animateWithDuration:fadeDuration.floatValue animations:^{
             [webLayer setAlpha:1.0];
@@ -1957,19 +1941,42 @@ clickedButtonAtIndex:(NSInteger)index {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)webViewDidStartLoad:(UIWebView *)currentWebView {
-    // Stops queues until Web view is loaded
+    // Stops queue until Web view is loaded
     [toJavaScriptOperationQueue setSuspended:YES];
+    
+    // (res)set context
+    if ([JSContext class]) {
+        JSContext *context = [currentWebView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+        context[@"CobaltViewController"] = self;
+    }
+    
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)currentWebView {
-    //(res)set context
-    if([JSContext class]) {
+    // (res)set context
+    if ([JSContext class]) {
         JSContext *context = [currentWebView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
         context[@"CobaltViewController"] = self;
     }
+    
     // (re)start queue
     [toJavaScriptOperationQueue setSuspended:NO];
+    
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+}
+
+- (void)webView:(UIWebView *)currentWebView
+didFailLoadWithError:(NSError *)error {
+    // (res)set context
+    if ([JSContext class]) {
+        JSContext *context = [currentWebView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+        context[@"CobaltViewController"] = self;
+    }
+    
+    // (re)start queue
+    [toJavaScriptOperationQueue setSuspended:NO];
+    
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 
