@@ -1946,6 +1946,13 @@ clickedButtonAtIndex:(NSInteger)index {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)webViewDidStartLoad:(UIWebView *)currentWebView {
+    // Warns parent WebView that webLayer is loading page (or changing page)
+    if ([currentWebView isEqual:webLayer]) {
+        [self sendEvent:JSEventWebLayerOnLoading
+               withData:nil
+            andCallback:nil];
+    }
+    
     // Stops queue until Web view is loaded
     [toJavaScriptOperationQueue setSuspended:YES];
     
@@ -1968,6 +1975,13 @@ clickedButtonAtIndex:(NSInteger)index {
     // (re)start queue
     [toJavaScriptOperationQueue setSuspended:NO];
     
+    // Warns parent WebView that webLayer has finished loading page
+    if ([currentWebView isEqual:webLayer]) {
+        [self sendEvent:JSEventWebLayerOnLoaded
+               withData:nil
+            andCallback:nil];
+    }
+    
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 
@@ -1981,6 +1995,13 @@ didFailLoadWithError:(NSError *)error {
     
     // (re)start queue
     [toJavaScriptOperationQueue setSuspended:NO];
+    
+    // Warns parent WebView that webLayer has failed loading page
+    if ([currentWebView isEqual:webLayer]) {
+        [self sendEvent:JSEventWebLayerOnLoadFailed
+               withData:nil
+            andCallback:nil];
+    }
     
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
