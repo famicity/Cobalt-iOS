@@ -1957,31 +1957,40 @@ clickedButtonAtIndex:(NSInteger)index {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)webViewDidStartLoad:(UIWebView *)currentWebView {
-    //warn parent webview that weblayer is loading page (or changin page)
-    if (currentWebView == webLayer) {
+    // Warns parent WebView that webLayer is loading page (or changing page)
+    if ([currentWebView isEqual:webLayer]) {
         [self sendEvent:JSEventWebLayerOnLoading
                withData:nil
             andCallback:nil];
     }
-    // Stops queues until Web view is loaded
+    
+    // Stops queue until Web view is loaded
     [toJavaScriptOperationQueue setSuspended:YES];
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)currentWebView {
-    //warn parent webview that weblayer has finished loading page
-    if (currentWebView == webLayer) {
+    // Warns parent WebView that webLayer has finished loading page
+    if ([currentWebView isEqual:webLayer]) {
         [self sendEvent:JSEventWebLayerOnLoaded
                withData:nil
             andCallback:nil];
     }
+    
     // (re)start queue
     [toJavaScriptOperationQueue setSuspended:NO];
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 
-- (void)webView:(UIWebView *)webView
+- (void)webView:(UIWebView *)currentWebView
 didFailLoadWithError:(NSError *)error {
+    // Warns parent WebView that webLayer has failed loading page
+    if ([currentWebView isEqual:webLayer]) {
+        [self sendEvent:JSEventWebLayerOnLoadFailed
+               withData:nil
+            andCallback:nil];
+    }
+    
     // (re)start queue
     [toJavaScriptOperationQueue setSuspended:NO];
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
