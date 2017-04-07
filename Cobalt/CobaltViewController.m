@@ -998,7 +998,8 @@ forBarButtonItemNamed:(NSString *)name {
 }
 
 // Unable to get result from the onUnhandled methods of the delegate and from the CobaltPluginManager one since we cannot called it synchronously (WebThread is blocking the MainThread so waiting the MainThread from the WebThread would completely stuck the app)
-- (void)onCobaltMessage:(NSString *)message {
+- (void)onCobaltMessage:(NSString *)message
+            fromWebView:(UIWebView *)webView {
     __block BOOL messageHandled = NO;
     
     NSDictionary *dict = [Cobalt dictionaryWithString:message];
@@ -1959,7 +1960,10 @@ clickedButtonAtIndex:(NSInteger)index {
     // (res)set context
     if ([JSContext class]) {
         JSContext *context = [currentWebView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
-        context[@"CobaltViewController"] = self;
+        context[@"CobaltViewController"] = @{@"onCobaltMessage":^(NSString *message) {
+            [self onCobaltMessage:message
+                      fromWebView:currentWebView];
+        }};
     }
     
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
@@ -1969,7 +1973,10 @@ clickedButtonAtIndex:(NSInteger)index {
     // (res)set context
     if ([JSContext class]) {
         JSContext *context = [currentWebView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
-        context[@"CobaltViewController"] = self;
+        context[@"CobaltViewController"] = @{@"onCobaltMessage":^(NSString *message) {
+            [self onCobaltMessage:message
+                      fromWebView:currentWebView];
+        }};
     }
     
     // (re)start queue
@@ -1990,7 +1997,10 @@ didFailLoadWithError:(NSError *)error {
     // (res)set context
     if ([JSContext class]) {
         JSContext *context = [currentWebView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
-        context[@"CobaltViewController"] = self;
+        context[@"CobaltViewController"] = @{@"onCobaltMessage":^(NSString *message) {
+            [self onCobaltMessage:message
+                      fromWebView:currentWebView];
+        }};
     }
     
     // (re)start queue

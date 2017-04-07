@@ -181,12 +181,6 @@
 
 @end
 
-@protocol CobaltViewControllerJS <JSExport>
-
-- (void)onCobaltMessage:(NSString *)message;
-
-@end
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma mark INTERFACE
@@ -202,7 +196,7 @@ typedef enum {
  @class			CobaltViewController
  @abstract		Base class for a webView controller that allows javascript/native dialogs
  */
-@interface CobaltViewController : UIViewController <UIScrollViewDelegate, UIWebViewDelegate, CobaltAlertDelegate, CobaltToastDelegate, CobaltViewControllerJS, CobaltBarButtonItemDelegate, BackBarButtonItemDelegate>
+@interface CobaltViewController : UIViewController <UIScrollViewDelegate, UIWebViewDelegate, CobaltAlertDelegate, CobaltToastDelegate, CobaltBarButtonItemDelegate, BackBarButtonItemDelegate>
 {
     // Javascript queues
     NSOperationQueue * toJavaScriptOperationQueue;
