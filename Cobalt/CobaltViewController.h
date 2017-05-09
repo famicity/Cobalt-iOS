@@ -139,6 +139,8 @@
 #define JSTypeWebLayer                      @"webLayer"
 #define JSActionWebLayerShow                @"show"
 #define JSActionWebLayerDismiss             @"dismiss"
+#define JSActionWebLayerBringToFront        @"bringToFront"
+#define JSActionWebLayerSendToBack          @"sendToBack"
 #define kJSWebLayerFadeDuration             @"fadeDuration"
 #define JSEventWebLayerOnDismiss            @"onWebLayerDismissed"
 #define JSEventWebLayerOnLoading            @"onWebLayerLoading"

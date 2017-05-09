@@ -1452,7 +1452,7 @@ forBarButtonItemNamed:(NSString *)name {
             
             if (action
                 && [action isKindOfClass:[NSString class]]) {
-                
+
                 // SHOW
                 if ([action isEqualToString:JSActionWebLayerShow]) {
                     if (data
@@ -1474,6 +1474,24 @@ forBarButtonItemNamed:(NSString *)name {
                 else if([action isEqualToString:JSActionWebLayerDismiss]) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [self dismissWebLayer:data];
+                    });
+                    
+                    messageHandled = YES;
+                }
+                
+                // BRING TO FRONT
+                else if ([action isEqualToString:JSActionWebLayerBringToFront]) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self bringWebLayerToFront];
+                    });
+                    
+                    messageHandled = YES;
+                }
+                
+                // SEND TO BACK
+                else if ([action isEqualToString:JSActionWebLayerSendToBack]) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self sendWebLayerToBack];
                     });
                     
                     messageHandled = YES;
@@ -1910,6 +1928,28 @@ clickedButtonAtIndex:(NSInteger)index {
         NSLog(@"showWebLayer: page field missing or not a string (data: %@)", data);
     }
 #endif
+}
+
+/*!
+ @method      - (void)bringWebLayerToFront
+ @abstract    if the WebLayer is showed, this method sends the WebView to the back, so the WebLayer appears above it
+ */
+- (void)bringWebLayerToFront {
+    if (webLayer != nil
+        && [self.view.subviews containsObject:webLayer]) {
+        [self.view sendSubviewToBack:webView];
+    }
+}
+
+/*!
+ @method      - (void)bringWebLayerToFront
+ @abstract    if the WebLayer is showed, this method sends the WebLayer to the back, so the WebView appears above it
+ */
+- (void)sendWebLayerToBack {
+    if (webLayer != nil
+        && [self.view.subviews containsObject:webLayer]) {
+        [self.view sendSubviewToBack:webLayer];
+    }
 }
 
 // TODO: like Android code, implement getDataForDismiss
