@@ -67,23 +67,25 @@ static CobaltPluginManager *cobaltPluginManagerInstance = nil;
 	return self;
 }
 
-- (BOOL)onMessageFromCobaltViewController:(CobaltViewController *)viewController
-                                  andData: (NSDictionary *)data {
+- (BOOL)onMessageFromWebView:(WebViewType)webView
+    fromCobaltViewController:(CobaltViewController *)viewController
+                     andData:(NSDictionary *)data {
     NSString *pluginName = [data objectForKey:kJSPluginName];
-    BOOL isFromWebLayer = [[[data objectForKey:kJSData] objectForKey:kJSIsWebLayer] boolValue];
     
     if ([pluginName isKindOfClass:[NSString class]]) {
         NSString *className = [[_pluginsDictionary objectForKey:pluginName] objectForKey:kConfigurationIOS];
         Class class = NSClassFromString(className);
         if(class) {
             CobaltAbstractPlugin *plugin = [class sharedInstanceWithCobaltViewController:viewController];
-            if (! isFromWebLayer) {
-                [plugin onMessageFromCobaltController:viewController
-                                              andData:data];
-            }
-            else {
-                [plugin onMessageFromWebLayerWithCobaltController:viewController
-                                                          andData:data];
+            switch (webView) {
+                case WEB_VIEW:
+                    [plugin onMessageFromCobaltController:viewController
+                                                  andData:data];
+                    break;
+                case WEB_LAYER:
+                    [plugin onMessageFromWebLayerWithCobaltController:viewController
+                                                              andData:data];
+                    break;
             }
             
             return YES;

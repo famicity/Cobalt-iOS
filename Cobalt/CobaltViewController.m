@@ -999,7 +999,7 @@ forBarButtonItemNamed:(NSString *)name {
 
 // Unable to get result from the onUnhandled methods of the delegate and from the CobaltPluginManager one since we cannot called it synchronously (WebThread is blocking the MainThread so waiting the MainThread from the WebThread would completely stuck the app)
 - (void)onCobaltMessage:(NSString *)message
-            fromWebView:(UIWebView *)webView {
+            fromWebView:(UIWebView *)currentWebView {
     __block BOOL messageHandled = NO;
     
     NSDictionary *dict = [Cobalt dictionaryWithString:message];
@@ -1540,8 +1540,19 @@ forBarButtonItemNamed:(NSString *)name {
         // PLUGIN
         else if ([type isEqualToString: kJSTypePlugin]) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                [[CobaltPluginManager sharedInstance] onMessageFromCobaltViewController:self
-                                                                                andData:dict];
+                WebViewType webViewType = -1;
+                if ([currentWebView isEqual:webView]) {
+                    webViewType = WEB_VIEW;
+                }
+                else if ([currentWebView isEqual:webLayer]) {
+                    webViewType = WEB_LAYER;
+                }
+                
+                if (webViewType != -1) {
+                    [[CobaltPluginManager sharedInstance] onMessageFromWebView:webViewType
+                                                      fromCobaltViewController:self
+                                                                       andData:dict];
+                }
             });
             
             messageHandled = YES;

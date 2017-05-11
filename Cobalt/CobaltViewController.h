@@ -189,10 +189,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef enum {
-    WEB_VIEW,
-    WEB_LAYER
-} WebViewType;
+enum {
+    WEB_VIEW = 0,
+    WEB_LAYER = 1
+};
+typedef NSInteger WebViewType;
 
 /*!
  @class			CobaltViewController

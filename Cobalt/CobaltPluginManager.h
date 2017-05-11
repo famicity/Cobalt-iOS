@@ -43,7 +43,8 @@
  @result    The singleton instance of the Cobalt plugin manager.
  */
 + (CobaltPluginManager *)sharedInstance;
-- (BOOL)onMessageFromCobaltViewController:(CobaltViewController *)viewController
-                                  andData:(NSDictionary *)data;
+- (BOOL)onMessageFromWebView:(WebViewType)webView
+    fromCobaltViewController:(CobaltViewController *)viewController
+                     andData:(NSDictionary *)data;
 
 @end
