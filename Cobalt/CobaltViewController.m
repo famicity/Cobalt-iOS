@@ -689,6 +689,7 @@ forBarButtonItemNamed:(NSString *)name {
     }
     [barButtonItem setVisible:visible];
     
+    [self resetBarButtonItems];
     [self setBarButtonItems];
     
     id actions = [_barsConfiguration objectForKey:kConfigurationBarsActions];
@@ -790,8 +791,14 @@ forBarButtonItemNamed:(NSString *)name {
             self.navigationItem.hidesBackButton = YES;
         }
     }
-    self.navigationItem.rightBarButtonItems = visibleTopRightBarButtonItems;
-    self.toolbarItems = visibleBottomBarButtonItems;
+    
+    if (visibleTopRightBarButtonItems.count > 0) {
+        self.navigationItem.rightBarButtonItems = visibleTopRightBarButtonItems;
+    }
+    
+    if (visibleBottomBarButtonItems.count > 0) {
+        self.toolbarItems = visibleBottomBarButtonItems;
+    }
 }
 
 - (void)resizeBarButtonitems {
@@ -810,6 +817,12 @@ forBarButtonItemNamed:(NSString *)name {
             [(CobaltBarButtonItem *)barButtonItem resizeWithBarHeight:self.navigationController.toolbar.bounds.size.height];
         }
     }
+}
+
+- (void)resetBarButtonItems {
+    self.navigationItem.leftBarButtonItems = @[];
+    self.navigationItem.rightBarButtonItems = @[];
+    self.toolbarItems = @[];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1290,6 +1303,7 @@ forBarButtonItemNamed:(NSString *)name {
                                     _barsConfiguration = bars;
                                     dispatch_async(dispatch_get_main_queue(), ^(void) {
                                         [self configureBars];
+                                        [self resetBarButtonItems];
                                         [self setBarButtonItems];
                                     });
                                     
