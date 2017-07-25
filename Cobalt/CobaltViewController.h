@@ -391,6 +391,7 @@ typedef NSInteger WebViewType;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)configureBars;
+- (void)resetBars;
 - (void)setBarButtonItems;
 - (CobaltBarButtonItem *)barButtonItemForAction:(NSDictionary *)action;
 
