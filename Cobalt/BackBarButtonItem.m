@@ -33,7 +33,6 @@
 
 @interface BackBarButtonItem () {
     UIImageView *backButtonImageView;
-    UILabel *backButtonTitle;
 }
 
 @end
