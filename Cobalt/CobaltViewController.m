@@ -173,6 +173,9 @@ NSString * webLayerPage;
     if ([webView respondsToSelector:@selector(setKeyboardDisplayRequiresUserAction:)]) {
         [webView setKeyboardDisplayRequiresUserAction:NO];
     }
+    if ([webLayer respondsToSelector:@selector(setKeyboardDisplayRequiresUserAction:)]) {
+        [webLayer setKeyboardDisplayRequiresUserAction:NO];
+    }
     
     if (! pageName
         || pageName.length == 0) {
@@ -202,6 +205,7 @@ NSString * webLayerPage;
     }
     
     [webView.scrollView setDelegate:self];
+    [webLayer.scrollView setBounces:NO];
     
     [self loadPage:pageName inWebView:webView];
 }
@@ -1582,10 +1586,15 @@ forBarButtonItemNamed:(NSString *)name {
 }
 
 
-- (void) sendMessageToWebLayer:(NSDictionary *) message {
-    if (message != nil && webLayer != nil) [self executeScriptInWebView:WEB_LAYER withDictionary:message];
+- (void)sendMessageToWebLayer:(NSDictionary *)message {
+    if (message != nil) {
+        [self executeScriptInWebView:WEB_LAYER
+                      withDictionary:message];
+    }
 #if DEBUG_COBALT
-    else NSLog(@"sendMessage: message is nil!");
+    else {
+        NSLog(@"sendMessage: message is nil!");
+    }
 #endif
 }
 
@@ -1904,35 +1913,17 @@ clickedButtonAtIndex:(NSInteger)index {
 
 - (void)showWebLayer:(NSDictionary *)data
 {
-    if (webLayer
-        && webLayer.superview) {
-        [webLayer removeFromSuperview];
-        [webLayer setDelegate:nil];
-        webLayer = nil;
-    }
-    
     webLayerPage = [data objectForKey:kJSPage];
     NSNumber * fadeDuration = ([data objectForKey:kJSWebLayerFadeDuration] && [[data objectForKey:kJSWebLayerFadeDuration] isKindOfClass:[NSNumber class]]) ? [data objectForKey:kJSWebLayerFadeDuration] : [NSNumber numberWithFloat:0.3];
     
     if (webLayerPage) {
-        webLayer = [[UIWebView alloc] initWithFrame:self.view.bounds];
-        [webLayer setDelegate:self];
-        [webLayer setAlpha:0.0];
-        [webLayer setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
-        [webLayer setBackgroundColor:[UIColor clearColor]];
-        [webLayer setOpaque:NO];
-        [webLayer.scrollView setBounces:NO];
-        
-        if ([webLayer respondsToSelector:@selector(setKeyboardDisplayRequiresUserAction:)]) {
-            [webLayer setKeyboardDisplayRequiresUserAction:NO];
-        }
-        
         [self loadPage:webLayerPage inWebView:webLayer];
         
-        [self.view addSubview:webLayer];
-        [UIView animateWithDuration:fadeDuration.floatValue animations:^{
-            [webLayer setAlpha:1.0];
-        } completion:nil];
+        [UIView animateWithDuration:fadeDuration.floatValue
+                         animations:^{
+                             webLayer.hidden = NO;
+                         }
+                         completion:nil];
     }
 #if DEBUG_COBALT
     else {
@@ -1943,44 +1934,39 @@ clickedButtonAtIndex:(NSInteger)index {
 
 /*!
  @method      - (void)bringWebLayerToFront
- @abstract    if the WebLayer is showed, this method sends the WebView to the back, so the WebLayer appears above it
+ @abstract    this method sends the WebView to the back, so the WebLayer appears above it
  */
 - (void)bringWebLayerToFront {
-    if (webLayer != nil
-        && [self.view.subviews containsObject:webLayer]) {
-        [self.view sendSubviewToBack:webView];
-    }
+    [self.view sendSubviewToBack:webView];
 }
 
 /*!
  @method      - (void)bringWebLayerToFront
- @abstract    if the WebLayer is showed, this method sends the WebLayer to the back, so the WebView appears above it
+ @abstract    this method sends the WebLayer to the back, so the WebView appears above it
  */
 - (void)sendWebLayerToBack {
-    if (webLayer != nil
-        && [self.view.subviews containsObject:webLayer]) {
-        [self.view sendSubviewToBack:webLayer];
-    }
+    [self.view sendSubviewToBack:webLayer];
 }
 
 // TODO: like Android code, implement getDataForDismiss
-- (void)dismissWebLayer:(NSDictionary *)data
-{
+- (void)dismissWebLayer:(NSDictionary *)data {
     // Guillaume told me that having a customizable fadeDuration is a bad idea. So, it's a fixed fadeDuration...
     // REMEMBER, So if Guillaume tells me the opposite, he owes me a chocolate croissant :)
     NSNumber * fadeDuration = [NSNumber numberWithFloat:0.3];
     //NSNumber * fadeDuration = (dict && [dict objectForKey:kJSWebLayerFadeDuration] && [[dict objectForKey:kJSWebLayerFadeDuration] isKindOfClass:[NSNumber class]]) ? [dict objectForKey:kJSWebLayerFadeDuration] : [NSNumber numberWithFloat:0.3];
     
-    [UIView animateWithDuration:fadeDuration.floatValue animations:^{
-        [webLayer setAlpha:0.0];
-    } completion:^(BOOL finished) {
-        [webLayer removeFromSuperview];
-        [webLayer setDelegate:nil];
-        webLayer = nil;
-
-        [self onWebLayerDismissed:webLayerPage withData:data];
-        webLayerPage = nil;
-    }];
+    [UIView animateWithDuration:fadeDuration.floatValue
+                     animations:^{
+                         [self bringWebLayerToFront];
+                         webLayer.hidden = YES;
+                     }
+                     completion:^(BOOL finished) {
+                         [self onWebLayerDismissed:webLayerPage
+                                          withData:data];
+                         webLayerPage = nil;
+                         
+                         //[webLayer stringByEvaluatingJavaScriptFromString:@"document.open();document.close();"];
+                     }];
 }
 
 - (void)onWebLayerDismissed:(NSString *)page withData:(NSDictionary *)dict

@@ -246,7 +246,7 @@ typedef NSInteger WebViewType;
  */
 @property (strong, nonatomic) NSDictionary *navigationData;
 
-@property (strong, nonatomic) UIWebView * webLayer;
+@property (strong, nonatomic) IBOutlet UIWebView * webLayer;
 
 /*!
  @property             refreshControl
