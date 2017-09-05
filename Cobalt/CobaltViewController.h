@@ -392,7 +392,10 @@ typedef NSInteger WebViewType;
 
 - (void)configureBars;
 - (void)resetBars;
+- (void)setBarsVisible:(NSDictionary *)visible;
 - (void)setBarButtonItems;
+- (void)setBadgeLabelText:(NSString *)text
+    forBarButtonItemNamed:(NSString *)name;
 - (CobaltBarButtonItem *)barButtonItemForAction:(NSDictionary *)action;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
