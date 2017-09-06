@@ -382,22 +382,18 @@ NSString * webLayerPage;
             
             if (top != nil
                 && [top isKindOfClass:[NSNumber class]]) {
-                [self.navigationController setNavigationBarHidden:! [top boolValue]
-                                                         animated:YES];
+                self.navigationController.navigationBarHidden = ! [top boolValue];
             }
             else {
-                [self.navigationController setNavigationBarHidden:NO
-                                                         animated:YES];
+                self.navigationController.navigationBarHidden = NO;
             }
             
             if (bottom != nil
                 && [bottom isKindOfClass:[NSNumber class]]) {
-                [self.navigationController setToolbarHidden:! [bottom boolValue]
-                                                   animated:YES];
+                self.navigationController.toolbarHidden = ! [bottom boolValue];
             }
             else {
-                [self.navigationController setToolbarHidden:YES
-                                                   animated:YES];
+                self.navigationController.toolbarHidden = YES;
             }
             
             barsVisibleSet = YES;
@@ -474,10 +470,8 @@ NSString * webLayerPage;
     }
     
     if (! barsVisibleSet) {
-        [self.navigationController setNavigationBarHidden:NO
-                                                 animated:YES];
-        [self.navigationController setToolbarHidden:YES
-                                           animated:YES];
+        self.navigationController.navigationBarHidden = NO;
+        self.navigationController.toolbarHidden = YES;
     }
 }
 
@@ -497,19 +491,16 @@ NSString * webLayerPage;
     
     if (top != nil
         && [top isKindOfClass:[NSNumber class]]) {
-        [self.navigationController setNavigationBarHidden:! [top boolValue]
-                                                 animated:YES];
+        self.navigationController.navigationBarHidden = ! [top boolValue];
         [barsVisible setObject:top
                         forKey:kConfigurationBarsVisibleTop];
     }
     if (bottom != nil
         && [bottom isKindOfClass:[NSNumber class]]) {
-        [self.navigationController setToolbarHidden:! [bottom boolValue]
-                                           animated:YES];
+        self.navigationController.toolbarHidden = ! [bottom boolValue];
         [barsVisible setObject:bottom
                         forKey:kConfigurationBarsVisibleBottom];
     }
-    
     if (barsVisible.count > 0) {
         [barsConfiguration setObject:barsVisible
                               forKey:kConfigurationBarsVisible];
