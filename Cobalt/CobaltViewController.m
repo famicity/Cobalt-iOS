@@ -157,7 +157,14 @@ NSString * webLayerPage;
     // Do any additional setup after loading the view from its nib.
     self.view.backgroundColor = _background;
     
-    // Configure pull-to-refresh header view
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    
+    if (pageName == nil
+        || pageName.length == 0) {
+        pageName = defaultHtmlPage;
+    }
+    
+    // Add pull-to-refresh table header view
     if (isPullToRefreshEnabled) {
         NSBundle *cobaltBundle = [Cobalt bundleResources];
         
@@ -196,6 +203,11 @@ NSString * webLayerPage;
             [scrollView addSubview:_refreshControl];
             [scrollView sendSubviewToBack:_refreshControl];
         }
+        
+        _webLayer = [[WKWebView alloc] initWithFrame:_webLayerPlaceholder.frame
+                                       configuration:configuration];
+        ((WKWebView *) _webLayer).navigationDelegate = self;
+        ((WKWebView *) _webLayer).scrollView.bounces = NO;
     }
     else {
         _webView = [[UIWebView alloc] initWithFrame:_webViewPlaceholder.frame];
@@ -213,33 +225,35 @@ NSString * webLayerPage;
             [(UIWebView *)_webView setKeyboardDisplayRequiresUserAction:NO];
         }
         
+        _webLayer = [[UIWebView alloc] initWithFrame:_webLayerPlaceholder.frame];
+        ((UIWebView *) _webLayer).delegate = self;
+        ((UIWebView *) _webLayer).scrollView.bounces = NO;
+        
+        if ([_webLayer respondsToSelector:@selector(setKeyboardDisplayRequiresUserAction:)]) {
+            [(UIWebView *)_webLayer setKeyboardDisplayRequiresUserAction:NO];
+        }
+        
         if ([JSContext class]) {
-            JSContext *context = [_webView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+            JSContext *webViewContext = [_webView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+            webViewContext[@"CobaltViewController"] = self;
             
-            //[context setExceptionHandler:^(JSContext *context, JSValue *value) {
-            //    NSLog(@"%@", value);
-            //}];
-            
-            // register CobaltViewController class
-            context[@"CobaltViewController"] = self;
+            JSContext *webLayerContext = [_webLayer valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+            webLayerContext[@"CobaltViewController"] = self;
         }
     }
     
     _webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _webLayer.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _webLayer.backgroundColor = [UIColor clearColor];
+    _webLayer.opaque = NO;
     
     [_webViewPlaceholder addSubview:_webView];
+    [_webLayerPlaceholder addSubview:_webLayer];
     
     [self customWebView];
     
     _currentAlerts = [[NSMutableArray alloc] init];
     toastsToShow = [[NSMutableArray alloc] init];
-    
-    if (pageName == nil
-        || pageName.length == 0) {
-        pageName = defaultHtmlPage;
-    }
-    
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     
     [self loadPage:pageName
          inWebView:_webView];
@@ -416,22 +430,18 @@ NSString * webLayerPage;
             
             if (top != nil
                 && [top isKindOfClass:[NSNumber class]]) {
-                [self.navigationController setNavigationBarHidden:! [top boolValue]
-                                                         animated:YES];
+                self.navigationController.navigationBarHidden = ! [top boolValue];
             }
             else {
-                [self.navigationController setNavigationBarHidden:NO
-                                                         animated:YES];
+                self.navigationController.navigationBarHidden = NO;
             }
             
             if (bottom != nil
                 && [bottom isKindOfClass:[NSNumber class]]) {
-                [self.navigationController setToolbarHidden:! [bottom boolValue]
-                                                   animated:YES];
+                self.navigationController.toolbarHidden = ! [bottom boolValue];
             }
             else {
-                [self.navigationController setToolbarHidden:YES
-                                                   animated:YES];
+                self.navigationController.toolbarHidden = YES;
             }
             
             barsVisibleSet = YES;
@@ -508,10 +518,8 @@ NSString * webLayerPage;
     }
     
     if (! barsVisibleSet) {
-        [self.navigationController setNavigationBarHidden:NO
-                                                 animated:YES];
-        [self.navigationController setToolbarHidden:YES
-                                           animated:YES];
+        self.navigationController.navigationBarHidden = NO;
+        self.navigationController.toolbarHidden = YES;
     }
 }
 
@@ -531,19 +539,16 @@ NSString * webLayerPage;
     
     if (top != nil
         && [top isKindOfClass:[NSNumber class]]) {
-        [self.navigationController setNavigationBarHidden:! [top boolValue]
-                                                 animated:YES];
+        self.navigationController.navigationBarHidden = ! [top boolValue];
         [barsVisible setObject:top
                         forKey:kConfigurationBarsVisibleTop];
     }
     if (bottom != nil
         && [bottom isKindOfClass:[NSNumber class]]) {
-        [self.navigationController setToolbarHidden:! [bottom boolValue]
-                                           animated:YES];
+        self.navigationController.toolbarHidden = ! [bottom boolValue];
         [barsVisible setObject:bottom
                         forKey:kConfigurationBarsVisibleBottom];
     }
-    
     if (barsVisible.count > 0) {
         [barsConfiguration setObject:barsVisible
                               forKey:kConfigurationBarsVisible];
@@ -911,13 +916,26 @@ forBarButtonItemNamed:(NSString *)name {
 
 - (void)loadPage:(NSString *)page
        inWebView:(UIView *)webView {
-    NSURL *fileURL = [NSURL fileURLWithPath:[[Cobalt resourcePath] stringByAppendingPathComponent:page]];
-    NSURLRequest *requestURL = [NSURLRequest requestWithURL:fileURL];
+    NSURL *fileURL;
+    NSURLRequest *requestURL;
+    if ([page hasPrefix:@"http://"]
+        || [page hasPrefix:@"https://"]) {
+        requestURL = [NSURLRequest requestWithURL:[NSURL URLWithString:page]];
+    }
+    else {
+        fileURL = [NSURL fileURLWithPath:[[Cobalt resourcePath] stringByAppendingPathComponent:page]];
+        requestURL = [NSURLRequest requestWithURL:fileURL];
+    }
     
     if ([WKWebView class]
         && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
-        [(WKWebView *)webView loadFileURL:fileURL
-                  allowingReadAccessToURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]]];
+        if (fileURL != nil) {
+            [(WKWebView *)webView loadFileURL:fileURL
+                      allowingReadAccessToURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]]];
+        }
+        else {
+            [(WKWebView *)webView loadRequest:requestURL];
+        }
     }
     else {
         [(UIWebView *)webView loadRequest:requestURL];
@@ -1059,7 +1077,8 @@ forBarButtonItemNamed:(NSString *)name {
 }
 
 // Unable to get result from the onUnhandled methods of the delegate and from the CobaltPluginManager one since we cannot called it synchronously (WebThread is blocking the MainThread so waiting the MainThread from the WebThread would completely stuck the app)
-- (void)onCobaltMessage:(NSString *)message {
+- (void)onCobaltMessage:(NSString *)message
+            fromWebView:(UIWebView *)currentWebView {
     __block BOOL messageHandled = NO;
     
     NSDictionary *dict = [Cobalt dictionaryWithString:message];
@@ -1512,7 +1531,7 @@ forBarButtonItemNamed:(NSString *)name {
             
             if (action
                 && [action isKindOfClass:[NSString class]]) {
-                
+
                 // SHOW
                 if ([action isEqualToString:JSActionWebLayerShow]) {
                     if (data
@@ -1534,6 +1553,24 @@ forBarButtonItemNamed:(NSString *)name {
                 else if([action isEqualToString:JSActionWebLayerDismiss]) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [self dismissWebLayer:data];
+                    });
+                    
+                    messageHandled = YES;
+                }
+                
+                // BRING TO FRONT
+                else if ([action isEqualToString:JSActionWebLayerBringToFront]) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self bringWebLayerToFront];
+                    });
+                    
+                    messageHandled = YES;
+                }
+                
+                // SEND TO BACK
+                else if ([action isEqualToString:JSActionWebLayerSendToBack]) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self sendWebLayerToBack];
                     });
                     
                     messageHandled = YES;
@@ -1582,8 +1619,19 @@ forBarButtonItemNamed:(NSString *)name {
         // PLUGIN
         else if ([type isEqualToString: kJSTypePlugin]) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                [[CobaltPluginManager sharedInstance] onMessageFromCobaltViewController:self
-                                                                                andData:dict];
+                WebViewType webViewType = -1;
+                if ([currentWebView isEqual:_webView]) {
+                    webViewType = WEB_VIEW;
+                }
+                else if ([currentWebView isEqual:_webLayer]) {
+                    webViewType = WEB_LAYER;
+                }
+                
+                if (webViewType != -1) {
+                    [[CobaltPluginManager sharedInstance] onMessageFromWebView:webViewType
+                                                      fromCobaltViewController:self
+                                                                       andData:dict];
+                }
             });
             
             messageHandled = YES;
@@ -1612,10 +1660,8 @@ forBarButtonItemNamed:(NSString *)name {
 #endif
 }
 
-
-- (void) sendMessageToWebLayer:(NSDictionary *) message {
-    if (message != nil
-        && _webLayer != nil) {
+- (void)sendMessageToWebLayer:(NSDictionary *)message {
+    if (message != nil) {
         [self executeScriptInWebView:WEB_LAYER
                       withDictionary:message];
     }
@@ -1940,64 +1986,17 @@ clickedButtonAtIndex:(NSInteger)index {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)showWebLayer:(NSDictionary *)data {
-    if (_webLayer != nil
-        && _webLayer.superview != nil) {
-        [_webLayer removeFromSuperview];
-        if ([WKWebView class]
-            && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
-            ((WKWebView *)_webLayer).navigationDelegate = nil;
-        }
-        else {
-            ((UIWebView *)_webLayer).delegate = nil;
-        }
-        _webLayer = nil;
-    }
-    
     webLayerPage = [data objectForKey:kJSPage];
-    NSNumber * fadeDuration = ([data objectForKey:kJSWebLayerFadeDuration] && [[data objectForKey:kJSWebLayerFadeDuration] isKindOfClass:[NSNumber class]]) ? [data objectForKey:kJSWebLayerFadeDuration] : [NSNumber numberWithFloat:0.3];
+    NSNumber *fadeDuration = ([data objectForKey:kJSWebLayerFadeDuration] && [[data objectForKey:kJSWebLayerFadeDuration] isKindOfClass:[NSNumber class]]) ? [data objectForKey:kJSWebLayerFadeDuration] : [NSNumber numberWithFloat:0.3];
     
     if (webLayerPage) {
-        if ([WKWebView class]
-            && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
-            WKUserContentController *controller = [[WKUserContentController alloc] init];
-            [controller addScriptMessageHandler:self
-                                           name:@"cobalt"];
-            WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
-            configuration.userContentController = controller;
-            
-            _webLayer = [[WKWebView alloc] initWithFrame:_webViewPlaceholder.frame
-                                           configuration:configuration];
-            ((WKWebView *) _webLayer).navigationDelegate = self;
-            ((WKWebView *) _webLayer).scrollView.bounces = NO;
-        }
-        else {
-            _webLayer = [[UIWebView alloc] initWithFrame:_webViewPlaceholder.frame];
-            ((UIWebView *) _webLayer).delegate = self;
-            ((UIWebView *) _webLayer).scrollView.bounces = NO;
-            
-            if ([_webLayer respondsToSelector:@selector(setKeyboardDisplayRequiresUserAction:)]) {
-                [(UIWebView *)_webLayer setKeyboardDisplayRequiresUserAction:NO];
-            }
-            
-            if ([JSContext class]) {
-                JSContext *context = [_webLayer valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
-                context[@"CobaltViewController"] = self;
-            }
-        }
-        
-        [_webLayer setAlpha:0.0];
-        [_webLayer setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
-        [_webLayer setBackgroundColor:[UIColor clearColor]];
-        [_webLayer setOpaque:NO];
-        
         [self loadPage:webLayerPage
              inWebView:_webLayer];
         
-        [self.view addSubview:_webLayer];
-        [UIView animateWithDuration:fadeDuration.floatValue 
+        [UIView animateWithDuration:fadeDuration.floatValue
                          animations:^{
-                             [_webLayer setAlpha:1.0];
-                         } 
+                             _webLayerPlaceholder.hidden = NO;
+                         }
                          completion:nil];
     }
 #if DEBUG_COBALT
@@ -2007,31 +2006,41 @@ clickedButtonAtIndex:(NSInteger)index {
 #endif
 }
 
+/*!
+ @method      - (void)bringWebLayerToFront
+ @abstract    this method sends the WebView to the back, so the WebLayer appears above it
+ */
+- (void)bringWebLayerToFront {
+    [self.view sendSubviewToBack:_webLayerPlaceholder];
+}
+
+/*!
+ @method      - (void)bringWebLayerToFront
+ @abstract    this method sends the WebLayer to the back, so the WebView appears above it
+ */
+- (void)sendWebLayerToBack {
+    [self.view sendSubviewToBack:_webLayerPlaceholder];
+}
+
 // TODO: like Android code, implement getDataForDismiss
 - (void)dismissWebLayer:(NSDictionary *)data {
     // Guillaume told me that having a customizable fadeDuration is a bad idea. So, it's a fixed fadeDuration...
     // REMEMBER, So if Guillaume tells me the opposite, he owes me a chocolate croissant :)
-    NSNumber *fadeDuration = [NSNumber numberWithFloat:0.3];
-    //NSNumber *fadeDuration = (dict && [dict objectForKey:kJSWebLayerFadeDuration] && [[dict objectForKey:kJSWebLayerFadeDuration] isKindOfClass:[NSNumber class]]) ? [dict objectForKey:kJSWebLayerFadeDuration] : [NSNumber numberWithFloat:0.3];
+    NSNumber * fadeDuration = [NSNumber numberWithFloat:0.3];
+    //NSNumber * fadeDuration = (dict && [dict objectForKey:kJSWebLayerFadeDuration] && [[dict objectForKey:kJSWebLayerFadeDuration] isKindOfClass:[NSNumber class]]) ? [dict objectForKey:kJSWebLayerFadeDuration] : [NSNumber numberWithFloat:0.3];
     
     [UIView animateWithDuration:fadeDuration.floatValue
                      animations:^{
-                         [_webLayer setAlpha:0.0];
+                         [self bringWebLayerToFront];
+                         _webLayerPlaceholder.hidden = YES;
                      }
                      completion:^(BOOL finished) {
-                         [_webLayer removeFromSuperview];
-                         if ([WKWebView class]
-                             && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
-                             ((WKWebView *)_webLayer).navigationDelegate = nil;
-                         }
-                         else {
-                             ((UIWebView *)_webLayer).delegate = nil;
-                         }
-                         _webLayer = nil;
                          [self onWebLayerDismissed:webLayerPage
                                           withData:data];
                          webLayerPage = nil;
-    }];
+                         
+                         //[webLayer stringByEvaluatingJavaScriptFromString:@"document.open();document.close();"];
+                     }];
 }
 
 - (void)onWebLayerDismissed:(NSString *)page withData:(NSDictionary *)dict
@@ -2055,16 +2064,16 @@ clickedButtonAtIndex:(NSInteger)index {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
-    [self webViewStartLoadingPage];
+    [self webViewStartLoadingPage:webView];
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
-    [self webViewDidLoadPage];
+    [self webViewDidLoadPage:webView];
 }
 
 - (void)webView:(UIWebView *)webView
 didFailLoadWithError:(NSError *)error {
-    [self webViewDidFailLoadPage];
+    [self webViewDidFailLoadPage:webView];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2075,18 +2084,18 @@ didFailLoadWithError:(NSError *)error {
 
 - (void)webView:(WKWebView *)webView
 didCommitNavigation:(WKNavigation *)navigation {
-    [self webViewStartLoadingPage];
+    [self webViewStartLoadingPage:webView];
 }
 
 - (void)webView:(WKWebView *)webView
 didFinishNavigation:(WKNavigation *)navigation {
-    [self webViewDidLoadPage];
+    [self webViewDidLoadPage:webView];
 }
 
 - (void)webView:(WKWebView *)webView 
 didFailNavigation:(WKNavigation *)navigation 
       withError:(NSError *)error {
-    [self webViewDidFailLoadPage];
+    [self webViewDidFailLoadPage:webView];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2095,21 +2104,72 @@ didFailNavigation:(WKNavigation *)navigation
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)webViewStartLoadingPage {
-    // Stops queues until Web view is loaded
+- (void)webViewStartLoadingPage:(UIView *)currentWebView {
+    // Warns parent WebView that webLayer is loading page (or changing page)
+    if ([currentWebView isEqual:webLayer]) {
+        [self sendEvent:JSEventWebLayerOnLoading
+               withData:nil
+            andCallback:nil];
+    }
+    
+    // Stops queue until Web view is loaded
     [toJavaScriptOperationQueue setSuspended:YES];
+    
+    // (res)set context
+    if ([JSContext class]) {
+        JSContext *context = [currentWebView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+        context[@"CobaltViewController"] = @{@"onCobaltMessage":^(NSString *message) {
+            [self onCobaltMessage:message
+                      fromWebView:currentWebView];
+        }};
+    }
+    
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 }
 
-- (void)webViewDidLoadPage {
+- (void)webViewDidLoadPage:(UIView *)currentWebView {
+    // (res)set context
+    if ([JSContext class]) {
+        JSContext *context = [currentWebView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+        context[@"CobaltViewController"] = @{@"onCobaltMessage":^(NSString *message) {
+            [self onCobaltMessage:message
+                      fromWebView:currentWebView];
+        }};
+    }
+    
     // (re)start queue
     [toJavaScriptOperationQueue setSuspended:NO];
+    
+    // Warns parent WebView that webLayer has finished loading page
+    if ([currentWebView isEqual:webLayer]) {
+        [self sendEvent:JSEventWebLayerOnLoaded
+               withData:nil
+            andCallback:nil];
+    }
+    
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 
-- (void)webViewDidFailLoadPage {
+- (void)webViewDidFailLoadPage:(UIView *)currentWebView {
+    // (res)set context
+    if ([JSContext class]) {
+        JSContext *context = [currentWebView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+        context[@"CobaltViewController"] = @{@"onCobaltMessage":^(NSString *message) {
+            [self onCobaltMessage:message
+                      fromWebView:currentWebView];
+        }};
+    }
+    
     // (re)start queue
     [toJavaScriptOperationQueue setSuspended:NO];
+    
+    // Warns parent WebView that webLayer has failed loading page
+    if ([currentWebView isEqual:webLayer]) {
+        [self sendEvent:JSEventWebLayerOnLoadFailed
+               withData:nil
+            andCallback:nil];
+    }
+    
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 

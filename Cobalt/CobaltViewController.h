@@ -140,8 +140,13 @@
 #define JSTypeWebLayer                      @"webLayer"
 #define JSActionWebLayerShow                @"show"
 #define JSActionWebLayerDismiss             @"dismiss"
+#define JSActionWebLayerBringToFront        @"bringToFront"
+#define JSActionWebLayerSendToBack          @"sendToBack"
 #define kJSWebLayerFadeDuration             @"fadeDuration"
 #define JSEventWebLayerOnDismiss            @"onWebLayerDismissed"
+#define JSEventWebLayerOnLoading            @"onWebLayerLoading"
+#define JSEventWebLayerOnLoaded             @"onWebLayerLoaded"
+#define JSEventWebLayerOnLoadFailed         @"onWebLayerLoadFailed"
 #define kJSIsWebLayer                       @"isWebLayer"
 
 //INTENT
@@ -179,28 +184,23 @@
 
 @end
 
-@protocol CobaltViewControllerJS <JSExport>
-
-- (void)onCobaltMessage:(NSString *)message;
-
-@end
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma mark INTERFACE
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef enum {
-    WEB_VIEW,
-    WEB_LAYER
-} WebViewType;
+enum {
+    WEB_VIEW = 0,
+    WEB_LAYER = 1
+};
+typedef NSInteger WebViewType;
 
 /*!
  @class			CobaltViewController
  @abstract		Base class for a webView controller that allows javascript/native dialogs
  */
-@interface CobaltViewController : UIViewController <UIScrollViewDelegate, UIWebViewDelegate, WKScriptMessageHandler, WKNavigationDelegate, CobaltViewControllerJS, CobaltAlertDelegate, CobaltToastDelegate, CobaltBarButtonItemDelegate, BackBarButtonItemDelegate> {
+@interface CobaltViewController : UIViewController <UIScrollViewDelegate, UIWebViewDelegate, WKScriptMessageHandler, WKNavigationDelegate, CobaltAlertDelegate, CobaltToastDelegate, CobaltBarButtonItemDelegate, BackBarButtonItemDelegate> {
     // Javascript queues
     NSOperationQueue * toJavaScriptOperationQueue;
     NSOperationQueue * fromJavaScriptOperationQueue;
@@ -219,8 +219,6 @@ typedef enum {
     
     NSAttributedString * _ptrRefreshText;
     NSAttributedString * _ptrRefreshingText;
-    
-    
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -259,6 +257,12 @@ typedef enum {
  @abstract             the data to pass to the webview in onPageShown event on navigation
  */
 @property (strong, nonatomic) NSDictionary *navigationData;
+
+/*!
+ @property        webLayerPlaceholder
+ @abstract        the view containing the webLayer displaying content.
+ */
+@property (strong, nonatomic) IBOutlet UIView * webLayerPlaceholder;
 
 /*!
  @property             refreshControl
@@ -372,12 +376,26 @@ typedef enum {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+#pragma mark LIFECYCLE
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)onAppStarted:(NSNotification *)notification;
+- (void)onAppBackground:(NSNotification *)notification;
+- (void)onAppForeground:(NSNotification *)notification;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark BARS
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)configureBars;
+- (void)resetBars;
+- (void)setBarsVisible:(NSDictionary *)visible;
 - (void)setBarButtonItems;
+- (void)setBadgeLabelText:(NSString *)text
+    forBarButtonItemNamed:(NSString *)name;
 - (CobaltBarButtonItem *)barButtonItemForAction:(NSDictionary *)action;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
