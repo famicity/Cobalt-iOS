@@ -186,14 +186,15 @@ NSString * webLayerPage;
     
     if ([WKWebView class]
         && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
-        WKUserContentController *controller = [[WKUserContentController alloc] init];
-        [controller addScriptMessageHandler:self
-                                       name:@"cobalt"];
-        WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
-        configuration.userContentController = controller;
+        // WebView
+        WKUserContentController *webViewController = [[WKUserContentController alloc] init];
+        [webViewController addScriptMessageHandler:self
+                                              name:@"cobalt"];
+        WKWebViewConfiguration *webViewConfiguration = [[WKWebViewConfiguration alloc] init];
+        webViewConfiguration.userContentController = webViewController;
         
         _webView = [[WKWebView alloc] initWithFrame:_webViewPlaceholder.frame
-                                      configuration:configuration];
+                                      configuration:webViewConfiguration];
         ((WKWebView *)_webView).navigationDelegate = self;
         
         UIScrollView *scrollView = ((WKWebView *) _webView).scrollView;
@@ -204,8 +205,15 @@ NSString * webLayerPage;
             [scrollView sendSubviewToBack:_refreshControl];
         }
         
+        // WebLayer
+        WKUserContentController *webLayerController = [[WKUserContentController alloc] init];
+        [webLayerController addScriptMessageHandler:self
+                                               name:@"cobalt"];
+        WKWebViewConfiguration *webLayerConfiguration = [[WKWebViewConfiguration alloc] init];
+        webLayerConfiguration.userContentController = webLayerController;
+        
         _webLayer = [[WKWebView alloc] initWithFrame:_webLayerPlaceholder.frame
-                                       configuration:configuration];
+                                       configuration:webLayerConfiguration];
         ((WKWebView *) _webLayer).navigationDelegate = self;
         ((WKWebView *) _webLayer).scrollView.bounces = NO;
     }
@@ -243,6 +251,8 @@ NSString * webLayerPage;
     }
     
     _webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _webView.backgroundColor = [UIColor clearColor];
+    _webView.opaque = NO;
     _webLayer.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     _webLayer.backgroundColor = [UIColor clearColor];
     _webLayer.opaque = NO;
@@ -1073,12 +1083,20 @@ forBarButtonItemNamed:(NSString *)name {
 
 - (void)userContentController:(WKUserContentController *)userContentController
       didReceiveScriptMessage:(WKScriptMessage *)message {
-    [self onCobaltMessage:message.body];
+    UIView *currentWebView;
+    if ([((WKWebView *) _webLayer).configuration.userContentController isEqual:userContentController]) {
+        currentWebView = _webLayer;
+    }
+    else {
+        currentWebView = _webView;
+    }
+    [self onCobaltMessage:message.body
+              fromWebView:currentWebView];
 }
 
 // Unable to get result from the onUnhandled methods of the delegate and from the CobaltPluginManager one since we cannot called it synchronously (WebThread is blocking the MainThread so waiting the MainThread from the WebThread would completely stuck the app)
 - (void)onCobaltMessage:(NSString *)message
-            fromWebView:(UIWebView *)currentWebView {
+            fromWebView:(UIView *)currentWebView {
     __block BOOL messageHandled = NO;
     
     NSDictionary *dict = [Cobalt dictionaryWithString:message];
@@ -2106,7 +2124,7 @@ didFailNavigation:(WKNavigation *)navigation
 
 - (void)webViewStartLoadingPage:(UIView *)currentWebView {
     // Warns parent WebView that webLayer is loading page (or changing page)
-    if ([currentWebView isEqual:webLayer]) {
+    if ([currentWebView isEqual:_webLayer]) {
         [self sendEvent:JSEventWebLayerOnLoading
                withData:nil
             andCallback:nil];
@@ -2116,7 +2134,13 @@ didFailNavigation:(WKNavigation *)navigation
     [toJavaScriptOperationQueue setSuspended:YES];
     
     // (res)set context
-    if ([JSContext class]) {
+    if ([currentWebView isKindOfClass:[WKWebView class]]) {
+        WKUserContentController *controller = [[WKUserContentController alloc] init];
+        [controller addScriptMessageHandler:self
+                                       name:@"cobalt"];
+        ((WKWebView *) currentWebView).configuration.userContentController = controller;
+    }
+    else if ([JSContext class]) {
         JSContext *context = [currentWebView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
         context[@"CobaltViewController"] = @{@"onCobaltMessage":^(NSString *message) {
             [self onCobaltMessage:message
@@ -2129,7 +2153,13 @@ didFailNavigation:(WKNavigation *)navigation
 
 - (void)webViewDidLoadPage:(UIView *)currentWebView {
     // (res)set context
-    if ([JSContext class]) {
+    if ([currentWebView isKindOfClass:[WKWebView class]]) {
+        WKUserContentController *controller = [[WKUserContentController alloc] init];
+        [controller addScriptMessageHandler:self
+                                       name:@"cobalt"];
+        ((WKWebView *) currentWebView).configuration.userContentController = controller;
+    }
+    else if ([JSContext class]) {
         JSContext *context = [currentWebView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
         context[@"CobaltViewController"] = @{@"onCobaltMessage":^(NSString *message) {
             [self onCobaltMessage:message
@@ -2141,7 +2171,7 @@ didFailNavigation:(WKNavigation *)navigation
     [toJavaScriptOperationQueue setSuspended:NO];
     
     // Warns parent WebView that webLayer has finished loading page
-    if ([currentWebView isEqual:webLayer]) {
+    if ([currentWebView isEqual:_webLayer]) {
         [self sendEvent:JSEventWebLayerOnLoaded
                withData:nil
             andCallback:nil];
@@ -2152,7 +2182,13 @@ didFailNavigation:(WKNavigation *)navigation
 
 - (void)webViewDidFailLoadPage:(UIView *)currentWebView {
     // (res)set context
-    if ([JSContext class]) {
+    if ([currentWebView isKindOfClass:[WKWebView class]]) {
+        WKUserContentController *controller = [[WKUserContentController alloc] init];
+        [controller addScriptMessageHandler:self
+                                       name:@"cobalt"];
+        ((WKWebView *) currentWebView).configuration.userContentController = controller;
+    }
+    else if ([JSContext class]) {
         JSContext *context = [currentWebView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
         context[@"CobaltViewController"] = @{@"onCobaltMessage":^(NSString *message) {
             [self onCobaltMessage:message
@@ -2164,7 +2200,7 @@ didFailNavigation:(WKNavigation *)navigation
     [toJavaScriptOperationQueue setSuspended:NO];
     
     // Warns parent WebView that webLayer has failed loading page
-    if ([currentWebView isEqual:webLayer]) {
+    if ([currentWebView isEqual:_webLayer]) {
         [self sendEvent:JSEventWebLayerOnLoadFailed
                withData:nil
             andCallback:nil];
