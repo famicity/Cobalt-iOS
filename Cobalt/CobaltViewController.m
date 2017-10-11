@@ -2029,7 +2029,7 @@ clickedButtonAtIndex:(NSInteger)index {
  @abstract    this method sends the WebView to the back, so the WebLayer appears above it
  */
 - (void)bringWebLayerToFront {
-    [self.view sendSubviewToBack:_webLayerPlaceholder];
+    [self.view sendSubviewToBack:_webViewPlaceholder];
 }
 
 /*!
