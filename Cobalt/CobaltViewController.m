@@ -34,6 +34,8 @@
 
 #import "iToast.h"
 
+#define IS_IOS10_OR_GREATER() [[[UIDevice currentDevice] systemVersion] compare:@"10" options:NSNumericSearch] != NSOrderedAscending
+
 @interface CobaltViewController () {
     /*
     NSMutableArray *topLeftBarButtonItems;
@@ -184,8 +186,7 @@ NSString * webLayerPage;
                   forControlEvents:UIControlEventValueChanged];
     }
     
-    if ([WKWebView class]
-        && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
+    if (IS_IOS10_OR_GREATER()) {
         // WebView
         WKUserContentController *webViewController = [[WKUserContentController alloc] init];
         [webViewController addScriptMessageHandler:self
@@ -937,8 +938,7 @@ forBarButtonItemNamed:(NSString *)name {
         requestURL = [NSURLRequest requestWithURL:fileURL];
     }
     
-    if ([WKWebView class]
-        && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
+    if ([webView isKindOfClass:[WKWebView class]]) {
         if (fileURL != nil) {
             [(WKWebView *)webView loadFileURL:fileURL
                       allowingReadAccessToURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]]];
@@ -979,8 +979,7 @@ forBarButtonItemNamed:(NSString *)name {
                         break;
                 }
                 
-                if ([WKWebView class]
-                    && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
+                if ([webViewToExecute isKindOfClass:[WKWebView class]]) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [(WKWebView *)webViewToExecute evaluateJavaScript:script
                                                         completionHandler:nil];
@@ -2249,8 +2248,7 @@ didFailNavigation:(WKNavigation *)navigation
  */
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     UIScrollView *webScrollView = nil;
-    if ([WKWebView class]
-        && [[WKWebView class] instancesRespondToSelector:@selector(loadFileURL:allowingReadAccessToURL:)]) {
+    if (IS_IOS10_OR_GREATER()) {
         webScrollView = ((WKWebView *) _webView).scrollView;
     }
     else {
