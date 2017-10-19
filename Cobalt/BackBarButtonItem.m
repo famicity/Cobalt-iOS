@@ -76,6 +76,22 @@
         backButtonImageView.translatesAutoresizingMaskIntoConstraints = NO;
         backButtonTitle.translatesAutoresizingMaskIntoConstraints = NO;
         
+        // Back button height
+        [backButton addConstraint:[NSLayoutConstraint constraintWithItem:backButton
+                                                               attribute:NSLayoutAttributeHeight
+                                                               relatedBy:NSLayoutRelationGreaterThanOrEqual
+                                                                  toItem:backButtonImageView
+                                                               attribute:NSLayoutAttributeHeight
+                                                              multiplier:1.0
+                                                                constant:0.0]];
+        [backButton addConstraint:[NSLayoutConstraint constraintWithItem:backButton
+                                                               attribute:NSLayoutAttributeHeight
+                                                               relatedBy:NSLayoutRelationGreaterThanOrEqual
+                                                                  toItem:backButtonTitle
+                                                               attribute:NSLayoutAttributeHeight
+                                                              multiplier:1.0
+                                                                constant:0.0]];
+        // Center vertically
         [backButton addConstraint:[NSLayoutConstraint constraintWithItem:backButtonImageView
                                                                attribute:NSLayoutAttributeCenterY
                                                                relatedBy:NSLayoutRelationEqual
@@ -90,6 +106,7 @@
                                                                attribute:NSLayoutAttributeCenterY
                                                               multiplier:1.0
                                                                 constant:0.0]];
+        // Width
         [backButton addConstraint:[NSLayoutConstraint constraintWithItem:backButtonImageView
                                                                attribute:NSLayoutAttributeLeading
                                                                relatedBy:NSLayoutRelationEqual
@@ -104,6 +121,13 @@
                                                                attribute:NSLayoutAttributeTrailing
                                                               multiplier:1.0
                                                                 constant:6.0]];
+        [backButton addConstraint:[NSLayoutConstraint constraintWithItem:backButton
+                                                               attribute:NSLayoutAttributeTrailing
+                                                               relatedBy:NSLayoutRelationEqual
+                                                                  toItem:backButtonTitle
+                                                               attribute:NSLayoutAttributeTrailing
+                                                              multiplier:1.0
+                                                                constant:0.0]];
         
         self.customView = backButton;
     }
