@@ -2056,7 +2056,13 @@ clickedButtonAtIndex:(NSInteger)index {
                                           withData:data];
                          webLayerPage = nil;
                          
-                         //[webLayer stringByEvaluatingJavaScriptFromString:@"document.open();document.close();"];
+                         if (IS_IOS10_OR_GREATER()) {
+                             [(WKWebView *)_webLayer evaluateJavaScript:@"document.open();document.close();"
+                                                      completionHandler:nil];
+                         }
+                         else {
+                             [(UIWebView *) _webLayer stringByEvaluatingJavaScriptFromString:@"document.open();document.close();"];
+                         }
                      }];
 }
 
