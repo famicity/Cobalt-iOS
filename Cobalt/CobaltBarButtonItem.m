@@ -41,6 +41,24 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (instancetype)initWithCustomView:(UIView *)customView {
+
+    self = [super initWithCustomView:customView];
+
+    if ([[UIDevice currentDevice].systemVersion compare:@"11.0" options:NSNumericSearch] != NSOrderedAscending) {
+        CGFloat width = customView.frame.size.width;
+        CGFloat height = customView.frame.size.height;
+
+        NSLayoutConstraint *widthConstraint = [[customView widthAnchor] constraintEqualToConstant:width];
+        NSLayoutConstraint *heightConstraint = [[customView heightAnchor] constraintEqualToConstant:height];
+
+        [widthConstraint setActive:YES];
+        [heightConstraint setActive:YES];
+    }
+
+    return self;
+}
+
 - (instancetype)initWithAction:(NSDictionary *)action
                      barHeight:(CGFloat)barHeight
                       barColor:(UIColor *)barColor

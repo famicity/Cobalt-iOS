@@ -31,6 +31,23 @@
 
 @implementation CobaltButton
 
+- (CGRect)frame {
+    CGRect frame = [super frame];
+
+    if ([[UIDevice currentDevice].systemVersion compare:@"11.0" options:NSNumericSearch] != NSOrderedAscending) {
+        frame.origin.x += self.alignmentRectInsets.left;
+        frame.origin.y += self.alignmentRectInsets.top;
+
+        frame.size.width -= self.alignmentRectInsets.left;
+        frame.size.width -= self.alignmentRectInsets.right;
+
+        frame.size.height -= self.alignmentRectInsets.top;
+        frame.size.height -= self.alignmentRectInsets.bottom;
+    }
+
+    return frame;
+}
+
 - (void)setBadgeLabelWithText:(NSString *)text {
     if (_badgeLabel == nil) {
         _badgeLabel = [[UILabel alloc] init];
