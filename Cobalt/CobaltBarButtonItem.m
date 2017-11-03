@@ -49,11 +49,11 @@
         CGFloat width = customView.frame.size.width;
         CGFloat height = customView.frame.size.height;
 
-        NSLayoutConstraint *widthConstraint = [[customView widthAnchor] constraintEqualToConstant:width];
-        NSLayoutConstraint *heightConstraint = [[customView heightAnchor] constraintEqualToConstant:height];
+        self.widthConstraint = [[customView widthAnchor] constraintEqualToConstant:width];
+        self.heightConstraint = [[customView heightAnchor] constraintEqualToConstant:height];
 
-        [widthConstraint setActive:YES];
-        [heightConstraint setActive:YES];
+        [self.widthConstraint setActive:YES];
+        [self.heightConstraint setActive:YES];
     }
 
     return self;

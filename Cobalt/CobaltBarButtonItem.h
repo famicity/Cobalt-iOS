@@ -52,6 +52,9 @@
 @property (weak, nonatomic) id<CobaltBarButtonItemDelegate> delegate;
 @property (strong, nonatomic) CobaltButton *button;
 
+@property (strong, nonatomic) NSLayoutConstraint *widthConstraint;
+@property (strong, nonatomic) NSLayoutConstraint *heightConstraint;
+
 - (instancetype)initWithAction:(NSDictionary *)action
                      barHeight:(CGFloat)barHeight
                       barColor:(UIColor *)barColor
