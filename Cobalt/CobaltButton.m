@@ -29,8 +29,16 @@
 
 #import "CobaltButton.h"
 
+@interface CobaltButton() {
+    UILabel *_titleLabel;
+    UIImageView *_iconImageView;
+}
+
+@end
+
 @implementation CobaltButton
 
+/*
 - (CGRect)frame {
     CGRect frame = [super frame];
 
@@ -47,7 +55,102 @@
 
     return frame;
 }
+*/
 
+- (instancetype)init {
+    if (self = [super init]) {
+        [[self.heightAnchor constraintEqualToConstant:44.0] setActive:YES];
+    }
+    
+    return self;
+}
+
+- (instancetype)initWithImage:(UIImage *)image {
+    if (self = [self init]) {
+        [self setImage:image];
+    }
+    
+    return self;
+}
+
+- (instancetype)initWithAttributedTitle:(NSAttributedString *)title {
+    if (self = [self init]) {
+        [self setAttributedTitle:title];
+    }
+    
+    return self;
+}
+
+- (void)setImage:(UIImage *)image {
+    if (_titleLabel != nil) {
+        [_titleLabel removeFromSuperview];
+    }
+    
+    if (_iconImageView == nil) {
+        _iconImageView = [[UIImageView alloc] init];
+        _iconImageView.contentMode = UIViewContentModeScaleAspectFit;
+    }
+    
+    CGFloat imageWidth = image.size.width;
+    CGFloat imageHeight = image.size.height;
+    CGFloat maxDimension = MAX(imageWidth, imageHeight);
+    CGFloat imageViewWidth, imageViewHeight;
+    if (maxDimension > 44.0) {
+        CGFloat ratio = 44.0 / maxDimension;
+        imageViewWidth = imageWidth * ratio;
+        imageViewHeight = imageHeight * ratio;
+    }
+    else {
+        imageViewWidth = imageWidth;
+        imageViewHeight = imageHeight;
+    }
+    
+    _iconImageView.frame = CGRectMake(11.0, (44.0 - imageViewHeight) / 2.0 - 0.3333, imageViewWidth, imageViewHeight);
+    _iconImageView.image = image;
+    
+    [self addSubview:_iconImageView];
+    
+    [[_iconImageView.widthAnchor constraintEqualToConstant:imageViewWidth] setActive:YES];
+    [[_iconImageView.heightAnchor constraintEqualToConstant:imageViewHeight] setActive:YES];
+    [[self.widthAnchor constraintEqualToAnchor:_iconImageView.widthAnchor
+                                      constant:22.0] setActive:YES];
+    [[_iconImageView.centerXAnchor constraintEqualToAnchor:self.centerXAnchor] setActive:YES];
+    [[_iconImageView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor
+                                                  constant:-0.3333] setActive:YES];
+}
+
+- (void)setAttributedTitle:(NSAttributedString *)title {
+    if (_iconImageView != nil) {
+        [_iconImageView removeFromSuperview];
+    }
+    
+    if (_titleLabel == nil) {
+        _titleLabel = [[UILabel alloc] init];
+        _titleLabel.shadowOffset = CGSizeZero;
+        _titleLabel.opaque = NO;
+        _titleLabel.contentMode = UIViewContentModeScaleToFill;
+        _titleLabel.backgroundColor = nil;
+        _titleLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
+    }
+    
+    CGSize titleSize = title.size;
+    CGFloat buttonWidth = titleSize.width + 3.0;
+    CGFloat labelheight = titleSize.height;
+    
+    _titleLabel.frame = CGRectMake(0.0, (44.0 - labelheight) / 2.0 - 0.5, titleSize.width, labelheight);
+    _titleLabel.attributedText = title;
+    
+    [self addSubview:_titleLabel];
+    
+    [[_titleLabel.widthAnchor constraintEqualToConstant:titleSize.width] setActive:YES];
+    [[_titleLabel.heightAnchor constraintEqualToConstant:labelheight] setActive:YES];
+    [[self.widthAnchor constraintEqualToConstant:buttonWidth] setActive:YES];
+    [[_titleLabel.leadingAnchor constraintEqualToAnchor:self.leadingAnchor] setActive:YES];
+    [[_titleLabel.centerYAnchor constraintEqualToAnchor:self.centerYAnchor
+                                               constant:-0.5] setActive:YES];
+}
+
+/*
 - (void)setBadgeLabelWithText:(NSString *)text {
     if (_badgeLabel == nil) {
         _badgeLabel = [[UILabel alloc] init];
@@ -56,6 +159,7 @@
         _badgeLabel.font = [UIFont systemFontOfSize:12.0];
         _badgeLabel.textAlignment = NSTextAlignmentCenter;
         _badgeLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
+        //[self addSubview:_badgeLabel];
     }
     _badgeLabel.text = text;
     
@@ -87,5 +191,6 @@
     
     [self bringSubviewToFront:_badgeLabel];
 }
+*/
 
 @end

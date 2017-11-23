@@ -35,7 +35,15 @@
 @property (strong, nonatomic) NSNumber *visible;
 @property (strong, nonatomic) UILabel *badgeLabel;
 
+- (instancetype)initWithImage:(UIImage *)image;
+- (instancetype)initWithAttributedTitle:(NSAttributedString *)title;
+
+- (void)setImage:(UIImage *)image;
+- (void)setAttributedTitle:(NSAttributedString *)title;
+
+/*
 - (void)setBadgeLabelWithText:(NSString *)text;
 - (void)resizeBadge;
+*/
 
 @end

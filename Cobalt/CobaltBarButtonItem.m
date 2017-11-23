@@ -41,6 +41,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*
 - (instancetype)initWithCustomView:(UIView *)customView {
 
     self = [super initWithCustomView:customView];
@@ -58,6 +59,7 @@
 
     return self;
 }
+*/
 
 - (instancetype)initWithAction:(NSDictionary *)action
                      barHeight:(CGFloat)barHeight
@@ -89,9 +91,12 @@
                 && [iosIcon isKindOfClass:[NSString class]]) {
                 UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
                 if (image != nil) {
+                    _button = [[CobaltButton alloc] initWithImage:image];
+                    /*
                     _button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, 22.0, 22.0)];
                     [_button setImage:image
                              forState:UIControlStateNormal];
+                     */
                     _button.tintColor = self.tintColor;
                 }
             }
@@ -103,9 +108,12 @@
                                                             color:self.tintColor
                                                           andSize:22.0];
                 if (image != nil) {
+                    _button = [[CobaltButton alloc] initWithImage:image];
+                    /*
                     _button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, 22.0, 22.0)];
                     [_button setImage:image
                              forState:UIControlStateNormal];
+                     */
                 }
             }
             
@@ -120,19 +128,22 @@
                                         value:self.tintColor
                                         range:titleRange];
                 
+                _button = [[CobaltButton alloc] initWithAttributedTitle:attributedTitle];
+                /*
                 CGSize titleSize = attributedTitle.size;
-                
                 _button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, titleSize.width, titleSize.height)];
                 [_button setAttributedTitle:attributedTitle
                                    forState:UIControlStateNormal];
+                 */
             }
             
             [_button addTarget:self
                         action:@selector(onBarButtonItemPressed:)
               forControlEvents:UIControlEventTouchUpInside];
             _button.accessibilityLabel = [NSString stringWithFormat:@"%@ %@", badge, title];
-            [_button setBadgeLabelWithText:badge];
+            //[_button setBadgeLabelWithText:badge];
             
+            /*
             if ([_position isEqualToString:kConfigurationBarsActionPositionBottom]) {
                 _button.imageEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
                 
@@ -153,6 +164,7 @@
                     _button.titleEdgeInsets = UIEdgeInsetsMake(1.0, 0, -1.0, 0);
                 }
             }
+            */
             
             self = [super initWithCustomView:_button];
         }
@@ -221,6 +233,7 @@
 - (void)resizeWithBarHeight:(CGFloat)barHeight {
     _barHeight = barHeight;
     
+    /*
     if (_button != nil) {
         if ([_position isEqualToString:kConfigurationBarsActionPositionBottom]) {
             _button.imageEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
@@ -243,6 +256,7 @@
             }
         }
     }
+     */
 }
 
 - (void)setContent:(NSDictionary *)content {
@@ -262,8 +276,11 @@
             && [iosIcon isKindOfClass:[NSString class]]) {
             UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
             if (image != nil) {
+                [_button setImage:image];
+                /*
                 [_button setImage:image
                          forState:UIControlStateNormal];
+                 */
                 _button.tintColor = self.tintColor;
             }
         }
@@ -273,8 +290,11 @@
                                                         color:self.tintColor
                                                       andSize:22.0];
             if (image != nil) {
+                [_button setImage:image];
+                /*
                 [_button setImage:image
                          forState:UIControlStateNormal];
+                 */
             }
         }
         else if (title != nil
@@ -289,6 +309,8 @@
                                     value:self.tintColor
                                     range:titleRange];
             
+            [_button setAttributedTitle:attributedTitle];
+            /*
             CGSize titleSize = attributedTitle.size;
             
             _button.frame = CGRectMake(0, 0, titleSize.width, titleSize.height);
@@ -296,6 +318,7 @@
                                forState:UIControlStateNormal];
             [_button setImage:nil
                      forState:UIControlStateNormal];
+             */
         }
         
         if (title != nil
@@ -340,6 +363,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)setBadge:(NSString *)text {
+    /*
     if (_button != nil) {
         [_button setBadgeLabelWithText:text];
     }
@@ -348,6 +372,7 @@
         NSLog(@"setBadge: no badge was initially set");
     }
 #endif
+     */
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
