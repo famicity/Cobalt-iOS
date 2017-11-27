@@ -59,15 +59,32 @@
 
 - (instancetype)init {
     if (self = [super init]) {
-        [[self.heightAnchor constraintEqualToConstant:44.0] setActive:YES];
+        if (@available(iOS 11, *)) {
+            [[self.heightAnchor constraintEqualToConstant:44.0] setActive:YES];
+        }
     }
     
     return self;
 }
 
 - (instancetype)initWithImage:(UIImage *)image {
+    if (self = [self initWithImage:image
+                      andTintColor:nil]) {
+        
+    }
+    
+    return self;
+}
+
+- (instancetype)initWithImage:(UIImage *)image
+                 andTintColor:(UIColor *)tintColor {
     if (self = [self init]) {
-        [self setImage:image];
+        if (! @available(iOS 11, *)) {
+            self.frame = CGRectMake(0, 0, 22.0, 22.0);
+        }
+        
+        [self setImage:image
+         withTintColor:tintColor];
     }
     
     return self;
@@ -82,72 +99,124 @@
 }
 
 - (void)setImage:(UIImage *)image {
-    if (_titleLabel != nil) {
-        [_titleLabel removeFromSuperview];
-    }
+    [self setImage:image
+     withTintColor:nil];
+}
+
+- (void)setImage:(UIImage *)image
+   withTintColor:(UIColor *)tintColor {
+    if (@available(iOS 11, *)) {
+        if (_titleLabel != nil) {
+            [_titleLabel removeFromSuperview];
+        }
+        
+        if (_iconImageView == nil) {
+            _iconImageView = [[UIImageView alloc] init];
+            _iconImageView.contentMode = UIViewContentModeScaleAspectFit;
+        }
+        
+        CGFloat imageWidth = image.size.width;
+        CGFloat imageHeight = image.size.height;
+        CGFloat maxDimension = MAX(imageWidth, imageHeight);
+        CGFloat imageViewWidth, imageViewHeight;
+        if (maxDimension > 44.0) {
+            CGFloat ratio = 44.0 / maxDimension;
+            imageViewWidth = imageWidth * ratio;
+            imageViewHeight = imageHeight * ratio;
+        }
+        else {
+            imageViewWidth = imageWidth;
+            imageViewHeight = imageHeight;
+        }
+        _iconImageView.frame = CGRectMake(11.0, (44.0 - imageViewHeight) / 2.0 - 0.3333, imageViewWidth, imageViewHeight);
+        
+        _iconImageView.image = image;
+        _iconImageView.tintColor = tintColor;
+        
+        [self addSubview:_iconImageView];
     
-    if (_iconImageView == nil) {
-        _iconImageView = [[UIImageView alloc] init];
-        _iconImageView.contentMode = UIViewContentModeScaleAspectFit;
-    }
-    
-    CGFloat imageWidth = image.size.width;
-    CGFloat imageHeight = image.size.height;
-    CGFloat maxDimension = MAX(imageWidth, imageHeight);
-    CGFloat imageViewWidth, imageViewHeight;
-    if (maxDimension > 44.0) {
-        CGFloat ratio = 44.0 / maxDimension;
-        imageViewWidth = imageWidth * ratio;
-        imageViewHeight = imageHeight * ratio;
+        [[_iconImageView.widthAnchor constraintEqualToConstant:imageViewWidth] setActive:YES];
+        [[_iconImageView.heightAnchor constraintEqualToConstant:imageViewHeight] setActive:YES];
+        [[self.widthAnchor constraintEqualToAnchor:_iconImageView.widthAnchor
+                                          constant:22.0] setActive:YES];
+        [[_iconImageView.centerXAnchor constraintEqualToAnchor:self.centerXAnchor] setActive:YES];
+        [[_iconImageView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor
+                                                      constant:-0.3333] setActive:YES];
     }
     else {
-        imageViewWidth = imageWidth;
-        imageViewHeight = imageHeight;
+        [self setImage:image
+              forState:UIControlStateNormal];
+        self.tintColor = tintColor;
     }
-    
-    _iconImageView.frame = CGRectMake(11.0, (44.0 - imageViewHeight) / 2.0 - 0.3333, imageViewWidth, imageViewHeight);
-    _iconImageView.image = image;
-    
-    [self addSubview:_iconImageView];
-    
-    [[_iconImageView.widthAnchor constraintEqualToConstant:imageViewWidth] setActive:YES];
-    [[_iconImageView.heightAnchor constraintEqualToConstant:imageViewHeight] setActive:YES];
-    [[self.widthAnchor constraintEqualToAnchor:_iconImageView.widthAnchor
-                                      constant:22.0] setActive:YES];
-    [[_iconImageView.centerXAnchor constraintEqualToAnchor:self.centerXAnchor] setActive:YES];
-    [[_iconImageView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor
-                                                  constant:-0.3333] setActive:YES];
 }
 
 - (void)setAttributedTitle:(NSAttributedString *)title {
-    if (_iconImageView != nil) {
-        [_iconImageView removeFromSuperview];
+    if (@available(iOS 11, *)) {
+        if (_iconImageView != nil) {
+            [_iconImageView removeFromSuperview];
+        }
+        
+        if (_titleLabel == nil) {
+            _titleLabel = [[UILabel alloc] init];
+            _titleLabel.shadowOffset = CGSizeZero;
+            _titleLabel.opaque = NO;
+            _titleLabel.contentMode = UIViewContentModeScaleToFill;
+            _titleLabel.backgroundColor = nil;
+            _titleLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
+        }
+        
+        CGSize titleSize = title.size;
+        CGFloat buttonWidth = titleSize.width + 3.0;
+        CGFloat labelheight = titleSize.height;
+        
+        _titleLabel.frame = CGRectMake(0.0, (44.0 - labelheight) / 2.0 - 0.5, titleSize.width, labelheight);
+        _titleLabel.attributedText = title;
+        
+        [self addSubview:_titleLabel];
+        
+        [[_titleLabel.widthAnchor constraintEqualToConstant:titleSize.width] setActive:YES];
+        [[_titleLabel.heightAnchor constraintEqualToConstant:labelheight] setActive:YES];
+        [[self.widthAnchor constraintEqualToConstant:buttonWidth] setActive:YES];
+        [[_titleLabel.leadingAnchor constraintEqualToAnchor:self.leadingAnchor] setActive:YES];
+        [[_titleLabel.centerYAnchor constraintEqualToAnchor:self.centerYAnchor
+                                                   constant:-0.5] setActive:YES];
     }
-    
-    if (_titleLabel == nil) {
-        _titleLabel = [[UILabel alloc] init];
-        _titleLabel.shadowOffset = CGSizeZero;
-        _titleLabel.opaque = NO;
-        _titleLabel.contentMode = UIViewContentModeScaleToFill;
-        _titleLabel.backgroundColor = nil;
-        _titleLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
+    else {
+        CGSize titleSize = title.size;
+        self.frame = CGRectMake(0, 0, titleSize.width, titleSize.height);
+        [self setAttributedTitle:title
+                        forState:UIControlStateNormal];
+        [self setImage:nil
+              forState:UIControlStateNormal];
     }
-    
-    CGSize titleSize = title.size;
-    CGFloat buttonWidth = titleSize.width + 3.0;
-    CGFloat labelheight = titleSize.height;
-    
-    _titleLabel.frame = CGRectMake(0.0, (44.0 - labelheight) / 2.0 - 0.5, titleSize.width, labelheight);
-    _titleLabel.attributedText = title;
-    
-    [self addSubview:_titleLabel];
-    
-    [[_titleLabel.widthAnchor constraintEqualToConstant:titleSize.width] setActive:YES];
-    [[_titleLabel.heightAnchor constraintEqualToConstant:labelheight] setActive:YES];
-    [[self.widthAnchor constraintEqualToConstant:buttonWidth] setActive:YES];
-    [[_titleLabel.leadingAnchor constraintEqualToAnchor:self.leadingAnchor] setActive:YES];
-    [[_titleLabel.centerYAnchor constraintEqualToAnchor:self.centerYAnchor
-                                               constant:-0.5] setActive:YES];
+}
+
+- (void)updateEdgeInsetsWithBarPosition:(int)position
+                              andHeight:(CGFloat)height {
+    if (! @available(iOS 11, *)) {
+        switch(position) {
+            case POSITION_TOP:
+                self.imageEdgeInsets = UIEdgeInsetsMake(-1.0, 0, 1.0, 0);
+                
+                if (height < 44.0) {
+                    self.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+                }
+                else {
+                    self.titleEdgeInsets = UIEdgeInsetsMake(1.0, 0, -1.0, 0);
+                }
+                break;
+            case POSITION_BOTTOM:
+                self.imageEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+                
+                if (height < 44.0) {
+                    self.titleEdgeInsets = UIEdgeInsetsMake(-1.0, 0, 1.0, 0);
+                }
+                else {
+                    self.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+                }
+                break;
+        }
+    }
 }
 
 /*
