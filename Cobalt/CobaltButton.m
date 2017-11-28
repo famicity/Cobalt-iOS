@@ -119,6 +119,9 @@
 - (void)setImage:(UIImage *)image
    withTintColor:(UIColor *)tintColor
     andBarHeight:(CGFloat)height {
+    CGSize imageSize = image.size;
+    CGFloat imageViewWidth, imageViewHeight;
+    
     if (@available(iOS 11, *)) {
         if (_titleLabel != nil) {
             [_titleLabel removeFromSuperview];
@@ -130,18 +133,14 @@
             _buttonWidthConstraint = nil;
         }
         
-        CGFloat imageWidth = image.size.width;
-        CGFloat imageHeight = image.size.height;
-        CGFloat maxDimension = MAX(imageWidth, imageHeight);
-        CGFloat imageViewWidth, imageViewHeight;
-        if (maxDimension > height) {
-            CGFloat ratio = height / maxDimension;
-            imageViewWidth = imageWidth * ratio;
-            imageViewHeight = imageHeight * ratio;
+        if (imageSize.height > height) {
+            CGFloat ratio = height / imageSize.height;
+            imageViewWidth = imageSize.width * ratio;
+            imageViewHeight = imageSize.height * ratio;
         }
         else {
-            imageViewWidth = imageWidth;
-            imageViewHeight = imageHeight;
+            imageViewWidth = imageSize.width;
+            imageViewHeight = imageSize.height;
         }
         
         if (_iconImageView == nil) {
@@ -178,6 +177,19 @@
         _iconImageView.tintColor = tintColor;
     }
     else {
+        // TODO: issue on iOS < 11.0 in bottom bar where imageSize should be smaller in landscape on iPhone
+        if (imageSize.height > 22.0) {
+            CGFloat ratio = 22.0 / imageSize.height;
+            imageViewWidth = imageSize.width * ratio;
+            imageViewHeight = imageSize.height * ratio;
+        }
+        else {
+            imageViewWidth = imageSize.width;
+            imageViewHeight = imageSize.height;
+        }
+        
+        self.frame = CGRectMake(0, 0, imageViewWidth, imageViewHeight);
+        
         [self setImage:image
               forState:UIControlStateNormal];
         self.tintColor = tintColor;
@@ -304,6 +316,15 @@
     }
 }
 
+- (UIEdgeInsets)alignmentRectInsets {
+     if (@available(iOS 11, *)) {
+        return UIEdgeInsetsZero;
+     }
+     else {
+        return UIEdgeInsetsMake(0, -5.5, 0, -5.5);
+    }
+}
+
 /*
 - (void)setBadgeLabelWithText:(NSString *)text {
     if (_badgeLabel == nil) {
@@ -332,10 +353,6 @@
                                    width, badgeSize.height);
     _badgeLabel.layer.cornerRadius = _badgeLabel.frame.size.height / 2.0;
     _badgeLabel.layer.masksToBounds = YES;
-}
-
-- (UIEdgeInsets)alignmentRectInsets {
-    return UIEdgeInsetsMake(0, -5.5, 0, -5.5);
 }
 
 // Only override drawRect: if you perform custom drawing.
