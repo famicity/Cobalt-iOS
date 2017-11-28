@@ -38,15 +38,21 @@
 @property (strong, nonatomic) NSNumber *visible;
 @property (strong, nonatomic) UILabel *badgeLabel;
 
-- (instancetype)initWithImage:(UIImage *)image;
 - (instancetype)initWithImage:(UIImage *)image
-                 andTintColor:(UIColor *)tintColor ;
-- (instancetype)initWithAttributedTitle:(NSAttributedString *)title;
+                 andBarHeight:(CGFloat)height;
+- (instancetype)initWithImage:(UIImage *)image
+                 tintColor:(UIColor *)tintColor
+                 andBarHeight:(CGFloat)height;
+- (instancetype)initWithAttributedTitle:(NSAttributedString *)title
+                           andBarHeight:(CGFloat)height;
 
-- (void)setImage:(UIImage *)image;
 - (void)setImage:(UIImage *)image
-   withTintColor:(UIColor *)tintColor;
-- (void)setAttributedTitle:(NSAttributedString *)title;
+   withBarHeight:(CGFloat)height;
+- (void)setImage:(UIImage *)image
+   withTintColor:(UIColor *)tintColor
+    andBarHeight:(CGFloat)height;
+- (void)setAttributedTitle:(NSAttributedString *)title
+             withBarHeight:(CGFloat)height;
 
 - (void)updateEdgeInsetsWithBarPosition:(int)position
                               andHeight:(CGFloat)height;

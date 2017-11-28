@@ -32,6 +32,10 @@
 @interface CobaltButton() {
     UILabel *_titleLabel;
     UIImageView *_iconImageView;
+    NSLayoutConstraint *_buttonWidthConstraint;
+    NSLayoutConstraint *_buttonHeightConstraint;
+    NSLayoutConstraint *_contentWidthConstraint;
+    NSLayoutConstraint *_contentHeightConstraint;
 }
 
 @end
@@ -57,19 +61,22 @@
 }
 */
 
-- (instancetype)init {
+- (instancetype)initWithBarHeight:(CGFloat)height {
     if (self = [super init]) {
         if (@available(iOS 11, *)) {
-            [[self.heightAnchor constraintEqualToConstant:44.0] setActive:YES];
+            _buttonHeightConstraint = [self.heightAnchor constraintEqualToConstant:height];
+            _buttonHeightConstraint.active = YES;
         }
     }
     
     return self;
 }
 
-- (instancetype)initWithImage:(UIImage *)image {
+- (instancetype)initWithImage:(UIImage *)image
+                 andBarHeight:(CGFloat)height {
     if (self = [self initWithImage:image
-                      andTintColor:nil]) {
+                         tintColor:nil
+                      andBarHeight:height]) {
         
     }
     
@@ -77,50 +84,58 @@
 }
 
 - (instancetype)initWithImage:(UIImage *)image
-                 andTintColor:(UIColor *)tintColor {
-    if (self = [self init]) {
+                    tintColor:(UIColor *)tintColor
+                 andBarHeight:(CGFloat)height {
+    if (self = [self initWithBarHeight:height]) {
         if (! @available(iOS 11, *)) {
             self.frame = CGRectMake(0, 0, 22.0, 22.0);
         }
         
         [self setImage:image
-         withTintColor:tintColor];
+         withTintColor:tintColor
+          andBarHeight:height];
     }
     
     return self;
 }
 
-- (instancetype)initWithAttributedTitle:(NSAttributedString *)title {
-    if (self = [self init]) {
-        [self setAttributedTitle:title];
+- (instancetype)initWithAttributedTitle:(NSAttributedString *)title
+                           andBarHeight:(CGFloat)height {
+    if (self = [self initWithBarHeight:height]) {
+        [self setAttributedTitle:title
+                   withBarHeight:height];
     }
     
     return self;
-}
-
-- (void)setImage:(UIImage *)image {
-    [self setImage:image
-     withTintColor:nil];
 }
 
 - (void)setImage:(UIImage *)image
-   withTintColor:(UIColor *)tintColor {
+   withBarHeight:(CGFloat)height {
+    [self setImage:image
+     withTintColor:nil
+      andBarHeight:height];
+}
+
+- (void)setImage:(UIImage *)image
+   withTintColor:(UIColor *)tintColor
+    andBarHeight:(CGFloat)height {
     if (@available(iOS 11, *)) {
         if (_titleLabel != nil) {
             [_titleLabel removeFromSuperview];
-        }
-        
-        if (_iconImageView == nil) {
-            _iconImageView = [[UIImageView alloc] init];
-            _iconImageView.contentMode = UIViewContentModeScaleAspectFit;
+            _titleLabel = nil;
+            _contentWidthConstraint = nil;
+            _contentHeightConstraint = nil;
+            
+            [self removeConstraint:_buttonWidthConstraint];
+            _buttonWidthConstraint = nil;
         }
         
         CGFloat imageWidth = image.size.width;
         CGFloat imageHeight = image.size.height;
         CGFloat maxDimension = MAX(imageWidth, imageHeight);
         CGFloat imageViewWidth, imageViewHeight;
-        if (maxDimension > 44.0) {
-            CGFloat ratio = 44.0 / maxDimension;
+        if (maxDimension > height) {
+            CGFloat ratio = height / maxDimension;
             imageViewWidth = imageWidth * ratio;
             imageViewHeight = imageHeight * ratio;
         }
@@ -128,20 +143,39 @@
             imageViewWidth = imageWidth;
             imageViewHeight = imageHeight;
         }
-        _iconImageView.frame = CGRectMake(11.0, (44.0 - imageViewHeight) / 2.0 - 0.3333, imageViewWidth, imageViewHeight);
         
+        if (_iconImageView == nil) {
+            _iconImageView = [[UIImageView alloc] init];
+            _iconImageView.contentMode = UIViewContentModeScaleAspectFit;
+            
+            [self addSubview:_iconImageView];
+            
+            [[_iconImageView.centerXAnchor constraintEqualToAnchor:self.centerXAnchor] setActive:YES];
+            [[_iconImageView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor
+                                                          constant:-0.3333] setActive:YES];
+            _buttonWidthConstraint = [self.widthAnchor constraintEqualToAnchor:_iconImageView.widthAnchor
+                                                                      constant:22.0];
+            [_buttonWidthConstraint setActive:YES];
+        }
+        
+        if (_contentWidthConstraint == nil) {
+            _contentWidthConstraint = [_iconImageView.widthAnchor constraintEqualToConstant:imageViewWidth];
+            [_contentWidthConstraint setActive:YES];
+        }
+        else {
+            _contentWidthConstraint.constant = imageViewWidth;
+        }
+        if (_contentHeightConstraint == nil) {
+            _contentHeightConstraint = [_iconImageView.heightAnchor constraintEqualToConstant:imageViewHeight];
+            [_contentHeightConstraint setActive:YES];
+        }
+        else {
+            _contentHeightConstraint.constant = imageViewHeight;
+        }
+        
+        _iconImageView.frame = CGRectMake(11.0, (height - imageViewHeight) / 2.0 - 0.3333, imageViewWidth, imageViewHeight);
         _iconImageView.image = image;
         _iconImageView.tintColor = tintColor;
-        
-        [self addSubview:_iconImageView];
-    
-        [[_iconImageView.widthAnchor constraintEqualToConstant:imageViewWidth] setActive:YES];
-        [[_iconImageView.heightAnchor constraintEqualToConstant:imageViewHeight] setActive:YES];
-        [[self.widthAnchor constraintEqualToAnchor:_iconImageView.widthAnchor
-                                          constant:22.0] setActive:YES];
-        [[_iconImageView.centerXAnchor constraintEqualToAnchor:self.centerXAnchor] setActive:YES];
-        [[_iconImageView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor
-                                                      constant:-0.3333] setActive:YES];
     }
     else {
         [self setImage:image
@@ -150,11 +184,21 @@
     }
 }
 
-- (void)setAttributedTitle:(NSAttributedString *)title {
+- (void)setAttributedTitle:(NSAttributedString *)title
+             withBarHeight:(CGFloat)height {
     if (@available(iOS 11, *)) {
         if (_iconImageView != nil) {
             [_iconImageView removeFromSuperview];
+            _iconImageView = nil;
+            _contentWidthConstraint = nil;
+            _contentHeightConstraint = nil;
+            
+            [self removeConstraint:_buttonWidthConstraint];
+            _buttonWidthConstraint = nil;
         }
+        
+        CGSize titleSize = title.size;
+        CGFloat labelheight = titleSize.height;
         
         if (_titleLabel == nil) {
             _titleLabel = [[UILabel alloc] init];
@@ -163,23 +207,34 @@
             _titleLabel.contentMode = UIViewContentModeScaleToFill;
             _titleLabel.backgroundColor = nil;
             _titleLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
+            
+            [self addSubview:_titleLabel];
+            
+            [[_titleLabel.leadingAnchor constraintEqualToAnchor:self.leadingAnchor] setActive:YES];
+            [[_titleLabel.centerYAnchor constraintEqualToAnchor:self.centerYAnchor
+                                                       constant:-0.6666] setActive:YES];
+            _buttonWidthConstraint = [self.widthAnchor constraintEqualToAnchor:_titleLabel.widthAnchor
+                                                                      constant:3.0];
+            [_buttonWidthConstraint setActive:YES];
         }
         
-        CGSize titleSize = title.size;
-        CGFloat buttonWidth = titleSize.width + 3.0;
-        CGFloat labelheight = titleSize.height;
+        if (_contentWidthConstraint == nil) {
+            _contentWidthConstraint = [_titleLabel.widthAnchor constraintEqualToConstant:titleSize.width];
+            [_contentWidthConstraint setActive:YES];
+        }
+        else {
+            _contentWidthConstraint.constant = titleSize.width;
+        }
+        if (_contentHeightConstraint == nil) {
+            _contentHeightConstraint = [_titleLabel.heightAnchor constraintEqualToConstant:labelheight];
+            [_contentHeightConstraint setActive:YES];
+        }
+        else {
+            _contentHeightConstraint.constant = labelheight;
+        }
         
-        _titleLabel.frame = CGRectMake(0.0, (44.0 - labelheight) / 2.0 - 0.5, titleSize.width, labelheight);
+        _titleLabel.frame = CGRectMake(0.0, (height - labelheight) / 2.0 - 0.6666, titleSize.width, labelheight);
         _titleLabel.attributedText = title;
-        
-        [self addSubview:_titleLabel];
-        
-        [[_titleLabel.widthAnchor constraintEqualToConstant:titleSize.width] setActive:YES];
-        [[_titleLabel.heightAnchor constraintEqualToConstant:labelheight] setActive:YES];
-        [[self.widthAnchor constraintEqualToConstant:buttonWidth] setActive:YES];
-        [[_titleLabel.leadingAnchor constraintEqualToAnchor:self.leadingAnchor] setActive:YES];
-        [[_titleLabel.centerYAnchor constraintEqualToAnchor:self.centerYAnchor
-                                                   constant:-0.5] setActive:YES];
     }
     else {
         CGSize titleSize = title.size;
@@ -193,7 +248,37 @@
 
 - (void)updateEdgeInsetsWithBarPosition:(int)position
                               andHeight:(CGFloat)height {
-    if (! @available(iOS 11, *)) {
+    if (@available(iOS 11, *)) {
+        BOOL imageUpdated = _iconImageView == nil;
+        BOOL titleUpdated = _titleLabel == nil;
+        for (UIView *subview in self.subviews) {
+            if (! imageUpdated
+                && [subview isEqual:_iconImageView]) {
+                [self setImage:_iconImageView.image
+                 withTintColor:_iconImageView.tintColor
+                  andBarHeight:height];
+                
+                imageUpdated = YES;
+            }
+            else if (! titleUpdated
+                     && [subview isEqual:_titleLabel]) {
+                [self setAttributedTitle:_titleLabel.attributedText
+                           withBarHeight:height];
+                
+                titleUpdated = YES;
+            }
+            
+            if (imageUpdated
+                && titleUpdated) {
+                break;
+            }
+        }
+        
+        _buttonHeightConstraint.constant = height;
+        [self updateConstraintsIfNeeded];
+        [self layoutIfNeeded];
+    }
+    else {
         switch(position) {
             case POSITION_TOP:
                 self.imageEdgeInsets = UIEdgeInsetsMake(-1.0, 0, 1.0, 0);

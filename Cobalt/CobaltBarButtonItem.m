@@ -92,7 +92,8 @@
                 UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
                 if (image != nil) {
                     _button = [[CobaltButton alloc] initWithImage:image
-                                                     andTintColor:self.tintColor];
+                                                        tintColor:self.tintColor
+                                                     andBarHeight:_barHeight];
                 }
             }
             
@@ -103,7 +104,8 @@
                                                             color:self.tintColor
                                                           andSize:22.0];
                 if (image != nil) {
-                    _button = [[CobaltButton alloc] initWithImage:image];
+                    _button = [[CobaltButton alloc] initWithImage:image
+                                                     andBarHeight:_barHeight];
                 }
             }
             
@@ -118,7 +120,8 @@
                                         value:self.tintColor
                                         range:titleRange];
                 
-                _button = [[CobaltButton alloc] initWithAttributedTitle:attributedTitle];
+                _button = [[CobaltButton alloc] initWithAttributedTitle:attributedTitle
+                                                           andBarHeight:_barHeight];
             }
             [_button addTarget:self
                         action:@selector(onBarButtonItemPressed:)
@@ -222,7 +225,8 @@
             UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
             if (image != nil) {
                 [_button setImage:image
-                    withTintColor:self.tintColor];
+                    withTintColor:self.tintColor
+                     andBarHeight:_barHeight];
             }
         }
         else if (icon != nil
@@ -231,7 +235,8 @@
                                                         color:self.tintColor
                                                       andSize:22.0];
             if (image != nil) {
-                [_button setImage:image];
+                [_button setImage:image
+                    withBarHeight:_barHeight];
             }
         }
         else if (title != nil
@@ -246,7 +251,8 @@
                                     value:self.tintColor
                                     range:titleRange];
             
-            [_button setAttributedTitle:attributedTitle];
+            [_button setAttributedTitle:attributedTitle
+                          withBarHeight:_barHeight];
         }
         
         if (title != nil
