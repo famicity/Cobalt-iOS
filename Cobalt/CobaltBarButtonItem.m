@@ -41,26 +41,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*
-- (instancetype)initWithCustomView:(UIView *)customView {
-
-    self = [super initWithCustomView:customView];
-
-    if ([[UIDevice currentDevice].systemVersion compare:@"11.0" options:NSNumericSearch] != NSOrderedAscending) {
-        CGFloat width = customView.frame.size.width;
-        CGFloat height = customView.frame.size.height;
-
-        self.widthConstraint = [[customView widthAnchor] constraintEqualToConstant:width];
-        self.heightConstraint = [[customView heightAnchor] constraintEqualToConstant:height];
-
-        [self.widthConstraint setActive:YES];
-        [self.heightConstraint setActive:YES];
-    }
-
-    return self;
-}
-*/
-
 - (instancetype)initWithAction:(NSDictionary *)action
                      barHeight:(CGFloat)barHeight
                       barColor:(UIColor *)barColor
@@ -127,7 +107,7 @@
                         action:@selector(onBarButtonItemPressed:)
               forControlEvents:UIControlEventTouchUpInside];
             _button.accessibilityLabel = [NSString stringWithFormat:@"%@ %@", badge, title];
-            //[_button setBadgeLabelWithText:badge];
+            [_button setBadgeLabelWithText:badge];
             
             int barPosition = [kConfigurationBarsActionPositionBottom isEqualToString:_position] ? POSITION_BOTTOM : POSITION_TOP;
             [_button updateEdgeInsetsWithBarPosition:barPosition
@@ -297,7 +277,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)setBadge:(NSString *)text {
-    /*
     if (_button != nil) {
         [_button setBadgeLabelWithText:text];
     }
@@ -306,7 +285,6 @@
         NSLog(@"setBadge: no badge was initially set");
     }
 #endif
-     */
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

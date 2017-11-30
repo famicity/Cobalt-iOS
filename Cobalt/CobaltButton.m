@@ -36,30 +36,13 @@
     NSLayoutConstraint *_buttonHeightConstraint;
     NSLayoutConstraint *_contentWidthConstraint;
     NSLayoutConstraint *_contentHeightConstraint;
+    NSLayoutConstraint *_badgeWidthConstraint;
+    NSLayoutConstraint *_badgeHeightConstraint;
 }
 
 @end
 
 @implementation CobaltButton
-
-/*
-- (CGRect)frame {
-    CGRect frame = [super frame];
-
-    if ([[UIDevice currentDevice].systemVersion compare:@"11.0" options:NSNumericSearch] != NSOrderedAscending) {
-        frame.origin.x += self.alignmentRectInsets.left;
-        frame.origin.y += self.alignmentRectInsets.top;
-
-        frame.size.width -= self.alignmentRectInsets.left;
-        frame.size.width -= self.alignmentRectInsets.right;
-
-        frame.size.height -= self.alignmentRectInsets.top;
-        frame.size.height -= self.alignmentRectInsets.bottom;
-    }
-
-    return frame;
-}
-*/
 
 - (instancetype)initWithBarHeight:(CGFloat)height {
     if (self = [super init]) {
@@ -175,6 +158,8 @@
         _iconImageView.frame = CGRectMake(11.0, (height - imageViewHeight) / 2.0 - 0.3333, imageViewWidth, imageViewHeight);
         _iconImageView.image = image;
         _iconImageView.tintColor = tintColor;
+        
+        self.bounds = CGRectMake(0, 0, imageViewWidth + 22.0, height);
     }
     else {
         // TODO: issue on iOS < 11.0 in bottom bar where imageSize should be smaller in landscape on iPhone
@@ -247,6 +232,8 @@
         
         _titleLabel.frame = CGRectMake(0.0, (height - labelheight) / 2.0 - 0.6666, titleSize.width, labelheight);
         _titleLabel.attributedText = title;
+        
+        self.bounds = CGRectMake(0, 0, titleSize.width + 3.0, height);
     }
     else {
         CGSize titleSize = title.size;
@@ -325,34 +312,77 @@
     }
 }
 
-/*
 - (void)setBadgeLabelWithText:(NSString *)text {
-    if (_badgeLabel == nil) {
-        _badgeLabel = [[UILabel alloc] init];
-        _badgeLabel.backgroundColor = [UIColor redColor];
-        _badgeLabel.textColor = [UIColor whiteColor];
-        _badgeLabel.font = [UIFont systemFontOfSize:12.0];
-        _badgeLabel.textAlignment = NSTextAlignmentCenter;
-        _badgeLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
-        //[self addSubview:_badgeLabel];
+    if (text.length == 0) {
+        [_badgeLabel removeFromSuperview];
+        _badgeLabel = nil;
+        _badgeWidthConstraint = nil;
+        _badgeHeightConstraint = nil;
     }
-    _badgeLabel.text = text;
-    
-    [self resizeBadge];
-    [self addSubview:_badgeLabel];
+    else {
+        if (_badgeLabel == nil) {
+            _badgeLabel = [[UILabel alloc] init];
+            _badgeLabel.backgroundColor = [UIColor redColor];
+            _badgeLabel.textColor = [UIColor whiteColor];
+            _badgeLabel.font = [UIFont systemFontOfSize:12.0];
+            _badgeLabel.textAlignment = NSTextAlignmentCenter;
+            _badgeLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
+            
+            [self addSubview:_badgeLabel];
+            
+            if (@available(iOS 11, *)) {
+                [[_badgeLabel.trailingAnchor constraintEqualToAnchor:self.trailingAnchor] setActive:YES];
+                [[_badgeLabel.topAnchor constraintEqualToAnchor:self.topAnchor] setActive:YES];
+            }
+        }
+        _badgeLabel.text = text;
+        
+        [self resizeBadge];
+    }
 }
 
 - (void)resizeBadge {
     [_badgeLabel sizeToFit];
     
     CGSize badgeSize = _badgeLabel.frame.size;
-    CGFloat width = badgeSize.width + 6.0 < badgeSize.height ? badgeSize.height : badgeSize.width + 6.0;
-    width = width > (self.frame.size.width + badgeSize.height / 2.0) ? self.frame.size.width + badgeSize.height / 2.0 : width;
     
-    _badgeLabel.frame = CGRectMake(self.frame.size.width - (width - badgeSize.height / 2.0), - badgeSize.height / 2.0,
-                                   width, badgeSize.height);
-    _badgeLabel.layer.cornerRadius = _badgeLabel.frame.size.height / 2.0;
+    CGRect newFrame;
+    CGFloat width = badgeSize.width + 6.0 < badgeSize.height ? badgeSize.height : badgeSize.width + 6.0;
+    if (@available(iOS 11, *)) {
+        width = width > self.bounds.size.width ? self.bounds.size.width : width;
+        newFrame = CGRectMake(self.bounds.size.width - width, 0,
+                              width, badgeSize.height);
+    }
+    else {
+        width = width > (self.bounds.size.width + badgeSize.height / 2.0) ? self.bounds.size.width + badgeSize.height / 2.0 : width;
+        newFrame = CGRectMake(self.bounds.size.width - (width - badgeSize.height / 2.0), - badgeSize.height / 2.0,
+                              width, badgeSize.height);
+    }
+    
+    _badgeLabel.frame = newFrame;
+    _badgeLabel.layer.cornerRadius = newFrame.size.height / 2.0;
     _badgeLabel.layer.masksToBounds = YES;
+    
+    if (@available(iOS 11, *)) {
+        if (_badgeWidthConstraint == nil) {
+            _badgeWidthConstraint = [_badgeLabel.widthAnchor constraintEqualToConstant:newFrame.size.width];
+            [_badgeWidthConstraint setActive:YES];
+        }
+        else {
+            _badgeWidthConstraint.constant = newFrame.size.width;
+        }
+        if (_badgeHeightConstraint == nil) {
+            _badgeHeightConstraint = [_badgeLabel.heightAnchor constraintEqualToConstant:newFrame.size.height];
+            [_badgeHeightConstraint setActive:YES];
+        }
+        else {
+            _badgeHeightConstraint.constant = newFrame.size.height;
+        }
+        
+        [self updateConstraintsIfNeeded];
+    }
+    
+    [self layoutIfNeeded];
 }
 
 // Only override drawRect: if you perform custom drawing.
@@ -362,6 +392,5 @@
     
     [self bringSubviewToFront:_badgeLabel];
 }
-*/
 
 @end

@@ -57,9 +57,7 @@
 - (void)updateEdgeInsetsWithBarPosition:(int)position
                               andHeight:(CGFloat)height;
 
-/*
 - (void)setBadgeLabelWithText:(NSString *)text;
 - (void)resizeBadge;
-*/
 
 @end
