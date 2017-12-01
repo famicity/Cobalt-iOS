@@ -29,11 +29,33 @@
 
 #import <UIKit/UIKit.h>
 
+#define POSITION_TOP    1
+#define POSITION_BOTTOM 2
+
 @interface CobaltButton : UIButton
 
 @property (strong, nonatomic) NSString *name;
 @property (strong, nonatomic) NSNumber *visible;
 @property (strong, nonatomic) UILabel *badgeLabel;
+
+- (instancetype)initWithImage:(UIImage *)image
+                 andBarHeight:(CGFloat)height;
+- (instancetype)initWithImage:(UIImage *)image
+                 tintColor:(UIColor *)tintColor
+                 andBarHeight:(CGFloat)height;
+- (instancetype)initWithAttributedTitle:(NSAttributedString *)title
+                           andBarHeight:(CGFloat)height;
+
+- (void)setImage:(UIImage *)image
+   withBarHeight:(CGFloat)height;
+- (void)setImage:(UIImage *)image
+   withTintColor:(UIColor *)tintColor
+    andBarHeight:(CGFloat)height;
+- (void)setAttributedTitle:(NSAttributedString *)title
+             withBarHeight:(CGFloat)height;
+
+- (void)updateEdgeInsetsWithBarPosition:(int)position
+                              andHeight:(CGFloat)height;
 
 - (void)setBadgeLabelWithText:(NSString *)text;
 - (void)resizeBadge;
