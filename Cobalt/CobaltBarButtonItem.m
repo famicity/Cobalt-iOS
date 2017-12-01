@@ -71,10 +71,9 @@
                 && [iosIcon isKindOfClass:[NSString class]]) {
                 UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
                 if (image != nil) {
-                    _button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, 22.0, 22.0)];
-                    [_button setImage:image
-                             forState:UIControlStateNormal];
-                    _button.tintColor = self.tintColor;
+                    _button = [[CobaltButton alloc] initWithImage:image
+                                                        tintColor:self.tintColor
+                                                     andBarHeight:_barHeight];
                 }
             }
             
@@ -85,9 +84,8 @@
                                                             color:self.tintColor
                                                           andSize:22.0];
                 if (image != nil) {
-                    _button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, 22.0, 22.0)];
-                    [_button setImage:image
-                             forState:UIControlStateNormal];
+                    _button = [[CobaltButton alloc] initWithImage:image
+                                                     andBarHeight:_barHeight];
                 }
             }
             
@@ -102,39 +100,18 @@
                                         value:self.tintColor
                                         range:titleRange];
                 
-                CGSize titleSize = attributedTitle.size;
-                
-                _button = [[CobaltButton alloc] initWithFrame:CGRectMake(0, 0, titleSize.width, titleSize.height)];
-                [_button setAttributedTitle:attributedTitle
-                                   forState:UIControlStateNormal];
+                _button = [[CobaltButton alloc] initWithAttributedTitle:attributedTitle
+                                                           andBarHeight:_barHeight];
             }
-            
             [_button addTarget:self
                         action:@selector(onBarButtonItemPressed:)
               forControlEvents:UIControlEventTouchUpInside];
             _button.accessibilityLabel = [NSString stringWithFormat:@"%@ %@", badge, title];
             [_button setBadgeLabelWithText:badge];
             
-            if ([_position isEqualToString:kConfigurationBarsActionPositionBottom]) {
-                _button.imageEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
-                
-                if (_barHeight < 44.0) {
-                    _button.titleEdgeInsets = UIEdgeInsetsMake(-1.0, 0, 1.0, 0);
-                }
-                else {
-                    _button.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
-                }
-            }
-            else {
-                _button.imageEdgeInsets = UIEdgeInsetsMake(-1.0, 0, 1.0, 0);
-                
-                if (_barHeight < 44.0) {
-                    _button.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
-                }
-                else {
-                    _button.titleEdgeInsets = UIEdgeInsetsMake(1.0, 0, -1.0, 0);
-                }
-            }
+            int barPosition = [kConfigurationBarsActionPositionBottom isEqualToString:_position] ? POSITION_BOTTOM : POSITION_TOP;
+            [_button updateEdgeInsetsWithBarPosition:barPosition
+                                           andHeight:_barHeight];
             
             self = [super initWithCustomView:_button];
         }
@@ -204,26 +181,9 @@
     _barHeight = barHeight;
     
     if (_button != nil) {
-        if ([_position isEqualToString:kConfigurationBarsActionPositionBottom]) {
-            _button.imageEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
-            
-            if (_barHeight < 44.0) {
-                _button.titleEdgeInsets = UIEdgeInsetsMake(-1.0, 0, 1.0, 0);
-            }
-            else {
-                _button.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
-            }
-        }
-        else {
-            _button.imageEdgeInsets = UIEdgeInsetsMake(-1.0, 0, 1.0, 0);
-            
-            if (_barHeight < 44.0) {
-                _button.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
-            }
-            else {
-                _button.titleEdgeInsets = UIEdgeInsetsMake(1.0, 0, -1.0, 0);
-            }
-        }
+        int barPosition = [kConfigurationBarsActionPositionBottom isEqualToString:_position] ? POSITION_BOTTOM : POSITION_TOP;
+        [_button updateEdgeInsetsWithBarPosition:barPosition
+                                       andHeight:_barHeight];
     }
 }
 
@@ -245,8 +205,8 @@
             UIImage *image = [[UIImage imageNamed:iosIcon] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
             if (image != nil) {
                 [_button setImage:image
-                         forState:UIControlStateNormal];
-                _button.tintColor = self.tintColor;
+                    withTintColor:self.tintColor
+                     andBarHeight:_barHeight];
             }
         }
         else if (icon != nil
@@ -256,7 +216,7 @@
                                                       andSize:22.0];
             if (image != nil) {
                 [_button setImage:image
-                         forState:UIControlStateNormal];
+                    withBarHeight:_barHeight];
             }
         }
         else if (title != nil
@@ -271,13 +231,8 @@
                                     value:self.tintColor
                                     range:titleRange];
             
-            CGSize titleSize = attributedTitle.size;
-            
-            _button.frame = CGRectMake(0, 0, titleSize.width, titleSize.height);
             [_button setAttributedTitle:attributedTitle
-                               forState:UIControlStateNormal];
-            [_button setImage:nil
-                     forState:UIControlStateNormal];
+                          withBarHeight:_barHeight];
         }
         
         if (title != nil
