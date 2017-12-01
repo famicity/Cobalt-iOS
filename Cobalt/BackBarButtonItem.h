@@ -38,7 +38,9 @@
 @end
 
 @interface BackBarButtonItem : UIBarButtonItem {
-    UILabel *backButtonTitle;
+    UIButton *_backButton;
+    UIImageView *_backButtonImageView;
+    UILabel *_backButtonTitle;
 }
 
 @property(weak, nonatomic) id <BackBarButtonItemDelegate> delegate;
