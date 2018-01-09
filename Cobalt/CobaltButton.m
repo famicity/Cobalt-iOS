@@ -31,7 +31,6 @@
 
 @interface CobaltButton() {
     UILabel *_titleLabel;
-    UIImageView *_iconImageView;
     NSLayoutConstraint *_buttonWidthConstraint;
     NSLayoutConstraint *_buttonHeightConstraint;
     NSLayoutConstraint *_contentWidthConstraint;

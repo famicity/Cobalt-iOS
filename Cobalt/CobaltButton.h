@@ -36,6 +36,7 @@
 
 @property (strong, nonatomic) NSString *name;
 @property (strong, nonatomic) NSNumber *visible;
+@property (strong, nonatomic) UIImageView *iconImageView;
 @property (strong, nonatomic) UILabel *badgeLabel;
 
 - (instancetype)initWithImage:(UIImage *)image
