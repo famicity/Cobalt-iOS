@@ -995,6 +995,17 @@ forBarButtonItemNamed:(NSString *)name {
 // Unable to get result from the onUnhandled methods of the delegate and from the CobaltPluginManager one since we cannot called it synchronously (WebThread is blocking the MainThread so waiting the MainThread from the WebThread would completely stuck the app)
 - (void)onCobaltMessage:(NSString *)message
             fromWebView:(UIWebView *)currentWebView {
+    WebViewType webViewType = -1;
+    if ([currentWebView isEqual:webView]) {
+        webViewType = WEB_VIEW;
+    }
+    else if ([currentWebView isEqual:webLayer]) {
+        webViewType = WEB_LAYER;
+    }
+    if (webViewType == -1) {
+        return;
+    }
+    
     __block BOOL messageHandled = NO;
     
     NSDictionary *dict = [Cobalt dictionaryWithString:message];
@@ -1027,10 +1038,11 @@ forBarButtonItemNamed:(NSString *)name {
                 }
                 else {
                     if (_delegate != nil
-                        && [_delegate respondsToSelector:@selector(onUnhandledCallback:withData:)]) {
+                        && [_delegate respondsToSelector:@selector(onUnhandledCallback:withData:fromWebView:)]) {
                         dispatch_async(dispatch_get_main_queue(), ^{
                             [_delegate onUnhandledCallback:callback
-                                                  withData:data];
+                                                  withData:data
+                                               fromWebView:webViewType];
                         });
                     }
 #if DEBUG_COBALT
@@ -1076,11 +1088,12 @@ forBarButtonItemNamed:(NSString *)name {
             if (event &&
                 [event isKindOfClass:[NSString class]]) {
                 if (_delegate != nil
-                    && [_delegate respondsToSelector:@selector(onUnhandledEvent:withData:andCallback:)]) {
+                    && [_delegate respondsToSelector:@selector(onUnhandledEvent:withData:andCallback:fromWebView:)]) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [_delegate onUnhandledEvent:event
                                            withData:data
-                                        andCallback:callback];
+                                        andCallback:callback
+                                        fromWebView:webViewType];
                     });
                 }
 #if DEBUG_COBALT
@@ -1535,19 +1548,9 @@ forBarButtonItemNamed:(NSString *)name {
         // PLUGIN
         else if ([type isEqualToString: kJSTypePlugin]) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                WebViewType webViewType = -1;
-                if ([currentWebView isEqual:webView]) {
-                    webViewType = WEB_VIEW;
-                }
-                else if ([currentWebView isEqual:webLayer]) {
-                    webViewType = WEB_LAYER;
-                }
-                
-                if (webViewType != -1) {
-                    [[CobaltPluginManager sharedInstance] onMessageFromWebView:webViewType
-                                                      fromCobaltViewController:self
-                                                                       andData:dict];
-                }
+                [[CobaltPluginManager sharedInstance] onMessageFromWebView:webViewType
+                                                  fromCobaltViewController:self
+                                                                   andData:dict];
             });
             
             messageHandled = YES;
@@ -1556,9 +1559,10 @@ forBarButtonItemNamed:(NSString *)name {
     
     if (! messageHandled) {
         if (_delegate != nil
-            && [_delegate respondsToSelector:@selector(onUnhandledMessage:)]) {
+            && [_delegate respondsToSelector:@selector(onUnhandledMessage:fromWebView:)]) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                [_delegate onUnhandledMessage:dict];
+                [_delegate onUnhandledMessage:dict
+                                  fromWebView:webViewType];
             });
         }
 #if DEBUG_COBALT

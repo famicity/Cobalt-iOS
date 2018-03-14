@@ -167,6 +167,18 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+#pragma mark ENUM
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum {
+    WEB_VIEW = 0,
+    WEB_LAYER = 1
+};
+typedef NSInteger WebViewType;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma mark PROTOCOL
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,9 +189,15 @@
 - (void)onCobaltIsReady;
 
 @required
-- (BOOL)onUnhandledMessage:(NSDictionary *)message;
-- (BOOL)onUnhandledEvent:(NSString *)event withData:(NSDictionary *)data andCallback:(NSString *)callback;
-- (BOOL)onUnhandledCallback:(NSString *)callback withData:(NSDictionary *)data;
+- (BOOL)onUnhandledMessage:(NSDictionary *)message
+               fromWebView:(WebViewType)webView;
+- (BOOL)onUnhandledEvent:(NSString *)event
+                withData:(NSDictionary *)data
+             andCallback:(NSString *)callback
+             fromWebView:(WebViewType)webView;
+- (BOOL)onUnhandledCallback:(NSString *)callback
+                   withData:(NSDictionary *)data
+                fromWebView:(WebViewType)webView;
 
 @end
 
@@ -188,12 +206,6 @@
 #pragma mark INTERFACE
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum {
-    WEB_VIEW = 0,
-    WEB_LAYER = 1
-};
-typedef NSInteger WebViewType;
 
 /*!
  @class			CobaltViewController
@@ -344,6 +356,8 @@ typedef NSInteger WebViewType;
  */
 - (void)sendCallback:(NSString *)callback withData:(NSObject *)data;
 
+- (void)sendCallbackToWebLayer:(NSString *)callback withData:(NSObject *)data;
+
 /*!
  @method		- (void)sendEvent:(NSString *)event withData:(NSObject *)data andCallback:(NSString *)callback
  @abstract		this method sends an event with a data object and an optional callback
@@ -353,8 +367,6 @@ typedef NSInteger WebViewType;
  @discussion    This method should NOT be overridden in subclasses.
  */
 - (void)sendEvent:(NSString *)event withData:(NSObject *)data andCallback:(NSString *)callback;
-
-- (void)sendCallbackToWebLayer:(NSString *)callback withData:(NSObject *)data;
 
 - (void)sendEventToWebLayer:(NSString *)event withData:(NSObject *)data andCallback:(NSString *)callback;
 
