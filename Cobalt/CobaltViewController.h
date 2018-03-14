@@ -441,4 +441,22 @@ typedef NSInteger WebViewType;
  */
 - (void)loadMoreContentInWebview;
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark WEB LAYER
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*!
+ @method      - (void)bringWebLayerToFront
+ @abstract    this method sends the WebView to the back, so the WebLayer appears above it
+ */
+- (void)bringWebLayerToFront;
+
+/*!
+ @method      - (void)bringWebLayerToFront
+ @abstract    this method sends the WebLayer to the back, so the WebView appears above it
+ */
+- (void)sendWebLayerToBack;
+
 @end
