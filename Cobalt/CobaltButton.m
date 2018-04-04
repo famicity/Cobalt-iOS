@@ -173,7 +173,9 @@
             imageViewHeight = imageSize.height;
         }
         
-        self.frame = CGRectMake(0, 0, imageViewWidth, imageViewHeight);
+        CGRect frame = self.frame;
+        CGPoint origin = frame.origin;
+        self.frame = CGRectMake(origin.x + (frame.size.width - imageViewWidth) / 2, origin.y, imageViewWidth, imageViewHeight);
         
         [self setImage:image
               forState:UIControlStateNormal];
