@@ -409,6 +409,9 @@ typedef NSInteger WebViewType;
 - (void)setBadgeLabelText:(NSString *)text
     forBarButtonItemNamed:(NSString *)name;
 - (CobaltBarButtonItem *)barButtonItemForAction:(NSDictionary *)action;
+- (void)onBarButtonItemPressed:(NSString *)name;
+- (void)setContent:(NSDictionary *)content
+forBarButtonItemNamed:(NSString *)name;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
