@@ -40,7 +40,7 @@
 
 @interface CobaltToast : iToast
 
-@property (nonatomic, retain) id<CobaltToastDelegate> delegate;
+@property (nonatomic, weak) id<CobaltToastDelegate> delegate;
 
 + (CobaltToast *)makeText:(NSString *)text;
 

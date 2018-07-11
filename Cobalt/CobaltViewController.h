@@ -243,7 +243,7 @@ typedef NSInteger WebViewType;
  @property		webView
  @abstract		the webView displaying content
  */
-@property (strong, nonatomic) IBOutlet UIWebView * webView;
+@property (weak, nonatomic) IBOutlet UIWebView * webView;
 
 /*!
  @property		pageName
@@ -258,7 +258,7 @@ typedef NSInteger WebViewType;
  */
 @property (strong, nonatomic) NSDictionary *navigationData;
 
-@property (strong, nonatomic) IBOutlet UIWebView * webLayer;
+@property (weak, nonatomic) IBOutlet UIWebView * webLayer;
 
 /*!
  @property             refreshControl
