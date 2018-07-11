@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16F73" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -38,15 +39,16 @@
             </subviews>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
-                <constraint firstItem="Ye6-O6-I12" firstAttribute="leading" secondItem="qD6-4s-9x7" secondAttribute="leading" id="KuG-OH-Z3l"/>
-                <constraint firstItem="Ye6-O6-I12" firstAttribute="top" secondItem="qD6-4s-9x7" secondAttribute="top" id="Qvy-RV-NSt"/>
+                <constraint firstItem="Ye6-O6-I12" firstAttribute="top" secondItem="qD6-4s-9x7" secondAttribute="top" id="3w2-kx-MN9"/>
                 <constraint firstItem="RER-35-w9L" firstAttribute="trailing" secondItem="Ye6-O6-I12" secondAttribute="trailing" id="U5c-AU-pyn"/>
+                <constraint firstItem="Ye6-O6-I12" firstAttribute="width" secondItem="qD6-4s-9x7" secondAttribute="width" id="Uo6-BV-JBh"/>
+                <constraint firstItem="Ye6-O6-I12" firstAttribute="leading" secondItem="qD6-4s-9x7" secondAttribute="leading" id="VqQ-BS-DQr"/>
                 <constraint firstItem="RER-35-w9L" firstAttribute="leading" secondItem="Ye6-O6-I12" secondAttribute="leading" id="Xb8-uz-1zq"/>
                 <constraint firstItem="RER-35-w9L" firstAttribute="bottom" secondItem="Ye6-O6-I12" secondAttribute="bottom" id="d5A-4e-AnD"/>
-                <constraint firstItem="Ye6-O6-I12" firstAttribute="height" secondItem="qD6-4s-9x7" secondAttribute="height" id="iMc-CB-g56"/>
+                <constraint firstItem="Ye6-O6-I12" firstAttribute="height" secondItem="qD6-4s-9x7" secondAttribute="height" id="f0h-U0-7gN"/>
                 <constraint firstItem="RER-35-w9L" firstAttribute="top" secondItem="Ye6-O6-I12" secondAttribute="top" id="kDY-Z4-kdV"/>
-                <constraint firstItem="Ye6-O6-I12" firstAttribute="width" secondItem="qD6-4s-9x7" secondAttribute="width" id="tX4-vT-cVy"/>
             </constraints>
+            <viewLayoutGuide key="safeArea" id="dDo-ec-gK2"/>
             <point key="canvasLocation" x="370" y="294"/>
         </view>
     </objects>
